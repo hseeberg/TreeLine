@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V5.34</title>
+<title>TreeLine V5.35</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%237A4864%22/%3E%3Crect%20x%3D%225%22%20y%3D%228%22%20width%3D%2215%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2211%22%20y%3D%2214%22%20width%3D%2216%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22%20opacity%3D%22.8%22/%3E%3Crect%20x%3D%227%22%20y%3D%2220%22%20width%3D%2212%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22%20opacity%3D%22.5%22/%3E%3C/svg%3E">
 <style>
 /* Atkinson Hyperlegible Next, embedded (SIL OFL 1.1, Braille Institute). Static 400/500/600/700, Latin subset.
@@ -979,7 +979,8 @@ body.profile-collapsed .gaps-bar { display: none; }
 .group-with { font-weight: 400; fill: var(--header-sub); }
 
 /* ═══ V5.17 */
-.lbl-place { font-weight: 400; fill: var(--header-sub); }
+.lbl-place { font-weight: 400; }
+.lbl-sep { font-weight: 400; fill: var(--header-sub); }
 .grp-frame { fill: var(--focal-hl); fill-opacity: 0.45; stroke: var(--panel-border); stroke-width: 1; }
 
 /* ═══ V5.20 — B1: frame (border only) around each partner's children, name set into the top border */
@@ -1089,7 +1090,7 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
 
 <div class="header">
   <div class="header-titles">
-    <h1><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V5.34</span><span class="about-sep">·</span><span class="about-lbl">About</span></button><span class="sample-badge" id="sampleBadge" hidden>Sample data</span></h1>
+    <h1><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V5.35</span><span class="about-sep">·</span><span class="about-lbl">About</span></button><span class="sample-badge" id="sampleBadge" hidden>Sample data</span></h1>
     <div class="about-pop" id="aboutPop" role="dialog" aria-label="About TreeLine" hidden></div>
   </div>
   <div class="header-focal" id="headerFocal"></div>
@@ -1337,6 +1338,7 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
   var X0 = 247.6, YEAR0 = 1680, PX = 3.765;
   var BAND_X = 20, PAD_T = 22, PAD_B = 22, GAP = 64, ROW_H = 25;
   var ANC_PITCH = 58, SPOUSE_STEP = 20, BAR_H = 14, HEIR_H = 14, MIN_LABEL_X = 200;
+  var LABEL_MARGIN = 24;   // V5.35: = space between a card's top edge and the first name in it
   var PARTNER_STEP = 25, HEIR_FADE = 130, SIB_FADE = 90, MARK_DX = 8, LIVING_FROM = 1920, SVG_W = 1680;
   var now = new Date();
   var start = new Date(now.getFullYear(), 0, 1), end = new Date(now.getFullYear() + 1, 0, 1);
@@ -1453,7 +1455,10 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
     else if (minA != null) t = 'lived at least ' + minA + ' years';
     return t ? ' data-tooltip="' + esc(nameOf(p) + ' — ' + t) + '"' : '';
   }
-  function labelHtml(p) { var pl = p.birth && p.birth.place; return esc(nameOf(p) + ' ' + yearsLabel(p)) + (pl ? '<tspan class="lbl-place">, ' + esc(pl) + '</tspan>' : ''); }
+  // V5.35: timeline shows only the first part of the birth place ("Lübeck", not "Lübeck, Germany"), after a grey middle dot
+  function shortPlace(p) { var pl = p.birth && p.birth.place; return pl ? String(pl).split(',')[0].trim() : ''; }
+  var SEP = '\u00A0\u00A0·\u00A0\u00A0';
+  function labelHtml(p) { var pl = shortPlace(p); return esc(nameOf(p) + ' ' + yearsLabel(p)) + (pl ? '<tspan class="lbl-sep">' + SEP + '</tspan><tspan class="lbl-place">' + esc(pl) + '</tspan>' : ''); }
   function yearsLabel(p) {
     var b = by(p), bs = b == null ? '?' : p.birth.isRange ? qmark({ q: 'BET', y: p.birth.yearLo, y2: p.birth.yearHi }, b) : qmark(qual(p, 'BIRT'), b);   // V5.29: range = 1688/92, like BET
     var d = dy(p), ds;
@@ -1461,7 +1466,7 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
     else ds = isLiving(p) ? '' : '?';
     return '(' + bs + '–' + ds + ')';
   }
-  function label(p) { var pl = p.birth && p.birth.place; return nameOf(p) + ' ' + yearsLabel(p) + (pl ? ', ' + pl : ''); }
+  function label(p) { var pl = shortPlace(p); return nameOf(p) + ' ' + yearsLabel(p) + (pl ? SEP + pl : ''); }
 
   // ── Focal partner groups (Q28 D2, Q28b, Q28c) ──
   function focalGroups(id) {
@@ -1786,12 +1791,18 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
     renderProfile(state.focal);
     updatePinUI();
     pinGenHeads();
-    // V5.28: a long label of a very early person can run past the left edge → move the whole chart right and draw again (once)
+    // V5.28/V5.35: a long label of a very early person can run past the left edge → move the whole chart right and draw again.
+    // Only person labels are measured (not the generation numbers). Left margin = the space above the first name in a card.
     var svgEl = document.getElementById('mainSvg'), minX = Infinity;
-    svgEl.querySelectorAll('text').forEach(function(t){ var b = t.getBBox(); if (b.width && b.x < minX) minX = b.x; });
-    if (minX < BAND_X + 6 && !render.fitting) {
-      widen(Math.ceil((BAND_X + 6 - minX) / 10) * 10);
-      render.fitting = true; navMode = navM; navPid = navP; render(); render.fitting = false;
+    svgEl.querySelectorAll('text').forEach(function(t){
+      if (t.closest('#genHeads') || /gen-|axis-|today-/.test(t.getAttribute('class') || '')) return;
+      var b = t.getBBox(); if (b.width && b.x < minX) minX = b.x;
+    });
+    var need = BAND_X + LABEL_MARGIN - minX;
+    if (need > 0 && (render.fitting || 0) < 3) {
+      var d = Math.ceil(need / 10) * 10;
+      widen(d); MIN_LABEL_X += d;                                   // clamped labels move with the chart
+      render.fitting = (render.fitting || 0) + 1; navMode = navM; navPid = navP; render(); render.fitting = 0;
     }
   }
   function widen(d) {
@@ -2749,12 +2760,11 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V5.34', date: '15 Oct 2026',
+  version: 'V5.35', date: '15 Oct 2026',
   // Rule (spec §2.1c): ONLY the changes that came with THIS version. Replace — never append — on every release.
   notes: [
-    'The sample family now opens on Arthur Brandt’s generation. No scrolling needed.',
-    'Profile panel: the pin button sits next to “Open on …”, so long names get the full width. “Added by” is now shown under “Also known as”.',
-    'Timeline: birth places are grey, so they no longer read as part of the name.'
+    'Timeline: the birth place now follows the name after a dot, e.g. “Johann Brandt (1688/92–>1751) · Lübeck”. Only the first part of the place is shown. The full place is in the profile panel.',
+    'Long names at the left edge no longer touch or run past the card edge.'
   ],
   author: 'Created and designed by', authorName: 'Hannes Seeberg', authorUrl: 'https://www.linkedin.com/in/seeberg/'
 };
