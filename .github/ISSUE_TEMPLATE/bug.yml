@@ -1,0 +1,67 @@
+name: Something does not work
+description: Tell us about a problem in TreeLine.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping to make TreeLine better.
+        **This page is public.** Do not add names, dates or files of living people.
+  - type: textarea
+    id: did
+    attributes:
+      label: What did you do?
+      description: Write the steps, one per line.
+      placeholder: |
+        1. I opened my GEDCOM file.
+        2. I clicked a name in the 3rd generation.
+    validations:
+      required: true
+  - type: textarea
+    id: saw
+    attributes:
+      label: What did you see?
+      description: You can add a screenshot here. Drag the image into this box.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to see?
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: TreeLine version
+      description: Click "About" at the top left. The version is next to the logo, e.g. V5.36.
+      placeholder: V5.36
+    validations:
+      required: true
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Safari
+        - Firefox
+        - Edge
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Where did your GEDCOM file come from?
+      options:
+        - Geni
+        - MyHeritage
+        - Ancestry
+        - FamilySearch
+        - Findmypast
+        - Other
+        - I used the sample family
+    validations:
+      required: false
