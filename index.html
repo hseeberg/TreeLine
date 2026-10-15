@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V5.29</title>
+<title>TreeLine V5.32</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%237A4864%22/%3E%3Crect%20x%3D%225%22%20y%3D%228%22%20width%3D%2215%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2211%22%20y%3D%2214%22%20width%3D%2216%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22%20opacity%3D%22.8%22/%3E%3Crect%20x%3D%227%22%20y%3D%2220%22%20width%3D%2212%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22%20opacity%3D%22.5%22/%3E%3C/svg%3E">
 <style>
 /* Atkinson Hyperlegible Next, embedded (SIL OFL 1.1, Braille Institute). Static 400/500/600/700, Latin subset.
@@ -1041,6 +1041,8 @@ body:not(.is-start) .sticky-ruler-wrap { padding-top: 24px; background: var(--bg
 
 /* ═══ V5.28 — sample family: button under the start-page example + header badge */
 .hero-visual { flex-direction: column; align-items: center; gap: 22px; }
+/* V5.32 — column flex re-centred the example vertically when the help opened; pin it to the top */
+.hero-visual { justify-content: flex-start; }
 .sample-btn { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border-radius: 10px;
   font: inherit; font-size: 16px; font-weight: 700; color: var(--header-accent); background: transparent; border: 0; cursor: pointer; position: relative; }
 .sample-btn:hover { background: var(--accent-tint); }
@@ -1053,6 +1055,10 @@ body:not(.is-start) .sticky-ruler-wrap { padding-top: 24px; background: var(--bg
 .sample-badge[hidden] { display: none; }
 /* ═══ V5.27 — hover highlight */
 line.hot { stroke-width: 2.5 !important; }
+
+/* ═══ V5.31 — half-sibling groups */
+.grp-half { cursor: default; }
+.grp-half:hover { text-decoration: none; }
 </style>
 </head>
 <body class="is-start">
@@ -1063,7 +1069,7 @@ line.hot { stroke-width: 2.5 !important; }
 
 <div class="header">
   <div class="header-titles">
-    <h1><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V5.29</span><span class="about-sep">·</span><span class="about-lbl">About</span></button><span class="sample-badge" id="sampleBadge" hidden>Sample data</span></h1>
+    <h1><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V5.32</span><span class="about-sep">·</span><span class="about-lbl">About</span></button><span class="sample-badge" id="sampleBadge" hidden>Sample data</span></h1>
     <div class="about-pop" id="aboutPop" role="dialog" aria-label="About TreeLine" hidden></div>
   </div>
   <div class="header-focal" id="headerFocal"></div>
@@ -1111,7 +1117,7 @@ line.hot { stroke-width: 2.5 !important; }
 <div class="empty-state" id="emptyState">
   <div class="hero-copy">
   <div id="emptyCopy">
-    <strong>See your family tree across timeline</strong>
+    <strong>See your family tree on a timeline</strong>
     Every life in your family tree, side by side on one timeline. Open the GEDCOM file (.ged) you exported from your genealogy service.
   </div>
   <div class="err" id="loadError" role="alert"></div>
@@ -1120,7 +1126,7 @@ line.hot { stroke-width: 2.5 !important; }
     <summary><span>How do I get a GEDCOM file?</span><svg class="gh-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
     <div class="gh-body">
       <p>Your genealogy service can save your tree as a GEDCOM file. Open the help page for the service you use. It opens in a new tab, so TreeLine stays open here.</p>
-      <ul class="gh-list"><li><a href="https://www.geni.com/gedcom" target="_blank" rel="noopener noreferrer"><span class="gh-name">Geni<svg class="gh-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span><span class="gh-hint">Export starts from you or from a profile you added.</span></a></li><li><a href="https://www.myheritage.com/help/en/articles/12851866-how-do-i-download-export-a-gedcom-file-of-my-family-tree-from-my-family-site" target="_blank" rel="noopener noreferrer"><span class="gh-name">MyHeritage<svg class="gh-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span><span class="gh-hint">Family tree → Manage trees → Export to GEDCOM.</span></a></li><li><a href="https://help-redir.ancestry.com/hc/en-ca/articles/53933352542867-Uploading-and-Downloading-Trees" target="_blank" rel="noopener noreferrer"><span class="gh-name">Ancestry<svg class="gh-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span><span class="gh-hint">Tree settings → Export tree. The file arrives as .zip — open it to get the .ged file.</span></a></li><li><a href="https://familysearch.org/innovate/export" target="_blank" rel="noopener noreferrer"><span class="gh-name">FamilySearch<svg class="gh-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span><span class="gh-hint">Exports up to 8 generations of your tree.</span></a></li><li><a href="https://www.myheritage.com/help/en/articles/12851478-how-can-i-export-a-gedcom-of-my-family-tree-from-findmypast" target="_blank" rel="noopener noreferrer"><span class="gh-name">Findmypast<svg class="gh-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span><span class="gh-hint">Family tree → View all trees → Export → Download tree.</span></a></li></ul>
+      <ul class="gh-list"><li><a href="https://www.geni.com/gedcom" target="_blank" rel="noopener noreferrer"><span class="gh-name">Geni<svg class="gh-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span><span class="gh-hint">Export starts from you or from a profile you added.</span></a></li><li><a href="https://www.myheritage.com/help/en/articles/12851866-how-do-i-download-export-a-gedcom-file-of-my-family-tree-from-my-family-site" target="_blank" rel="noopener noreferrer"><span class="gh-name">MyHeritage<svg class="gh-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span><span class="gh-hint">Family tree → Manage trees → Export to GEDCOM.</span></a></li><li><a href="https://help-redir.ancestry.com/hc/en-ca/articles/53933352542867-Uploading-and-Downloading-Trees" target="_blank" rel="noopener noreferrer"><span class="gh-name">Ancestry<svg class="gh-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span><span class="gh-hint">Tree settings → Export tree. The file arrives as .zip — double-click it to unzip, then choose the .ged file.</span></a></li><li><a href="https://familysearch.org/innovate/export" target="_blank" rel="noopener noreferrer"><span class="gh-name">FamilySearch<svg class="gh-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span><span class="gh-hint">Exports up to 8 generations of your tree.</span></a></li><li><a href="https://www.myheritage.com/help/en/articles/12851478-how-can-i-export-a-gedcom-of-my-family-tree-from-findmypast" target="_blank" rel="noopener noreferrer"><span class="gh-name">Findmypast<svg class="gh-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span><span class="gh-hint">Family tree → View all trees → Export → Download tree.</span></a></li></ul>
       <p class="gh-foot">Desktop programs (Family Tree Maker, RootsMagic, MacFamilyTree, Gramps): look for File → Export → GEDCOM.</p>
     </div>
   </details>
@@ -1468,6 +1474,7 @@ line.hot { stroke-width: 2.5 !important; }
 
   // ── Bars ──
   var FORCE_PRIMARY = false;   // V5.17: primary colour at partner (thin) height — parents/ancestors shown as partners
+  var halfSet = {};   // V5.31: ids shown as half-siblings (clicking one opens their own view)
   var lineChild = {};   // V5.6: heir → the next person on the line (their child)
   function barSVG(p, id, barY, heir, defs, solidEndYear) {   // V5.27: wrapper tags the bar with the person id (hover highlight)
     var r = barSVGraw(p, id, barY, heir, defs, solidEndYear);
@@ -1569,7 +1576,7 @@ line.hot { stroke-width: 2.5 !important; }
   function render() {
     var navM = navMode, navP = navPid;   // V5.28: kept for a re-render after widening
     gid = 0;
-    var L = lineage(state), defs = [], bands = [], y = GAP; descSet = {}; lineChild = {};
+    var L = lineage(state), defs = [], bands = [], y = GAP; halfSet = {}; descSet = {}; lineChild = {};
     var layer1 = [], layer2 = [], layer3 = [], genHeads = [], rowYOf = {}, barTopOf = {}, hl = [];
     var nGen = 0;
     function ordinal(n) { var s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]) + ' generation'; }
@@ -1577,6 +1584,22 @@ line.hot { stroke-width: 2.5 !important; }
     // Ancestor + focal bands, top → down
     for (var k = L.length - 1; k >= 0; k--) {
       var heirId = L[k], rows = knownFirst(sortByBirth([heirId].concat(siblings(heirId))));
+      // V5.31 (Q27): half-siblings — each parent's children from other relationships, one framed group per relationship
+      (function(){
+        var f = famcOf(heirId); if (!f) return;
+        var full = {}; f.children.forEach(function(c){ full[c] = 1; });
+        [f.husb, f.wife].filter(function(x){ return x && P(x); }).forEach(function(par){
+          (P(par).fams || []).forEach(function(fid){
+            if (fid === f.id || fid === (P(heirId).famc || [])[0]) return;
+            var of = G.families.get(fid); if (!of) return;
+            var kids = of.children.filter(function(c){ return P(c) && !full[c] && c !== heirId; });
+            if (!kids.length) return;
+            var other = of.husb === par ? of.wife : of.husb;
+            rows.push({ hdr: true, half: true, heir: heirId, shared: par, other: other && P(other) ? other : null });
+            knownFirst(sortByBirth(kids)).forEach(function(c){ halfSet[c] = 1; rows.push(c); });
+          });
+        });
+      })();
       lineChild[heirId] = k > 0 ? L[k - 1] : null;
       var sub = k === L.length - 1 ? 'Earliest known' : 'Children of ' + nameOf(P(L[k + 1]));
       bands.push({ kind: 'anc', level: k, heir: heirId, rows: rows, sub: sub });
@@ -1624,7 +1647,10 @@ line.hot { stroke-width: 2.5 !important; }
           closeGrp(rowY + 4);
           if (!first) rowY += 22;
           grpTop = rowY;
-          if (id.other) {
+          if (id.half) {
+            var shN = nameOf(P(id.shared)), hN = nameOf(P(id.heir));
+            grpLbl = '<text class="grp-label grp-half" x="__X__" y="__Y__" text-anchor="start"><tspan class="group-with">Half-siblings of </tspan>' + esc(hN) + '<tspan class="group-with"> · ' + esc(shN) + '’s children with </tspan>' + (id.other ? esc(nameOf(P(id.other))) : '<tspan class="group-with">an unknown partner</tspan>') + '</text>';
+          } else if (id.other) {
             var sp = P(id.other), link = spouseHasData(id.other);
             grpLbl = '<text class="grp-label' + (link ? ' spouse-link' : '') + '" x="__X__" y="__Y__" text-anchor="start" data-act="swap" data-level="0" data-pid="' + esc(id.other) + '"><tspan class="group-with">with </tspan>' + esc(nameOf(sp)) + '</text>';
           } else {
@@ -1674,7 +1700,7 @@ line.hot { stroke-width: 2.5 !important; }
           var kids = childrenOf(id).length > 0 || spousesOf(id).length > 0;
           layer3.push(sbar.svg);
           // V5.9: every name is clickable (select + profile); ↳ only signals descendants/spouse
-          layer3.push('<text class="sib-text sib-link" x="' + f1(sx) + '" y="' + f1(rowY + 9) + '" text-anchor="end" data-pid="' + esc(id) + '"' + (band.kind === 'anc' ? ' data-act="promote" data-level="' + band.level + '"' : ' data-act="focus-desc"') + '>' + esc(label(p)) + (kids ? '<tspan dx="' + MARK_DX + '">↳</tspan>' : '') + '</text>');
+          layer3.push('<text class="sib-text sib-link" x="' + f1(sx) + '" y="' + f1(rowY + 9) + '" text-anchor="end" data-pid="' + esc(id) + '"' + (halfSet[id] ? ' data-act="select"' : band.kind === 'anc' ? ' data-act="promote" data-level="' + band.level + '"' : ' data-act="focus-desc"') + '>' + esc(label(p)) + (kids ? '<tspan dx="' + MARK_DX + '">↳</tspan>' : '') + '</text>');
           rowYOf[id] = rowY; barTopOf[id] = rowY;
           rowY += ROW_H;
         }
@@ -1847,11 +1873,17 @@ line.hot { stroke-width: 2.5 !important; }
   // Original profile (V5.2 rule): shown only when the person's record carries a provider ID we can turn into
   // a profile URL with a known pattern. Source unknown / no ID / desktop program → no "Original profile" section.
   // A web page cannot open desktop genealogy programs, so desktop exports never get a button.
+  function geniSlug(p) {
+    var raw = ''; (p.raw || []).some(function(t){ if (t.level === 1 && t.tag === 'NAME') { raw = t.value || ''; return true; } return false; });
+    var m = /^(.*?)\/(.*?)\//.exec(raw), given = m ? m[1].trim() : raw.trim(), sur = m ? m[2].trim() : '';
+    var slug = [given, sur].filter(Boolean).join(' ').replace(/[^\p{L}\p{N}\s-]/gu, ' ').trim().replace(/\s+/g, '-');   // V5.31: every given name + surname, e.g. Tõnis-Anton-Seeberg-Seep
+    return encodeURIComponent(slug || 'person').replace(/%2D/g, '-');
+  }
   function providerLinks(p) {
     var links = [];
     blocks(p).forEach(function(b){
       var v = (b.value || '').trim();
-      if (b.tag === 'RFN' && /^geni:\d+$/i.test(v)) links.push({ name: 'Geni', url: 'https://www.geni.com/people/' + v.split(':')[1] });
+      if (b.tag === 'RFN' && /^geni:\d+$/i.test(v)) links.push({ name: 'Geni', url: 'https://www.geni.com/people/' + geniSlug(p) + '/' + v.split(':')[1] });   // V5.30: Geni needs /people/{Name-Slug}/{id}
       if (b.tag === '_FSFTID' && /^[A-Z0-9-]+$/i.test(v)) links.push({ name: 'FamilySearch', url: 'https://www.familysearch.org/tree/person/details/' + v });
     });
     return links;
@@ -1891,6 +1923,12 @@ line.hot { stroke-width: 2.5 !important; }
   }
   // age at death from full dates when available (day/month aware), else year difference
   function ymd(raw) { var m = /(?:(\d{1,2})\s+)?(?:(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s+)?(\d{3,4})\s*$/i.exec(String(raw || '').trim()); if (!m) return null; var mo = m[2] ? 'JANFEBMARAPRMAYJUNJULAUGSEPOCTNOVDEC'.indexOf(m[2].toUpperCase()) / 3 + 1 : 0; return { y: +m[3], m: mo, d: m[1] ? +m[1] : 0 }; }
+  function ageNow(p) {   // V5.30 (Q23b): living person's current age from the birth date
+    var bd = null; (p.raw || []).forEach(function(t, i, a){ if (!bd && t.level === 2 && t.tag === 'DATE') { for (var j = i - 1; j >= 0 && a[j].level > 1; j--); if (a[j] && a[j].tag === 'BIRT') bd = t.value; } });
+    var B = ymd(bd); if (!B) return null; var now = new Date(), a = now.getFullYear() - B.y;
+    if (B.m && (now.getMonth() + 1 < B.m || (now.getMonth() + 1 === B.m && B.d && now.getDate() < B.d))) a--;
+    return a >= 0 && a < 130 ? a : null;
+  }
   function ageAtDeath(p) {
     var bd = null, dd = null;
     (p.raw || []).forEach(function(t, i, a){ if (t.level === 2 && t.tag === 'DATE' && i > 0) { for (var j = i - 1; j >= 0 && a[j].level > 1; j--); var ev = a[j] && a[j].tag; if (ev === 'BIRT' && !bd) bd = t.value; if (ev === 'DEAT' && !dd) dd = t.value; } });
@@ -2091,7 +2129,7 @@ line.hot { stroke-width: 2.5 !important; }
       var val = (b.value && b.value !== 'Y') ? b.value : '';
       if (b.tag === 'ADDR' && b.sub.EMAIL && b.sub.EMAIL !== val) val = val ? val + ', ' + b.sub.EMAIL : b.sub.EMAIL;
       if (val) lines.push(val);
-      if (b.sub.DATE) lines.push(niceDate(b.sub.DATE) + (b.tag === 'DEAT' && ageAtDeath(p) != null ? ' (' + ageAtDeath(p) + ')' : ''));
+      if (b.sub.DATE) lines.push(niceDate(b.sub.DATE) + (b.tag === 'DEAT' && ageAtDeath(p) != null ? ' (' + ageAtDeath(p) + ')' : '') + (b.tag === 'BIRT' && isLiving(p) && ageNow(p) != null ? ' (age ' + ageNow(p) + ')' : ''));
       var pl = placeOf(b); if (pl) lines.push({ place: pl });
       if (b.sub.CAUS) lines.push('Cause: ' + b.sub.CAUS);
       if (!lines.length) return;
@@ -2612,12 +2650,11 @@ line.hot { stroke-width: 2.5 !important; }
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V5.29', date: '15 Oct 2026',
+  version: 'V5.32', date: '15 Oct 2026',
   // Rule (spec §2.1c): ONLY the changes that came with THIS version. Replace — never append — on every release.
   notes: [
-    'Birth given as a range of years (for example “between 1688 and 1692”): the person now gets a normal life bar. It fades in across the range, stays solid through the children’s births and fades out after, like other uncertain dates. Before, only a small dashed outline was drawn and the life was missing.',
-    'The years read 1688/92, the same way as other date ranges.',
-    'Also in this release (from V5.28): the sample family, the start-page example drawn from it, and the left-edge fix for long early names.'
+    'Start page headline now reads “See your family tree on a timeline”.',
+    'Start page: the example timeline stays in place when “How do I get a GEDCOM file?” is opened.'
   ],
   author: 'Created and designed by', authorName: 'Hannes Seeberg', authorUrl: 'https://www.linkedin.com/in/seeberg/'
 };
