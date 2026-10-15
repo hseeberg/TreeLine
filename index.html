@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V5.33</title>
+<title>TreeLine V5.34</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%237A4864%22/%3E%3Crect%20x%3D%225%22%20y%3D%228%22%20width%3D%2215%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2211%22%20y%3D%2214%22%20width%3D%2216%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22%20opacity%3D%22.8%22/%3E%3Crect%20x%3D%227%22%20y%3D%2220%22%20width%3D%2212%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22%20opacity%3D%22.5%22/%3E%3C/svg%3E">
 <style>
 /* Atkinson Hyperlegible Next, embedded (SIL OFL 1.1, Braille Institute). Static 400/500/600/700, Latin subset.
@@ -979,7 +979,7 @@ body.profile-collapsed .gaps-bar { display: none; }
 .group-with { font-weight: 400; fill: var(--header-sub); }
 
 /* ═══ V5.17 */
-.lbl-place { font-weight: 400; }
+.lbl-place { font-weight: 400; fill: var(--header-sub); }
 .grp-frame { fill: var(--focal-hl); fill-opacity: 0.45; stroke: var(--panel-border); stroke-width: 1; }
 
 /* ═══ V5.20 — B1: frame (border only) around each partner's children, name set into the top border */
@@ -1061,8 +1061,8 @@ line.hot { stroke-width: 2.5 !important; }
 .pin-back[hidden] { display: none; }
 .header .pin-back, body .header .pin-back { background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.30); color: #FFFFFF; }
 .header .pin-back:hover { background: rgba(255,255,255,0.26); }
-.pp-head { display: flex; gap: 12px; align-items: flex-start; }
-.pp-who { flex: 1; min-width: 0; }
+.pp-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pp-actions .pp-ext + .pp-ext { margin-left: 0; }
 .pp-pin { flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px; border: 1px solid var(--panel-border); background: var(--band-bg);
   color: var(--header-sub); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .pp-pin:hover { color: var(--header-title); }
@@ -1089,7 +1089,7 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
 
 <div class="header">
   <div class="header-titles">
-    <h1><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V5.33</span><span class="about-sep">·</span><span class="about-lbl">About</span></button><span class="sample-badge" id="sampleBadge" hidden>Sample data</span></h1>
+    <h1><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V5.34</span><span class="about-sep">·</span><span class="about-lbl">About</span></button><span class="sample-badge" id="sampleBadge" hidden>Sample data</span></h1>
     <div class="about-pop" id="aboutPop" role="dialog" aria-label="About TreeLine" hidden></div>
   </div>
   <div class="header-focal" id="headerFocal"></div>
@@ -1600,6 +1600,7 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
     gid = 0;
     var L = lineage(state), defs = [], bands = [], y = GAP; halfSet = {}; descSet = {}; lineChild = {};
     var layer1 = [], layer2 = [], layer3 = [], genHeads = [], rowYOf = {}, barTopOf = {}, hl = [];
+    bandTops = [];
     var nGen = 0;
     function ordinal(n) { var s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]) + ' generation'; }
 
@@ -1708,7 +1709,7 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
             var fam = null; (p.fams || []).forEach(function(fid){ var f = G.families.get(fid); if (f && (f.husb === sid || f.wife === sid)) fam = f; });
             if (fam && fam.marr && fam.marr.year != null) layer3.push('<circle class="marr-mark" cx="' + f1(X(fam.marr.year)) + '" cy="' + f1(py - 4) + '" r="4.5" data-tooltip="Married ' + esc(String(fam.marr.year)) + '"/>');
             var act = (lvl === 0 || link) ? ' data-act="swap" data-level="' + lvl + '"' : ' data-act="select"';
-            var t = '+' + esc(label(sp)) + (link ? '<tspan dx="' + MARK_DX + '">⧉</tspan>' : '');
+            var t = '+' + labelHtml(sp) + (link ? '<tspan dx="' + MARK_DX + '">⧉</tspan>' : '');
             layer3.push('<text class="partner-text partner-' + ssex + ' spouse-link" x="' + f1(plx) + '" y="' + f1(py) + '" text-anchor="end" data-pid="' + esc(sid) + '"' + act + '>' + t + '</text>');
             rowYOf[sid] = rowYOf[sid] != null ? rowYOf[sid] : py - 9;
           });
@@ -1722,7 +1723,7 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
           var kids = childrenOf(id).length > 0 || spousesOf(id).length > 0;
           layer3.push(sbar.svg);
           // V5.9: every name is clickable (select + profile); ↳ only signals descendants/spouse
-          layer3.push('<text class="sib-text sib-link" x="' + f1(sx) + '" y="' + f1(rowY + 9) + '" text-anchor="end" data-pid="' + esc(id) + '"' + (halfSet[id] ? ' data-act="select"' : band.kind === 'anc' ? ' data-act="promote" data-level="' + band.level + '"' : ' data-act="focus-desc"') + '>' + esc(label(p)) + (kids ? '<tspan dx="' + MARK_DX + '">↳</tspan>' : '') + '</text>');
+          layer3.push('<text class="sib-text sib-link" x="' + f1(sx) + '" y="' + f1(rowY + 9) + '" text-anchor="end" data-pid="' + esc(id) + '"' + (halfSet[id] ? ' data-act="select"' : band.kind === 'anc' ? ' data-act="promote" data-level="' + band.level + '"' : ' data-act="focus-desc"') + '>' + labelHtml(p) + (kids ? '<tspan dx="' + MARK_DX + '">↳</tspan>' : '') + '</text>');
           rowYOf[id] = rowY; barTopOf[id] = rowY;
           rowY += ROW_H;
         }
@@ -1731,6 +1732,7 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
       var h = (rowY - bandY) + PAD_B;
       var r = 14, bx = BAND_X, bx2 = TODAY_X, by2 = bandY + h;
       layer1.push('<path class="band-bg" filter="url(#bandShadow)" d="M' + f1(bx + r) + ' ' + f1(bandY) + 'H' + f1(bx2) + 'V' + f1(by2) + 'H' + f1(bx + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + f1(bx) + ' ' + f1(by2 - r) + 'V' + f1(bandY + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + f1(bx + r) + ' ' + f1(bandY) + 'Z"/>');
+      bandTops.push(bandY - 40);
       genHeads.push('<circle class="gen-num" cx="' + (BAND_X + 14) + '" cy="' + f1(bandY - 20) + '" r="14"/><text class="gen-num-text" x="' + (BAND_X + 14) + '" y="' + f1(bandY - 15.5) + '" text-anchor="middle">' + nGen + '</text>');
       genHeads.push('<text class="gen-head" x="' + (BAND_X + 38) + '" y="' + f1(bandY - 14) + '"><tspan class="gen-head-strong">' + esc(band.sub) + '</tspan><tspan dx="10">' + ordinal(nGen) + '</tspan></text>');
       y = bandY + h + GAP;
@@ -1779,6 +1781,7 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
     animateIn(document.getElementById('mainSvg'), rowYOf, barTopOf);
     lastView = Object.keys(rowYOf);
     lineage(state).concat([state.focal]).forEach(function(x){ spousesOf(x).forEach(function(sp){ if (lastView.indexOf(sp) < 0) lastView.push(sp); }); });   // spouse lines are on screen too
+    focalY = rowYOf[state.focal];
     recent = [state.focal].concat(recent.filter(function(x){ return x !== state.focal; })).slice(0, 8);
     renderProfile(state.focal);
     updatePinUI();
@@ -1820,6 +1823,8 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
       return parseFloat(v) || 0;
     }
     var anchor = mode === 'full' ? 0 : (barTopOf[pid] != null ? barTopOf[pid] : 0);
+    // V5.34: when the view opens on the focal generation, the reveal starts there (not at the oldest ancestors, off screen)
+    if (mode === 'full' && genFirst) { var fy = rowYOf[pid]; bandTops.forEach(function(t){ if (fy != null && t <= fy && t > anchor) anchor = t; }); }
     // generation band that holds the anchor person
     var bTop = -1, bBot = -1;
     svg.querySelectorAll('path.band-bg').forEach(function(pth){
@@ -1863,6 +1868,24 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
   // V5.33 — Pin: one pinned person per session. Search pick (and the file's opening person) pins automatically;
   // clicking around the tree does not. Recent = people shown as focal, newest first.
   var pinId = null, recent = [];
+  // V5.34 — focal generation in view (sample family opens on Arthur's generation, not on the oldest ancestors)
+  var bandTops = [], focalY = null, genFirst = false;
+  function scrollToFocalGen() {
+    var o = document.getElementById('timelineOuter'), svg = document.getElementById('mainSvg');
+    if (focalY == null || !svg.viewBox.baseVal || !svg.viewBox.baseVal.height) return;
+    var top = 0; bandTops.forEach(function(t){ if (t <= focalY && t > top) top = t; });
+    var k = svg.getBoundingClientRect().height / svg.viewBox.baseVal.height;
+    var ruler = document.getElementById('rulerWrap').getBoundingClientRect().height;
+    var svgTop = svg.getBoundingClientRect().top - o.getBoundingClientRect().top + o.scrollTop;   // SVG has no offsetTop
+    o.scrollTop = Math.max(0, svgTop + top * k - ruler);
+    // and sideways: focal's birth year at ~55% of the visible width (label sits to its left; the profile panel covers the right)
+    var fp = P(state.focal), by = fp && fp.birth && fp.birth.year;
+    if (by != null) {
+      var oR = o.getBoundingClientRect(), pnl = document.getElementById('profilePanel'), right = oR.right;
+      if (!pnl.hidden) right = Math.min(right, pnl.getBoundingClientRect().left);
+      o.scrollLeft = Math.max(0, X(by) * k - (right - oR.left) * 0.55);
+    }
+  }
   var PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>';
   function updatePinUI() {
     var b = document.getElementById('pinBackBtn'), hr = document.querySelector('.header-right'), psw = document.getElementById('personSelectorWrap');
@@ -2166,7 +2189,7 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
     });
     aliases(p).names.forEach(function(n){ if (n && n !== nameOf(p) && aka.indexOf(n) < 0) aka.push(n); });
     if (aka.length) h += '<div class="pp-aka"><span>Also known as</span> ' + aka.map(esc).join(', ') + '</div>';
-    h += '</div><button class="pp-pin" type="button" data-pin aria-pressed="false">' + PIN_SVG + '</button></header>';
+    h += '@@ADDEDBY@@</div></header>';
     // 2. Life events — Geni-style: label | date, place on the line below; gap between events
     var ev = '';
     bl.forEach(function(b){
@@ -2216,7 +2239,9 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
     if (al2.length) h += sec('Possibly the same person', al2.map(function(x){ return personLink(x); }).join(''));
     // 3. Original profile
     var links = providerLinks(p);
-    if (links.length || addedBy) h += '<section class="pp-sec pp-orig">' + (links.map(function(l){ return '<a class="pp-ext" href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer">Open on ' + esc(l.name) + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>'; }).join('') + (links.length ? '<p class="pp-fine">Opens in a new tab. Photos are not shown in TreeLine.</p>' : '') + (addedBy ? '<div class="pp-row pp-added"><dt>Added by</dt><dd><span class="pp-l1">' + esc(addedBy) + '</span></dd></div>' : '')) + '</section>';
+    // V5.34: pin + 'Open on …' share one row; 'Added by' moved to the header, styled as 'Also known as'
+    h = h.replace('@@ADDEDBY@@', addedBy ? '<div class="pp-aka"><span>Added by</span> ' + esc(addedBy) + '</div>' : '');
+    h += '<section class="pp-sec pp-orig"><div class="pp-actions"><button class="pp-pin" type="button" data-pin aria-pressed="false">' + PIN_SVG + '</button>' + links.map(function(l){ return '<a class="pp-ext" href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer">Open on ' + esc(l.name) + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>'; }).join('') + '</div></section>';
     // 4. Sources
     var srcs = [];
     (p.raw || []).forEach(function(t){ if (t.tag === 'SOUR' && t.value) { var tt = /^@.+@$/.test(t.value) ? (G.sources && G.sources.get(t.value)) : t.value; if (tt && srcs.indexOf(tt) < 0) srcs.push(tt); } });
@@ -2356,6 +2381,8 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
   window.TreeLine = {
     setData: function(g){ G = g; renderRuler(); },
     show: function(id, pin){ if (pin) pinId = id; go({ focal: id, ov: {} }, true); },
+    genFirst: function(){ genFirst = true; },
+    scrollToFocalGen: function(){ genFirst = false; requestAnimationFrame(scrollToFocalGen); },   // render (incl. its one re-draw) is done by now
     recent: function(){ var f = state && state.focal; return { pin: pinId, list: recent.filter(function(x){ return x !== f && x !== pinId; }).slice(0, 5) }; }
   };
 })();
@@ -2626,7 +2653,7 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
     TreeLine.setData(gedData);
     personInput.disabled = false;
     personInput.placeholder = 'Search ' + gedData.individuals.size + ' people…';
-    if (focalPick) { var fid = focalPick(gedData); if (fid) { document.getElementById('personSelectorWrap').classList.remove('pre-render'); selectPerson(fid); return; } }
+    if (focalPick) { var fid = focalPick(gedData); if (fid) { document.getElementById('personSelectorWrap').classList.remove('pre-render'); TreeLine.genFirst(); selectPerson(fid); TreeLine.scrollToFocalGen(); return; } }
     if (!document.getElementById('mainSvg').childNodes.length) {
       document.getElementById('emptyCopy').innerHTML = '<strong class="ok">' + gedData.individuals.size + ' people found</strong>' +
         'Whose timeline do you want to see? Type a name, then pick the person from the list.';
@@ -2722,12 +2749,12 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V5.33', date: '15 Oct 2026',
+  version: 'V5.34', date: '15 Oct 2026',
   // Rule (spec §2.1c): ONLY the changes that came with THIS version. Replace — never append — on every release.
   notes: [
-    'Pin a person: the person you search for is pinned. When you move away from them, a pin button appears at the top. Click it to go straight back.',
-    'Pin someone else with the pin button in the profile panel, also when the panel is closed. Click it again to unpin.',
-    'Click the empty search field to see the pinned person and the people you looked at most recently.'
+    'The sample family now opens on Arthur Brandt’s generation. No scrolling needed.',
+    'Profile panel: the pin button sits next to “Open on …”, so long names get the full width. “Added by” is now shown under “Also known as”.',
+    'Timeline: birth places are grey, so they no longer read as part of the name.'
   ],
   author: 'Created and designed by', authorName: 'Hannes Seeberg', authorUrl: 'https://www.linkedin.com/in/seeberg/'
 };
