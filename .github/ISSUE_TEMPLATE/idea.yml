@@ -1,0 +1,24 @@
+name: Idea or feedback
+description: Tell us what TreeLine could do better.
+title: "[Idea] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        All ideas are welcome, small and large.
+        **This page is public.** Do not add names, dates or files of living people.
+  - type: textarea
+    id: idea
+    attributes:
+      label: What is your idea?
+      placeholder: I want to see …
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is this useful for you?
+      description: Tell us what you want to find out or do with your family tree.
+    validations:
+      required: false
