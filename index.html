@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V5.35</title>
+<title>TreeLine V5.36</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%237A4864%22/%3E%3Crect%20x%3D%225%22%20y%3D%228%22%20width%3D%2215%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2211%22%20y%3D%2214%22%20width%3D%2216%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22%20opacity%3D%22.8%22/%3E%3Crect%20x%3D%227%22%20y%3D%2220%22%20width%3D%2212%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22%20opacity%3D%22.5%22/%3E%3C/svg%3E">
 <style>
 /* Atkinson Hyperlegible Next, embedded (SIL OFL 1.1, Braille Institute). Static 400/500/600/700, Latin subset.
@@ -1008,6 +1008,20 @@ body.profile-collapsed .gaps-bar { display: none; }
 .ab-notes { margin: 8px 0 0 18px; font-size: 15px; line-height: 1.55; display: grid; gap: 8px; }
 .ab-author { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--panel-border); font-size: 14px; line-height: 1.5; color: var(--header-sub); }
 
+/* ═══ V5.36 — logo → start page · About: GitHub · Menu: bar legend */
+.home-link { display: inline-flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; border-radius: 8px; }
+.home-link:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+body:not(.is-start) .home-link:hover { opacity: 0.85; }
+.ab-gh { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--panel-border); font-size: 14px; line-height: 1.5; color: var(--header-sub); }
+.ab-gh p { margin: 0 0 8px; } .ab-gh p:last-child { margin-bottom: 0; }
+.ab-gh a { color: var(--header-accent); font-weight: 600; }
+.bar-legend { display: grid; gap: 12px; padding-top: 8px; }
+.bl-row { display: grid; grid-template-columns: 80px 1fr; gap: 12px; align-items: start; }
+.bl-row p { margin: 0; }
+.bl-row b { color: var(--header-title); font-weight: 600; }
+.bl-ex { width: 80px; height: 24px; margin-top: 0; }
+.bl-mark { font-size: 16px; color: var(--header-title); text-align: center; line-height: 1.5; }
+
 /* ═══ V5.23 — Menu */
 .menu-btn svg { width: 20px; height: 20px; }
 .settings-menu { min-width: 260px; }
@@ -1086,11 +1100,12 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
   <linearGradient id="tlSunset" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6E4260"/><stop offset="0.45" stop-color="#8E5468"/><stop offset="1" stop-color="#A85D46"/></linearGradient>
   <linearGradient id="tlSunsetH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7A4864"/><stop offset="0.5" stop-color="#985A66"/><stop offset="1" stop-color="#A85D46"/></linearGradient>
+  <linearGradient id="lgSoft" x1="0" y1="0" x2="1" y2="0"><stop class="sib-fade-stop-m" offset="0" stop-opacity="0"/><stop class="sib-fade-stop-m" offset="0.12" stop-opacity="1"/><stop class="sib-fade-stop-m" offset="0.88" stop-opacity="1"/><stop class="sib-fade-stop-m" offset="1" stop-opacity="0"/></linearGradient><linearGradient id="lgFadeIn" x1="0" y1="0" x2="1" y2="0"><stop class="sib-fade-stop-f" offset="0" stop-opacity="0"/><stop class="sib-fade-stop-f" offset="0.45" stop-opacity="1"/><stop class="sib-fade-stop-f" offset="1" stop-opacity="1"/></linearGradient><linearGradient id="lgOpenEnd" x1="0" y1="0" x2="1" y2="0"><stop class="sib-fade-stop-m" offset="0" stop-opacity="1"/><stop class="sib-fade-stop-m" offset="0.5" stop-opacity="1"/><stop class="sib-fade-stop-m" offset="1" stop-opacity="0"/></linearGradient><linearGradient id="lgHaze" x1="0" y1="0" x2="1" y2="0"><stop class="sib-fade-stop-f" offset="0" stop-opacity="0"/><stop class="sib-fade-stop-f" offset="0.35" stop-opacity="1"/><stop class="sib-fade-stop-f" offset="0.6" stop-opacity="1"/><stop class="sib-fade-stop-f" offset="1" stop-opacity="0"/></linearGradient>
 </defs></svg>
 
 <div class="header">
   <div class="header-titles">
-    <h1><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V5.35</span><span class="about-sep">·</span><span class="about-lbl">About</span></button><span class="sample-badge" id="sampleBadge" hidden>Sample data</span></h1>
+    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V5.36</span><span class="about-sep">·</span><span class="about-lbl">About</span></button><span class="sample-badge" id="sampleBadge" hidden>Sample data</span></h1>
     <div class="about-pop" id="aboutPop" role="dialog" aria-label="About TreeLine" hidden></div>
   </div>
   <div class="header-focal" id="headerFocal"></div>
@@ -1130,6 +1145,7 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
           <p class="menu-note" id="langNote" hidden>Translation is coming. TreeLine is shown in English for now.</p></div>
         <div class="settings-divider"></div>
         <details class="menu-help" id="menuHelp"><summary class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.8.9c0 1.7-2.3 2.1-2.3 3.6M12 17v.5"/></svg>How do I get a GEDCOM file?<svg class="menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="menu-help-body" id="menuHelpBody"></div></details>
+        <details class="menu-help" id="menuBars"><summary class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h11M8 12h12M6 17h9"/></svg>What do the bars mean?<svg class="menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="menu-help-body bar-legend"><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="anc-bar-m" x="14" y="5" width="62" height="14" rx="7"/><circle class="anc-bar-m" cx="14" cy="12" r="6" stroke="var(--band-bg)" stroke-width="3"/></svg><p><b>Selected person and direct line.</b> Strong colour. The dot marks the birth.</p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-m" x="4" y="1" width="72" height="9" rx="4.5"/><rect class="sib-bar-f" x="4" y="14" width="58" height="9" rx="4.5"/></svg><p><b>Other relatives.</b> Light colour. Blue is a man, pink is a woman.</p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-m" x="8" y="5" width="64" height="14" rx="7"/></svg><p><b>Exact dates.</b> The bar starts at the birth and stops at the death.</p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="8" y="5" width="64" height="14" rx="7" style="fill:url(#lgSoft)"/></svg><p><b>~1837 (about).</b> The ends are soft, about ±3 years.</p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgFadeIn)"/></svg><p><b>&lt;1837, &gt;1837, 1830/37.</b> Before, after, between. The bar fades in or out over that time.</p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgOpenEnd)"/></svg><p><b>Death unknown.</b> Solid up to the last known event (a child’s birth, a marriage), then it fades out.</p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-f" x="4" y="5" width="62" height="14" rx="7"/><line class="today-line" x1="66" y1="1" x2="66" y2="23"/></svg><p><b>Living.</b> The bar runs up to today (dashed line).</p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgHaze)"/></svg><p><b>(?–?) No dates.</b> The place on the timeline is an estimate from the parents or children.</p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><line x1="40" y1="0" x2="40" y2="24" stroke="var(--connector-m)" stroke-width="1.5"/></svg><p><b>Vertical line.</b> Goes from a parent’s bar to the birth of each child.</p></div><div class="bl-row"><span class="bl-mark">↳</span><p><b>Has children or a partner.</b> Click the name to see their family.</p></div><div class="bl-row"><span class="bl-mark">⧉</span><p><b>Partner with their own family.</b> Click to open the partner’s tree.</p></div></div></details>
       </div>
     </div>
   </div>
@@ -2692,6 +2708,11 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
   loadGedBtn.addEventListener('click', function() { gedFileInput.click(); });
   // V4.3: back to start screen; full reset clears the loaded tree from memory
   document.getElementById('openAnotherBtn').addEventListener('click', function() { location.href = location.pathname + location.search; });
+  // V5.36: logo / name → start page (same as "Open another file"); on the start page it does nothing
+  document.getElementById('homeLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    if (!document.body.classList.contains('is-start')) location.href = location.pathname + location.search;
+  });
   gedFileInput.addEventListener('change', function(e) {
     var file = e.target.files[0];
     if (file) loadGedcom(file);
@@ -2760,12 +2781,14 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V5.35', date: '15 Oct 2026',
+  version: 'V5.36', date: '15 Oct 2026',
   // Rule (spec §2.1c): ONLY the changes that came with THIS version. Replace — never append — on every release.
   notes: [
-    'Timeline: the birth place now follows the name after a dot, e.g. “Johann Brandt (1688/92–>1751) · Lübeck”. Only the first part of the place is shown. The full place is in the profile panel.',
-    'Long names at the left edge no longer touch or run past the card edge.'
+    'Click the TreeLine logo to go back to the start page.',
+    'Menu: “What do the bars mean?” shows each bar type with a short explanation.',
+    'About: download your own copy from GitHub, and send ideas or feedback in GitHub Issues.'
   ],
+  repoUrl: 'https://github.com/hseeberg/TreeLine', issuesUrl: 'https://github.com/hseeberg/TreeLine/issues',
   author: 'Created and designed by', authorName: 'Hannes Seeberg', authorUrl: 'https://www.linkedin.com/in/seeberg/'
 };
 (function(){
@@ -2773,6 +2796,8 @@ var RELEASE = {
   function e(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   pop.innerHTML = '<div class="ab-head"><div><div class="ab-title">TreeLine ' + e(RELEASE.version) + '</div><div class="ab-date">Released ' + e(RELEASE.date) + '</div></div><button class="ab-close" aria-label="Close">✕</button></div>' +
     '<div class="ab-label">What’s new</div><ul class="ab-notes">' + RELEASE.notes.map(function(n){ return '<li>' + e(n) + '</li>'; }).join('') + '</ul>' +
+    '<div class="ab-gh"><p>Want TreeLine on your own computer? <a href="' + e(RELEASE.repoUrl) + '" target="_blank" rel="noopener noreferrer">Download a copy from GitHub</a>. It works offline in your browser.</p>' +
+    '<p>Ideas or feedback? Add them under <a href="' + e(RELEASE.issuesUrl) + '" target="_blank" rel="noopener noreferrer">Issues on GitHub</a>.</p></div>' +
     '<p class="ab-author">' + e(RELEASE.author) + ' <a href="' + e(RELEASE.authorUrl) + '" target="_blank" rel="noopener noreferrer">' + e(RELEASE.authorName) + '</a></p>';
   function open(o){ pop.hidden = !o; btn.setAttribute('aria-expanded', String(o)); }
   btn.addEventListener('click', function(ev){ ev.stopPropagation(); open(pop.hidden); });
@@ -2790,7 +2815,7 @@ var RELEASE = {
   sel.addEventListener('change', function(){ note.hidden = sel.value === 'en'; document.documentElement.setAttribute('data-tl-lang', sel.value); });
   // V5.24: same GEDCOM help as on the start page, opens inside the menu (no jumping elsewhere)
   var src = document.querySelector('#gedcomHelp .gh-body'); if (src) document.getElementById('menuHelpBody').innerHTML = src.innerHTML;
-  document.getElementById('menuHelp').addEventListener('click', function(e){ if (!e.target.closest('a')) e.stopPropagation(); });
+  document.querySelectorAll('#settingsMenu .menu-help').forEach(function(d){ d.addEventListener('click', function(e){ if (!e.target.closest('a')) e.stopPropagation(); }); });
 })();
 </script>
 <script type="text/plain" id="sampleGed">
