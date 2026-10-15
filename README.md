@@ -50,6 +50,11 @@ born across 50 years. TreeLine puts time first.
 - Tested in: Google Chrome
 - Current version: 5.31
 
+## License
+
+Free for personal, non-commercial use.
+Commercial use requires permission.
+
 ## Feedback
 
 Report bugs and ideas in [Issues](https://github.com/hseeberg/TreeLine/issues).
