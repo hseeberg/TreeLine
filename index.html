@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V5.44</title>
+<title>TreeLine V5.45</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%237A4864%22/%3E%3Crect%20x%3D%225%22%20y%3D%228%22%20width%3D%2215%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2211%22%20y%3D%2214%22%20width%3D%2216%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22%20opacity%3D%22.8%22/%3E%3Crect%20x%3D%227%22%20y%3D%2220%22%20width%3D%2212%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22%20opacity%3D%22.5%22/%3E%3C/svg%3E">
 <style>
 /* Atkinson Hyperlegible Next, embedded (SIL OFL 1.1, Braille Institute). Static 400/500/600/700, Latin subset.
@@ -1138,7 +1138,7 @@ html[data-tl-theme="dark"] { --imp-bg: #3a2e17; --imp-border: #8a6a2a; --imp-tex
 
 <div class="header">
   <div class="header-titles">
-    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V5.44</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
+    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V5.45</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
     <div class="about-pop" id="aboutPop" role="dialog" aria-label="About TreeLine" data-i18n-aria="about.aria" hidden></div>
   </div>
   <div class="header-focal" id="headerFocal"></div>
@@ -4041,7 +4041,18 @@ window.TLPops = (function(){
     return null;
   }
 
-  function cleanName(s) { return (s||'').replace(/\//g,'').replace(/\s+/g,' ').trim(); }
+  // V5.45: names are shown exactly as written in the file. Only the two GEDCOM surname delimiters are removed:
+  // opening "/" = at start or after a space, followed by a non-space; closing "/" = the last "/" that is
+  // followed by a space or the end ("Mare /Talviste/Tömp/" → "Mare Talviste/Tömp"; "Ene Mall //" → "Ene Mall").
+  // Every other "/" ("Els / Elts", "Anne/Anna", "Rabasaare / Wina / Laeva Mart") and all brackets are name content — kept.
+  function cleanName(s) {
+    s = String(s || '');
+    let o = -1, c = -1;
+    for (let i = 0; i < s.length; i++) if (s[i] === '/' && (i === 0 || /\s/.test(s[i-1])) && i + 1 < s.length && !/\s/.test(s[i+1])) { o = i; break; }
+    if (o >= 0) for (let i = s.length - 1; i > o; i--) if (s[i] === '/' && (i === s.length - 1 || /\s/.test(s[i+1])) && !/\s/.test(s[i-1])) { c = i; break; }
+    if (o >= 0 && c > o) s = s.slice(0, o) + s.slice(o + 1, c) + s.slice(c + 1);
+    return s.replace(/\s+/g, ' ').trim();
+  }
 
   const LINE_RE = /^(\d+)\s+(?:(@[^@]+@)\s+)?(\S+)(?:\s+([\s\S]*))?$/;
 
@@ -4066,11 +4077,11 @@ window.TLPops = (function(){
 
   function parseIndividual(rec) {
     const indi={id:rec.xref,name:'',givn:'',surn:'',sex:'U',birth:null,death:null,note:'',famc:[],fams:[]};
-    let ctx=null, subCtx=null;
+    let ctx=null, subCtx=null, nameN=0;
     for (const {level,tag,value} of rec.children) {
       if (level===1) {
         ctx=tag; subCtx=null;
-        if (tag==='NAME') indi.name=cleanName(value);
+        if (tag==='NAME') { nameN++; if (nameN===1) indi.name=cleanName(value); } // V5.45: the first NAME is the primary name; later ones are alternatives (profile panel)
         else if (tag==='SEX') indi.sex=value==='M'?'M':value==='F'?'F':'U';
         else if (tag==='BIRT') indi.birth={year:null,place:'',approx:false,isRange:false,yearLo:null,yearHi:null};
         else if (tag==='DEAT') indi.death={year:null,place:'',approx:false};
@@ -4079,7 +4090,7 @@ window.TLPops = (function(){
         else if (tag==='FAMS') indi.fams.push(value);
       } else if (level===2) {
         subCtx=tag;
-        if (ctx==='NAME') { if (tag==='GIVN') indi.givn=value; else if (tag==='SURN') indi.surn=value; }
+        if (ctx==='NAME'&&nameN===1) { if (tag==='GIVN') indi.givn=value; else if (tag==='SURN') indi.surn=value; }
         else if (ctx==='BIRT'&&indi.birth) {
           if (tag==='DATE') { const d=parseDateStr(value); if (d) Object.assign(indi.birth,d); }
           else if (tag==='PLAC'&&value) indi.birth.place=value;
@@ -4160,7 +4171,7 @@ window.TLPops = (function(){
     return {individuals,families,sources,submitters};
   }
 
-  return {parse,parseAsync};
+  return {parse,parseAsync,cleanName};
 });
 
 </script>
@@ -5124,7 +5135,7 @@ window.TLPops = (function(){
     document.getElementById('ppToggle').setAttribute('aria-expanded', String(!ppCollapsed));
     updatePinUI();
   }
-  function cleanNm(s) { return String(s || '').replace(/\//g, '').replace(/\s+/g, ' ').trim(); }
+  function cleanNm(s) { return GEDCOMParser.cleanName(s); } // V5.45: one rule for every name (parser §3.1)
   function sec(title, inner) { return '<section class="pp-sec"><h3>' + esc(title) + '</h3>' + inner + '</section>'; }
   (function(){
     var panel = document.getElementById('profilePanel'), ticking = false;
@@ -5652,7 +5663,7 @@ window.TLPops = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V5.44', date: [2026, 10, 16],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V5.45', date: [2026, 10, 16],   // y, m, d — shown in the UI language (I18N date.dmy)
   // Rule (spec §2.1c): ONLY the changes that came with THIS version. Replace — never append — on every release.
   // Notes stay in English for now (open question, spec §i18n).
   notes: [
