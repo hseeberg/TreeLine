@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.14</title>
+<title>TreeLine V6.15</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -65,6 +65,8 @@
   --female-primary: #F07397;
   --female-secondary: #5E2B42;
   --female-secondary-border: #9C4B6F;
+  --unknown-primary: #9AA3AE;     /* V6.15 §6.2: SEX missing or not M/F — direct line */
+  --unknown-secondary: #3A4049;   /* V6.15 §6.2: SEX unknown — siblings / other relatives */
 
   --tick: rgba(255,255,255,0.5);
   --tick-sib: rgba(255,255,255,0.28);
@@ -106,6 +108,8 @@ html[data-tl-theme="light"] {
   --female-primary: #C23A63;
   --female-secondary: #F8D6E0;
   --female-secondary-border: #E39AB1;
+  --unknown-primary: #6B7480;     /* V6.15 §6.2 */
+  --unknown-secondary: #D5D9DE;   /* V6.15 §6.2 */
 
   --tick: rgba(0,0,0,0.35);
   --tick-sib: rgba(0,0,0,0.22);
@@ -255,6 +259,15 @@ svg text { font-family: var(--font); }
 .sib-bar-f { fill: var(--female-secondary); stroke: var(--female-secondary-border); stroke-width: 1; }
 .sib-fade-stop-m { stop-color: var(--male-secondary); }
 .sib-fade-stop-f { stop-color: var(--female-secondary); }
+/* V6.15 §6.2 — sex unknown: neutral grey */
+.sib-bar-u { fill: var(--unknown-secondary); }
+.sib-fade-stop-u { stop-color: var(--unknown-secondary); }
+.sib-range-u { fill: none; stroke: var(--unknown-primary); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.anc-bar-u { fill: var(--unknown-primary); }
+.anc-fade-stop-u { stop-color: var(--unknown-primary); }
+.anc-name-u { font-size: 16px; font-weight: 700; fill: var(--header-title); }
+.anc-loc-u { font-size: 14px; fill: var(--header-sub); }
+.connector-u { stroke: var(--unknown-primary); stroke-width: 1.5; stroke-linecap: round; opacity: 0.55; }
 
 /* Instant tooltip (custom overlay, rendering rules) */
 .tt {
@@ -407,9 +420,10 @@ html[data-tl-theme="light"] {
   --female-secondary-border: #E897AF;
   --focal-tint-m: rgba(45,91,227,0.08);
   --focal-tint-f: rgba(210,60,104,0.08);
+  --focal-tint-u: rgba(107,116,128,0.08);
   --brand: #141C33; --brand-2: #1F2A4A;
 }
-:root { --stripe: rgba(255,255,255,0.025); --focal-tint-m: rgba(111,150,247,0.12); --focal-tint-f: rgba(240,115,151,0.12); }
+:root { --stripe: rgba(255,255,255,0.025); --focal-tint-m: rgba(111,150,247,0.12); --focal-tint-f: rgba(240,115,151,0.12); --focal-tint-u: rgba(154,163,174,0.12); }
 
 /* App bar = brand frame */
 .header { background: var(--brand); border-bottom: none; color: var(--on-brand); box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(15,22,38,0.18); }
@@ -427,13 +441,16 @@ html[data-tl-theme="light"] {
 .grid-line { stroke: var(--grid-line); }
 .focal-hl-m { fill: var(--focal-tint-m); }
 .focal-hl-f { fill: var(--focal-tint-f); }
+.focal-hl-u { fill: var(--focal-tint-u); }
+.focal-edge-u { fill: var(--unknown-primary); }
+.birth-node-u { fill: var(--unknown-primary); }
 .focal-edge-m { fill: var(--male-primary); }
 .focal-edge-f { fill: var(--female-primary); }
 .birth-node { stroke: var(--band-bg); stroke-width: 3; }
 .birth-node-m { fill: var(--male-primary); }
 .birth-node-f { fill: var(--female-primary); }
-.sib-bar-m, .sib-bar-f { stroke: none; }
-.connector-m, .connector-f { stroke-width: 2; opacity: 0.5; }
+.sib-bar-m, .sib-bar-f, .sib-bar-u { stroke: none; }
+.connector-m, .connector-f, .connector-u { stroke-width: 2; opacity: 0.5; }
 .gen-num { fill: var(--brand); }
 .gen-num-text { font-size: 13px; fill: #FFFFFF; }
 .gen-head { font-size: 15px; }
@@ -772,9 +789,10 @@ html:not([data-tl-theme="light"]) .today-line, html:not([data-tl-theme="light"])
 /* ═══ V4.17 — connectors ═══
    Line to the past (ancestors → focal): same colour as the parent's bar, no transparency.
    Focal's children: same colour, thinner (secondary — nobody there is selected). */
-.connector-m, .connector-f, .hv-conn-m, .hv-conn-f { opacity: 1; stroke-width: 2; stroke-linecap: round; }
+.connector-m, .connector-f, .connector-u, .hv-conn-m, .hv-conn-f { opacity: 1; stroke-width: 2; stroke-linecap: round; }
 .connector-m, .hv-conn-m { stroke: var(--male-primary); }
 .connector-f, .hv-conn-f { stroke: var(--female-primary); }
+.connector-u { stroke: var(--unknown-primary); }
 .connector-child, .hv-conn-child { stroke-width: 1; }
 
 /* ═══ V4.18 — timeline load-in motion (same language as the start-page example) ═══ */
@@ -877,6 +895,7 @@ body.profile-collapsed .pp-toggle { left: 50%; transform: translateX(-50%); }
 .pp-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; align-self: center; }
 .pp-dot-m { background: var(--male-primary); }
 .pp-dot-f { background: var(--female-primary); }
+.pp-dot-u { background: var(--unknown-primary); }
 .pp-yrs { color: var(--header-sub); font-size: 14px; margin-left: auto; white-space: nowrap; }
 .pp-text { font-size: 15px; line-height: 1.55; color: var(--header-title); }
 .pp-note { white-space: normal; max-height: 320px; overflow-y: auto; padding-right: 6px; }
@@ -1278,6 +1297,7 @@ body.is-listview .timeline-outer, body.is-listview .sticky-ruler-wrap { display:
 .pl-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
 .pl-dot-m { background: var(--male-primary); }
 .pl-dot-f { background: var(--female-primary); }
+.pl-dot-u { background: var(--unknown-primary); }
 .pl-main { display: flex; flex-direction: column; min-width: 0; }
 .pl-line { font-size: 16px; line-height: 1.4; overflow-wrap: anywhere; }
 .pl-name { font-weight: 600; }
@@ -1397,7 +1417,7 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
 
 <div class="header">
   <div class="header-titles">
-    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V6.14</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
+    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V6.15</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
     <div class="about-pop" id="aboutPop" role="dialog" aria-label="About TreeLine" data-i18n-aria="about.aria" hidden></div>
   </div>
   <div class="header-focal" id="headerFocal"></div>
@@ -1432,7 +1452,7 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
         <div class="settings-section-label" data-i18n="menu.help">Help</div>
         <details class="menu-help" id="menuHelp"><summary class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.8.9c0 1.7-2.3 2.1-2.3 3.6M12 17v.5"/></svg><span data-i18n="menu.gedHelp">How do I get a GEDCOM file?</span><svg class="menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="menu-help-body" id="menuHelpBody"></div></details>
         <details class="menu-help" id="menuMissing"><summary class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><path d="M16 9h5"/></svg><span data-i18n="miss.title">Are people missing?</span><svg class="menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="menu-help-body miss-body" id="menuMissingBody"></div></details>
-        <details class="menu-help" id="menuBars"><summary class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h11M8 12h12M6 17h9"/></svg><span data-i18n="menu.bars">What do the bars mean?</span><svg class="menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="menu-help-body bar-legend"><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="anc-bar-m" x="14" y="5" width="62" height="14" rx="7"/><circle class="anc-bar-m" cx="14" cy="12" r="6" stroke="var(--band-bg)" stroke-width="3"/></svg><p><b data-i18n="legend.sel.t">Selected person and direct line.</b> <span data-i18n="legend.sel.d">Strong colour. The dot marks the birth.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-m" x="4" y="1" width="72" height="9" rx="4.5"/><rect class="sib-bar-f" x="4" y="14" width="58" height="9" rx="4.5"/></svg><p><b data-i18n="legend.other.t">Other relatives.</b> <span data-i18n="legend.other.d">Light colour. Blue is a man, pink is a woman.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-m" x="8" y="5" width="64" height="14" rx="7"/></svg><p><b data-i18n="legend.exact.t">Exact dates.</b> <span data-i18n="legend.exact.d">The bar starts at the birth and stops at the death.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="8" y="5" width="64" height="14" rx="7" style="fill:url(#lgSoft)"/></svg><p><b data-i18n="legend.about.t">~1837 (about).</b> <span data-i18n="legend.about.d">The ends are soft, about ±3 years.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgFadeIn)"/></svg><p><b data-i18n="legend.bef.t">&lt;1837, &gt;1837, 1830/37.</b> <span data-i18n="legend.bef.d">Before, after, between. The bar fades in or out over that time.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgOpenEnd)"/></svg><p><b data-i18n="legend.deathUnk.t">Death unknown.</b> <span data-i18n="legend.deathUnk.d">Solid up to the last known event (a child’s birth, a marriage), then it fades out.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-f" x="4" y="5" width="62" height="14" rx="7"/><line class="today-line" x1="66" y1="1" x2="66" y2="23"/></svg><p><b data-i18n="legend.living.t">Living.</b> <span data-i18n="legend.living.d">The bar runs up to today (dashed line).</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgHaze)"/></svg><p><b data-i18n="legend.nodates.t">(?–?) No dates.</b> <span data-i18n="legend.nodates.d">The place on the timeline is an estimate from the parents or children.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><line x1="40" y1="0" x2="40" y2="24" stroke="var(--connector-m)" stroke-width="1.5"/></svg><p><b data-i18n="legend.vline.t">Vertical line.</b> <span data-i18n="legend.vline.d">Goes from a parent’s bar to the birth of each child.</span></p></div><div class="bl-row"><span class="bl-mark">↳</span><p><b data-i18n="legend.kids.t">Has children or a partner.</b> <span data-i18n="legend.kids.d">Click the name to see their family.</span></p></div><div class="bl-row"><span class="bl-mark">⧉</span><p><b data-i18n="legend.partner.t">Partner with their own family.</b> <span data-i18n="legend.partner.d">Click to open the partner’s tree.</span></p></div></div></details>
+        <details class="menu-help" id="menuBars"><summary class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h11M8 12h12M6 17h9"/></svg><span data-i18n="menu.bars">What do the bars mean?</span><svg class="menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="menu-help-body bar-legend"><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="anc-bar-m" x="14" y="5" width="62" height="14" rx="7"/><circle class="anc-bar-m" cx="14" cy="12" r="6" stroke="var(--band-bg)" stroke-width="3"/></svg><p><b data-i18n="legend.sel.t">Selected person and direct line.</b> <span data-i18n="legend.sel.d">Strong colour. The dot marks the birth.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-m" x="4" y="1" width="72" height="9" rx="4.5"/><rect class="sib-bar-f" x="4" y="14" width="58" height="9" rx="4.5"/></svg><p><b data-i18n="legend.other.t">Other relatives.</b> <span data-i18n="legend.other.d">Light colour. Blue is a man, pink is a woman.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="anc-bar-u" x="4" y="1" width="72" height="9" rx="4.5"/><rect class="sib-bar-u" x="4" y="14" width="58" height="9" rx="4.5"/></svg><p><b data-i18n="legend.sexUnk.t">Sex unknown.</b> <span data-i18n="legend.sexUnk.d">Grey. The file does not say if the person is a man or a woman.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-m" x="8" y="5" width="64" height="14" rx="7"/></svg><p><b data-i18n="legend.exact.t">Exact dates.</b> <span data-i18n="legend.exact.d">The bar starts at the birth and stops at the death.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="8" y="5" width="64" height="14" rx="7" style="fill:url(#lgSoft)"/></svg><p><b data-i18n="legend.about.t">~1837 (about).</b> <span data-i18n="legend.about.d">The ends are soft, about ±3 years.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgFadeIn)"/></svg><p><b data-i18n="legend.bef.t">&lt;1837, &gt;1837, 1830/37.</b> <span data-i18n="legend.bef.d">Before, after, between. The bar fades in or out over that time.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgOpenEnd)"/></svg><p><b data-i18n="legend.deathUnk.t">Death unknown.</b> <span data-i18n="legend.deathUnk.d">Solid up to the last known event (a child’s birth, a marriage), then it fades out.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-f" x="4" y="5" width="62" height="14" rx="7"/><line class="today-line" x1="66" y1="1" x2="66" y2="23"/></svg><p><b data-i18n="legend.living.t">Living.</b> <span data-i18n="legend.living.d">The bar runs up to today (dashed line).</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgHaze)"/></svg><p><b data-i18n="legend.nodates.t">(?–?) No dates.</b> <span data-i18n="legend.nodates.d">The place on the timeline is an estimate from the parents or children.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><line x1="40" y1="0" x2="40" y2="24" stroke="var(--connector-m)" stroke-width="1.5"/></svg><p><b data-i18n="legend.vline.t">Vertical line.</b> <span data-i18n="legend.vline.d">Goes from a parent’s bar to the birth of each child.</span></p></div><div class="bl-row"><span class="bl-mark">↳</span><p><b data-i18n="legend.kids.t">Has children or a partner.</b> <span data-i18n="legend.kids.d">Click the name to see their family.</span></p></div><div class="bl-row"><span class="bl-mark">⧉</span><p><b data-i18n="legend.partner.t">Partner with their own family.</b> <span data-i18n="legend.partner.d">Click to open the partner’s tree.</span></p></div></div></details>
         <div class="settings-divider"></div>
         <div class="settings-section-label"><label for="langSel" data-i18n="menu.language">Language</label></div>
         <div class="menu-lang"><select id="langSel" class="lang-sel"><option value="en" selected>English</option><option value="es">Español</option><option value="et">Eesti</option><option value="lv">Latviešu</option><option value="lt">Lietuvių</option><option value="fi">Suomi</option><option value="sv">Svenska</option><option value="de">Deutsch</option><option value="fr">Français</option><option value="no">Norsk</option><option value="da">Dansk</option><option value="nl">Nederlands</option></select>
@@ -1593,7 +1613,7 @@ I18N.en = {
   'legend.sel.t': 'Selected person and direct line.',               // bar legend: bold part
   'legend.sel.d': 'Strong colour. The dot marks the birth.',        // bar legend: rest of the line
   'legend.other.t': 'Other relatives.',
-  'legend.other.d': 'Light colour. Blue is a man, pink is a woman.',
+  'legend.other.d': 'Light colour. Blue is a man, pink is a woman.', 'legend.sexUnk.t': "Sex unknown.", 'legend.sexUnk.d': "Grey. The file does not say if the person is a man or a woman.",   // V6.15 §2.1b
   'legend.exact.t': 'Exact dates.',
   'legend.exact.d': 'The bar starts at the birth and stops at the death.',
   'legend.about.t': '~1837 (about).',
@@ -1862,7 +1882,7 @@ I18N.et = {
   'legend.sel.t': 'Valitud inimene ja otseliin.',
   'legend.sel.d': 'Tugev värv. Täpp märgib sündi.',
   'legend.other.t': 'Teised sugulased.',
-  'legend.other.d': 'Hele värv. Sinine on mees, roosa on naine.',
+  'legend.other.d': 'Hele värv. Sinine on mees, roosa on naine.', 'legend.sexUnk.t': "Sugu teadmata.", 'legend.sexUnk.d': "Hall. Failis pole kirjas, kas inimene on mees või naine.",   // V6.15 §2.1b
   'legend.exact.t': 'Täpsed kuupäevad.',
   'legend.exact.d': 'Riba algab sünniga ja lõpeb surmaga.',
   'legend.about.t': '~1837 (umbes).',
@@ -2116,7 +2136,7 @@ I18N.de = {
   'menu.langNote': 'Die Übersetzung folgt. TreeLine wird vorerst auf Englisch angezeigt.',
   'menu.gedHelp': 'Wie bekomme ich eine GEDCOM-Datei?', 'menu.bars': 'Was bedeuten die Balken?',
   'legend.sel.t': 'Ausgewählte Person und direkte Linie.', 'legend.sel.d': 'Kräftige Farbe. Der Punkt markiert die Geburt.',
-  'legend.other.t': 'Andere Verwandte.', 'legend.other.d': 'Helle Farbe. Blau ist ein Mann, Rosa eine Frau.',
+  'legend.other.t': 'Andere Verwandte.', 'legend.other.d': 'Helle Farbe. Blau ist ein Mann, Rosa eine Frau.', 'legend.sexUnk.t': "Geschlecht unbekannt.", 'legend.sexUnk.d': "Grau. Die Datei sagt nicht, ob die Person ein Mann oder eine Frau ist.",   // V6.15 §2.1b
   'legend.exact.t': 'Genaue Daten.', 'legend.exact.d': 'Der Balken beginnt bei der Geburt und endet beim Tod.',
   'legend.about.t': '~1837 (etwa).', 'legend.about.d': 'Die Enden sind weich, etwa ±3 Jahre.',
   'legend.bef.t': '<1837, >1837, 1830/37.', 'legend.bef.d': 'Vor, nach, zwischen. Der Balken wird über diesen Zeitraum ein- oder ausgeblendet.',
@@ -2278,7 +2298,7 @@ I18N.fi = {
   'menu.langNote': 'Käännös on tulossa. TreeLine näkyy toistaiseksi englanniksi.',
   'menu.gedHelp': 'Mistä saan GEDCOM-tiedoston?', 'menu.bars': 'Mitä palkit tarkoittavat?',
   'legend.sel.t': 'Valittu henkilö ja suora linja.', 'legend.sel.d': 'Vahva väri. Piste merkitsee syntymää.',
-  'legend.other.t': 'Muut sukulaiset.', 'legend.other.d': 'Vaalea väri. Sininen on mies, vaaleanpunainen nainen.',
+  'legend.other.t': 'Muut sukulaiset.', 'legend.other.d': 'Vaalea väri. Sininen on mies, vaaleanpunainen nainen.', 'legend.sexUnk.t': "Sukupuoli tuntematon.", 'legend.sexUnk.d': "Harmaa. Tiedostossa ei kerrota, onko henkilö mies vai nainen.",   // V6.15 §2.1b
   'legend.exact.t': 'Tarkat päivämäärät.', 'legend.exact.d': 'Palkki alkaa syntymästä ja päättyy kuolemaan.',
   'legend.about.t': '~1837 (noin).', 'legend.about.d': 'Päät ovat pehmeät, noin ±3 vuotta.',
   'legend.bef.t': '<1837, >1837, 1830/37.', 'legend.bef.d': 'Ennen, jälkeen, välillä. Palkki häivyttyy esiin tai pois tuona aikana.',
@@ -2441,7 +2461,7 @@ I18N.sv = {
   'menu.langNote': 'Översättningen kommer. TreeLine visas på engelska tills vidare.',
   'menu.gedHelp': 'Hur får jag en GEDCOM-fil?', 'menu.bars': 'Vad betyder staplarna?',
   'legend.sel.t': 'Vald person och direkt linje.', 'legend.sel.d': 'Stark färg. Punkten markerar födelsen.',
-  'legend.other.t': 'Andra släktingar.', 'legend.other.d': 'Ljus färg. Blå är en man, rosa är en kvinna.',
+  'legend.other.t': 'Andra släktingar.', 'legend.other.d': 'Ljus färg. Blå är en man, rosa är en kvinna.', 'legend.sexUnk.t': "Kön okänt.", 'legend.sexUnk.d': "Grå. Filen anger inte om personen är en man eller en kvinna.",   // V6.15 §2.1b
   'legend.exact.t': 'Exakta datum.', 'legend.exact.d': 'Stapeln börjar vid födelsen och slutar vid döden.',
   'legend.about.t': '~1837 (omkring).', 'legend.about.d': 'Ändarna är mjuka, omkring ±3 år.',
   'legend.bef.t': '<1837, >1837, 1830/37.', 'legend.bef.d': 'Före, efter, mellan. Stapeln tonas in eller ut under den tiden.',
@@ -2648,7 +2668,7 @@ I18N.es = {
   'legend.sel.t': "Persona seleccionada y línea directa.",
   'legend.sel.d': "Color intenso. El punto marca el nacimiento.",
   'legend.other.t': "Otros parientes.",
-  'legend.other.d': "Color claro. Azul es un hombre, rosa una mujer.",
+  'legend.other.d': "Color claro. Azul es un hombre, rosa una mujer.", 'legend.sexUnk.t': "Sexo desconocido.", 'legend.sexUnk.d': "Gris. El archivo no indica si la persona es hombre o mujer.",   // V6.15 §2.1b
   'legend.exact.t': "Fechas exactas.",
   'legend.exact.d': "La barra empieza en el nacimiento y termina en la defunción.",
   'legend.about.t': "~1837 (aproximadamente).",
@@ -2960,7 +2980,7 @@ I18N.fr = {
   'legend.sel.t': "Personne sélectionnée et lignée directe.",
   'legend.sel.d': "Couleur forte. Le point marque la naissance.",
   'legend.other.t': "Autres membres de la famille.",
-  'legend.other.d': "Couleur claire. Bleu pour un homme, rose pour une femme.",
+  'legend.other.d': "Couleur claire. Bleu pour un homme, rose pour une femme.", 'legend.sexUnk.t': "Sexe inconnu.", 'legend.sexUnk.d': "Gris. Le fichier n’indique pas s’il s’agit d’un homme ou d’une femme.",   // V6.15 §2.1b
   'legend.exact.t': "Dates exactes.",
   'legend.exact.d': "La barre commence à la naissance et s’arrête au décès.",
   'legend.about.t': "~1837 (vers).",
@@ -3272,7 +3292,7 @@ I18N.nl = {
   'legend.sel.t': "Gekozen persoon en directe lijn.",
   'legend.sel.d': "Sterke kleur. De stip markeert de geboorte.",
   'legend.other.t': "Andere familieleden.",
-  'legend.other.d': "Lichte kleur. Blauw is een man, roze een vrouw.",
+  'legend.other.d': "Lichte kleur. Blauw is een man, roze een vrouw.", 'legend.sexUnk.t': "Geslacht onbekend.", 'legend.sexUnk.d': "Grijs. Het bestand zegt niet of de persoon een man of een vrouw is.",   // V6.15 §2.1b
   'legend.exact.t': "Exacte datums.",
   'legend.exact.d': "De balk begint bij de geboorte en stopt bij het overlijden.",
   'legend.about.t': "~1837 (circa).",
@@ -3584,7 +3604,7 @@ I18N.lv = {
   'legend.sel.t': "Izvēlētais cilvēks un tiešā līnija.",
   'legend.sel.d': "Spēcīga krāsa. Punkts apzīmē dzimšanu.",
   'legend.other.t': "Citi radinieki.",
-  'legend.other.d': "Gaiša krāsa. Zils ir vīrietis, rozā – sieviete.",
+  'legend.other.d': "Gaiša krāsa. Zils ir vīrietis, rozā – sieviete.", 'legend.sexUnk.t': "Dzimums nav zināms.", 'legend.sexUnk.d': "Pelēks. Failā nav norādīts, vai persona ir vīrietis vai sieviete.",   // V6.15 §2.1b
   'legend.exact.t': "Precīzi datumi.",
   'legend.exact.d': "Josla sākas ar dzimšanu un beidzas ar nāvi.",
   'legend.about.t': "~1837 (aptuveni).",
@@ -3896,7 +3916,7 @@ I18N.lt = {
   'legend.sel.t': "Pasirinktas asmuo ir tiesioginė linija.",
   'legend.sel.d': "Ryški spalva. Taškas žymi gimimą.",
   'legend.other.t': "Kiti giminaičiai.",
-  'legend.other.d': "Šviesi spalva. Mėlyna – vyras, rožinė – moteris.",
+  'legend.other.d': "Šviesi spalva. Mėlyna – vyras, rožinė – moteris.", 'legend.sexUnk.t': "Lytis nežinoma.", 'legend.sexUnk.d': "Pilka. Faile nenurodyta, ar asmuo yra vyras, ar moteris.",   // V6.15 §2.1b
   'legend.exact.t': "Tikslios datos.",
   'legend.exact.d': "Juosta prasideda gimimu ir baigiasi mirtimi.",
   'legend.about.t': "~1837 (apie).",
@@ -4208,7 +4228,7 @@ I18N.no = {
   'legend.sel.t': "Valgt person og direkte linje.",
   'legend.sel.d': "Sterk farge. Prikken markerer fødselen.",
   'legend.other.t': "Andre slektninger.",
-  'legend.other.d': "Lys farge. Blå er en mann, rosa er en kvinne.",
+  'legend.other.d': "Lys farge. Blå er en mann, rosa er en kvinne.", 'legend.sexUnk.t': "Kjønn ukjent.", 'legend.sexUnk.d': "Grå. Filen sier ikke om personen er en mann eller en kvinne.",   // V6.15 §2.1b
   'legend.exact.t': "Eksakte datoer.",
   'legend.exact.d': "Stolpen starter ved fødselen og slutter ved døden.",
   'legend.about.t': "~1837 (omkring).",
@@ -4520,7 +4540,7 @@ I18N.da = {
   'legend.sel.t': "Valgt person og direkte linje.",
   'legend.sel.d': "Stærk farve. Prikken markerer fødslen.",
   'legend.other.t': "Andre slægtninge.",
-  'legend.other.d': "Lys farve. Blå er en mand, lyserød er en kvinde.",
+  'legend.other.d': "Lys farve. Blå er en mand, lyserød er en kvinde.", 'legend.sexUnk.t': "Køn ukendt.", 'legend.sexUnk.d': "Grå. Filen siger ikke, om personen er en mand eller en kvinde.",   // V6.15 §2.1b
   'legend.exact.t': "Præcise datoer.",
   'legend.exact.d': "Bjælken starter ved fødslen og slutter ved døden.",
   'legend.about.t': "~1837 (omkring).",
@@ -4799,6 +4819,8 @@ window.TLPops = (function(){
 </script>
 
 <script>
+/* V6.15 §6.2 — colour key from sex: M → 'm', F → 'f', missing or other → 'u' (neutral grey) */
+function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' : 'u'; }
 /**
  * gedcom_parser.js — Browser-side GEDCOM 5.5.1 parser
  * Spec: treeline_spec.md §3
@@ -4870,7 +4892,7 @@ window.TLPops = (function(){
       if (level===1) {
         ctx=tag; subCtx=null;
         if (tag==='NAME') { nameN++; if (nameN===1) indi.name=cleanName(value); } // V5.45: the first NAME is the primary name; later ones are alternatives (profile panel)
-        else if (tag==='SEX') indi.sex=value==='M'?'M':value==='F'?'F':'U';
+        else if (tag==='SEX') indi.sex=value==='M'?'M':value==='F'?'F':'U';   // V6.15 §6.2: anything else → U (neutral)
         else if (tag==='BIRT') indi.birth={year:null,place:'',approx:false,isRange:false,yearLo:null,yearHi:null};
         else if (tag==='DEAT') indi.death={year:null,place:'',approx:false};
         else if (tag==='NOTE') indi.note=value;
@@ -5162,7 +5184,7 @@ window.TLPops = (function(){
     return r;
   }
   function barSVGraw(p, id, barY, heir, defs, solidEndYear) {
-    var sex = p.sex === 'F' ? 'f' : 'm', out = '', H = heir ? HEIR_H : 10, HR = H / 2;
+    var sex = sexKey(p), out = '', H = heir ? HEIR_H : 10, HR = H / 2;
     var tickCls = heir ? 'birth-tick' : 'birth-tick-sib', t1 = heir ? barY - 8 : barY - 2, t2 = heir ? barY + 14 : barY + 12;
     // V5.29: a birth-year range (BET … AND …, or "1688-1692") is a normal life bar that fades in across the range (§5.4b),
     // no longer a dashed box without a lifespan. Solid at least through the children's births, haze after.
@@ -5351,11 +5373,11 @@ window.TLPops = (function(){
           var barY = rowY + 4;
           var solidEnd = lvl > 0 ? (by(P(L[lvl - 1])) != null ? Math.max(by(P(L[lvl - 1])), lastChildBirth(id) || 0) : lastChildBirth(id)) : lastChildBirth(id);
           var bar = barSVG(p, id, barY, true, defs, solidEnd);
-          var lx = Math.max(bar.x - 16, MIN_LABEL_X), sex = p.sex === 'F' ? 'f' : 'm';
+          var lx = Math.max(bar.x - 16, MIN_LABEL_X), sex = sexKey(p);
           layer3.push(bar.svg);
           layer3.push('<text class="anc-name-' + sex + (isFocal ? ' focal-name' : ' name-link') + '" x="' + f1(lx) + '" y="' + f1(barY + 12) + '" text-anchor="end" data-pid="' + esc(id) + '"' + (isFocal ? '' : ' data-act="focus-anc" data-level="' + lvl + '"') + '>' + labelHtml(p) + '</text>');
           spouses.forEach(function(sid, i){
-            var sp = P(sid), link = spouseHasData(sid), ssex = sp.sex === 'F' ? 'f' : 'm', py = barY + 34 + i * PARTNER_STEP;
+            var sp = P(sid), link = spouseHasData(sid), ssex = sexKey(sp), py = barY + 34 + i * PARTNER_STEP;
             var onLine = lvl > 0;   // V5.16: both parents/ancestors in primary colour
             if (onLine) lineChild[sid] = L[lvl - 1];
             FORCE_PRIMARY = onLine;
@@ -5400,10 +5422,10 @@ window.TLPops = (function(){
     for (var c = L.length - 1; c >= 1; c--) {
       var par = L[c], ch = L[c - 1], cb = descEst(ch);
       if (cb == null || rowYOf[par] == null || rowYOf[ch] == null) continue;
-      layer2.push('<line class="connector-' + (P(par).sex === 'F' ? 'f' : 'm') + '" x1="' + f1(X(cb)) + '" y1="' + f1(barTopOf[par] + BAR_H) + '" x2="' + f1(X(cb)) + '" y2="' + f1(barTopOf[ch]) + '" data-to="' + esc(ch) + '"/>');
+      layer2.push('<line class="connector-' + (sexKey(P(par))) + '" x1="' + f1(X(cb)) + '" y1="' + f1(barTopOf[par] + BAR_H) + '" x2="' + f1(X(cb)) + '" y2="' + f1(barTopOf[ch]) + '" data-to="' + esc(ch) + '"/>');
     }
     // Connectors focal → each child (V3.2)
-    var fsex = P(state.focal).sex === 'F' ? 'f' : 'm';
+    var fsex = sexKey(P(state.focal));
     childrenOf(state.focal).forEach(function(ch){
       var cb = descEst(ch);
       if (cb == null || rowYOf[ch] == null) return;
@@ -5650,7 +5672,7 @@ window.TLPops = (function(){
   }
   function personLink(id, extra) {
     var q = P(id); if (!q) return '';
-    return '<button class="pp-person" data-goto="' + esc(id) + '"><span class="pp-dot pp-dot-' + (q.sex === 'F' ? 'f' : 'm') + '"></span><span>' + esc(nameOf(q)) + '</span><span class="pp-yrs">' + esc(yearsLabel(q)) + (extra ? ' · ' + esc(extra) : '') + '</span></button>';
+    return '<button class="pp-person" data-goto="' + esc(id) + '"><span class="pp-dot pp-dot-' + (sexKey(q)) + '"></span><span>' + esc(nameOf(q)) + '</span><span class="pp-yrs">' + esc(yearsLabel(q)) + (extra ? ' · ' + esc(extra) : '') + '</span></button>';
   }
 
   // V5.5: ASSO (associated people: godparent, witness…) and ALIA (possibly the same person) — shown when present.
@@ -5798,7 +5820,7 @@ window.TLPops = (function(){
       (gaps.flash ? '<div class="gb-flash" role="status">' + esc(gaps.flash) + '</div>' : '');
     if (gaps.listOpen) {
       h += '<div class="gb-items">' + gaps.ids.map(function(x, j){
-        var q = P(x); return '<button class="gb-item' + (j === gaps.i && k >= 0 ? ' cur' : '') + '" data-gi="' + j + '"><span class="pp-dot pp-dot-' + (q.sex === 'F' ? 'f' : 'm') + '"></span><span class="gb-nm">' + esc(nameOf(q)) + '<small>' + esc(yearsLabel(q)) + ' · ' + esc(missingOf(x).map(CS).join(', ')) + '</small></span></button>';
+        var q = P(x); return '<button class="gb-item' + (j === gaps.i && k >= 0 ? ' cur' : '') + '" data-gi="' + j + '"><span class="pp-dot pp-dot-' + (sexKey(q)) + '"></span><span class="gb-nm">' + esc(nameOf(q)) + '<small>' + esc(yearsLabel(q)) + ' · ' + esc(missingOf(x).map(CS).join(', ')) + '</small></span></button>';
       }).join('') + '</div>';
     }
     bar.innerHTML = h; bar.hidden = false; document.getElementById('profilePanel').classList.add('gaps-on');
@@ -6020,7 +6042,7 @@ window.TLPops = (function(){
     function swap(g, toPrimary) {
       g.querySelectorAll('rect').forEach(function(r){
         var c = r.getAttribute('class') || '';
-        if (toPrimary && /sib-bar-[mf]/.test(c)) { r.setAttribute('data-c', c); r.setAttribute('class', c.replace(/sib-bar-/, 'anc-bar-')); }
+        if (toPrimary && /sib-bar-[mfu]/.test(c)) { r.setAttribute('data-c', c); r.setAttribute('class', c.replace(/sib-bar-/, 'anc-bar-')); }
         else if (!toPrimary && r.hasAttribute('data-c')) { r.setAttribute('class', r.getAttribute('data-c')); r.removeAttribute('data-c'); }
         var f = r.getAttribute('fill'), m = f && /url\(#([^)]+)\)/.exec(f);
         if (m) { var gr = document.getElementById(m[1]); if (gr) gr.querySelectorAll('stop').forEach(function(st){
@@ -6235,7 +6257,7 @@ window.TLPops = (function(){
       var p = P(r.id), pl = p.birth && p.birth.place, sp = r.k === 's', gtag = mode === 'tree' && r.gen ? ' pl-gen-' + (r.gen % 2 ? 'odd' : 'even') : '';
       return '<button class="pl-row' + gtag + (sp ? ' pl-sp' : '') + (r.id === sel ? ' is-sel' : '') + '" type="button" data-id="' + esc(r.id) + '" style="--d:' + (r.d || 0) + '">' +
         (mode === 'tree' && (r.gen || sp) ? '<span class="pl-gen" aria-hidden="true">' + (sp ? '' : r.gen + '.') + '</span>' : '') +
-        '<span class="pl-dot pl-dot-' + (p.sex === 'F' ? 'f' : 'm') + '"></span><span class="pl-main"><span class="pl-line"><span class="pl-name">' + (sp ? '+' : '') + esc(nameOf(p)) + '</span> <span class="pl-yrs">' + esc(yearsLabel(p)) + '</span>' +
+        '<span class="pl-dot pl-dot-' + (sexKey(p)) + '"></span><span class="pl-main"><span class="pl-line"><span class="pl-name">' + (sp ? '+' : '') + esc(nameOf(p)) + '</span> <span class="pl-yrs">' + esc(yearsLabel(p)) + '</span>' +
         (r.stub ? '<span class="pl-see">' + esc(t('list.seeIn', { family: gName(r.stub) })) + '</span>' : '') + '</span>' +
         (pl ? '<span class="pl-place">' + esc(pl) + '</span>' : '') + '</span></button>';
     }
@@ -6872,7 +6894,7 @@ window.TLPops = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.14', date: [2026, 10, 21],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.15', date: [2026, 10, 21],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
@@ -6880,6 +6902,7 @@ var RELEASE = {
     "This is a summary of the biggest changes since V5.45.",
     "Names after marriage or a name change: the later name is shown first, the birth surname in brackets, e.g. Maria Kuuli (Seeberg), the same way as on Geni. Search finds both names.",
     "Half-sibling groups have a shorter label: the shared parent + the other parent.",
+    "Sex unknown: a person with no sex in the file is shown in grey, not in blue. “What do the bars mean?” explains it.",
     "All people: after you open a file, a list shows everyone in it, grouped by family or sorted A–Z. Pick a person to open their timeline.",
     "List view: the header switches between List view and Timeline view. In the profile, one button shows the person in the list or on the timeline.",
     "Start page after loading: the number of people, the earliest and latest born person, the search, Open another file, and the help “Are people missing?” (why an export can hold fewer people).",
