@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V5.45</title>
+<title>TreeLine V6.9</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%237A4864%22/%3E%3Crect%20x%3D%225%22%20y%3D%228%22%20width%3D%2215%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22/%3E%3Crect%20x%3D%2211%22%20y%3D%2214%22%20width%3D%2216%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22%20opacity%3D%22.8%22/%3E%3Crect%20x%3D%227%22%20y%3D%2220%22%20width%3D%2212%22%20height%3D%224.5%22%20rx%3D%222.25%22%20fill%3D%22%23fff%22%20opacity%3D%22.5%22/%3E%3C/svg%3E">
 <style>
 /* Atkinson Hyperlegible Next, embedded (SIL OFL 1.1, Braille Institute). Static 400/500/600/700, Latin subset.
@@ -1127,6 +1127,243 @@ html[data-tl-theme="dark"] { --imp-bg: #3a2e17; --imp-border: #8a6a2a; --imp-tex
 .imp-badge { margin-left: 6px; height: 26px; min-width: 30px; padding: 0 9px; border-radius: 13px; border: 1px solid var(--imp-border); background: var(--imp-bg); color: var(--imp-accent); font: inherit; font-size: 14px; font-weight: 700; line-height: 1; cursor: pointer; align-self: center; }
 .imp-badge[hidden], .imp-pop[hidden] { display: none; }
 .imp-pop { position: fixed; z-index: 60; width: min(460px, calc(100vw - 32px)); margin-top: 0; box-shadow: 0 12px 32px rgba(0,0,0,0.18); }
+
+/* ═══ V6.0 — start page after loading · All people list · List view · loading status ═══ */
+/* card: same size before and after loading (no jump); 40 / 60 */
+.empty-state { max-width: 1280px; grid-template-columns: 2fr 3fr; height: clamp(600px, calc(100vh - 72px - 14vh), 860px); }
+.hero-copy { overflow-y: auto; min-height: 0; justify-content: flex-start; }
+/* centred while it fits; when help is opened and it no longer fits, it scrolls from the top (nothing is cut off) */
+.hero-copy::before, .hero-copy::after { content: ''; flex: 1 0 0; }
+.hero-visual { min-height: 0; }
+.empty-state.is-loaded .hero-visual { padding: 28px 28px 18px; gap: 12px; }
+.empty-state.is-loaded .hero-tl { display: none; }
+.start-list { display: none; width: 100%; flex: 1 1 auto; min-height: 0; }
+.empty-state.is-loaded .start-list { display: flex; }
+.empty-state.is-loaded .sample-btn { flex-shrink: 0; font-size: 15px; }
+@media (max-width: 900px) {
+  .empty-state { height: auto; grid-template-columns: 1fr; }
+  .hero-copy::before, .hero-copy::after { display: none; }
+  .empty-state.is-loaded .hero-visual { order: 0; border-radius: 0 0 24px 24px; padding: 20px 16px 16px; }
+  .empty-state.is-loaded .start-list { height: 70vh; flex: none; }
+}
+
+/* found count, earliest / latest born */
+.found-range { margin: 2px 0 18px; display: grid; gap: 6px; }
+.found-range > div { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 10px; }
+.found-range dt { font-size: 15px; color: var(--header-sub); min-width: 8.5em; }
+.found-range dd { margin: 0; font-size: 16px; color: var(--header-title); }
+.fr-name { font: inherit; font-weight: 700; color: var(--header-title); background: none; border: 0; padding: 2px 0; cursor: pointer;
+  text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--header-accent) 45%, transparent); text-underline-offset: 3px; text-align: left; }
+.fr-name:hover { color: var(--header-accent); text-decoration-color: currentColor; }
+.fr-name:focus-visible { outline: 2px solid var(--header-accent); outline-offset: 2px; border-radius: 4px; }
+.fr-date { color: var(--header-sub); }
+.whose-narrow { display: none; }
+@media (max-width: 900px) { .has-narrow .whose-wide { display: none; } .has-narrow .whose-narrow { display: inline; } }
+
+/* Open another file + Are people missing? (only after loading) */
+.loaded-extra { display: none; }
+.empty-state.is-loaded .loaded-extra { display: block; margin-top: 14px; }
+.empty-state.is-reading .loaded-extra, .empty-state.is-reading #personSelectorWrap { display: none; }
+.start-another { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 48px; padding: 0 20px; border-radius: 10px;
+  font: inherit; font-size: 16px; font-weight: 700; color: var(--header-accent); background: transparent;
+  border: 1.5px solid color-mix(in srgb, var(--header-accent) 55%, transparent); cursor: pointer; }
+.start-another svg { width: 20px; height: 20px; }
+.start-another:hover { background: var(--accent-tint); border-color: var(--header-accent); }
+.start-another:focus-visible { outline: 2px solid var(--header-accent); outline-offset: 2px; }
+.start-another:disabled { opacity: .6; cursor: default; }
+.miss-help { margin-top: 10px; }
+.miss-help summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px 6px 8px; margin-left: -8px;
+  border-radius: 10px; font-size: 16px; font-weight: 700; color: var(--header-accent); }
+.miss-help summary::-webkit-details-marker { display: none; }
+.miss-help summary:hover { background: var(--accent-tint); }
+.miss-help summary:focus-visible { outline: 2px solid var(--header-accent); outline-offset: 2px; }
+.miss-help[open] .gh-chev { transform: rotate(180deg); }
+.miss-body h4 { margin: 12px 0 4px; font-size: 15px; font-weight: 700; color: var(--header-title); }
+.miss-body h4:first-of-type { margin-top: 8px; }
+.miss-body ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.miss-body p { margin: 0 0 6px; }
+.miss-body a { color: var(--header-accent); font-weight: 600; }
+.miss-body .miss-src { margin-top: 10px; font-size: 14px; }
+.menu-help-body.miss-body { max-width: 340px; }
+.menu-help-body.miss-body h4 { font-size: 14px; }
+
+/* loading status (replaces the button / search while a file is read) */
+.load-status { display: grid; grid-template-columns: auto 1fr auto; align-items: center; column-gap: 14px; row-gap: 10px; text-align: left; padding: 6px 4px; }
+.load-status[hidden] { display: none; }
+.empty-state.is-reading .load-ged-btn { display: none; }
+.ls-spin { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--accent-tint); border-top-color: var(--header-accent); animation: tlSpin .9s linear infinite; }
+@keyframes tlSpin { to { transform: rotate(360deg); } }
+.ls-text { display: flex; flex-direction: column; min-width: 0; }
+.ls-title { font-size: 16px; font-weight: 700; color: var(--header-title); }
+.ls-file { font-size: 15px; color: var(--header-sub); overflow-wrap: anywhere; }
+.ls-file:empty { display: none; }
+.ls-bar { grid-column: 1 / 3; height: 8px; border-radius: 99px; background: var(--accent-tint); overflow: hidden; }
+.ls-bar[hidden], .ls-pct[hidden] { display: none; }
+.ls-fill { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--sunset-btn); transition: width .15s ease; }
+.ls-pct { font-size: 15px; font-weight: 700; color: var(--header-title); font-variant-numeric: tabular-nums; min-width: 3.2em; text-align: right; }
+@media (prefers-reduced-motion: reduce) { .ls-spin { animation-duration: 2.4s; } }
+
+/* "Drawing the timeline…" — only becomes visible when drawing takes longer than 300 ms (compositor animation) */
+.tl-busy { position: fixed; z-index: 60; left: 50%; top: 96px; transform: translateX(-50%); display: flex; align-items: center; gap: 12px;
+  padding: 10px 18px; border-radius: 999px; background: var(--panel-bg); border: 1px solid var(--panel-border); box-shadow: var(--shadow);
+  font-size: 15px; font-weight: 600; color: var(--header-title); opacity: 0; animation: tlBusyIn .2s ease-out .3s forwards; pointer-events: none; }
+.tl-busy[hidden] { display: none; }
+.tl-busy .ls-spin { width: 20px; height: 20px; border-width: 2.5px; }
+@keyframes tlBusyIn { to { opacity: 1; } }
+
+/* header: List view / Timeline view switch */
+.view-btn.pre-render { display: none; }
+.view-btn .vb-ic-tl { display: none; }
+.view-btn.is-list .vb-ic-tl { display: block; }
+.view-btn.is-list .vb-ic-list { display: none; }
+
+/* List view replaces the timeline */
+.list-view[hidden] { display: none; }
+body.is-listview .timeline-outer, body.is-listview .sticky-ruler-wrap { display: none !important; }
+.list-view { width: 100%; align-self: stretch; height: calc(100vh - 72px); padding: 24px 0 20px; box-sizing: border-box; display: flex; }
+.list-view .plist { flex: 1 1 auto; }
+.list-view .plist { max-width: 1180px; margin: 0 auto; }
+
+/* ── All people list (one component: start page + List view) ── */
+.plist { display: flex; flex-direction: column; width: 100%; min-height: 0; background: var(--band-bg); border: 1px solid var(--panel-border);
+  border-radius: 16px; overflow: hidden; color: var(--header-title); }
+.pl-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 14px 16px 12px; border-bottom: 1px solid var(--panel-border); }
+.pl-title { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.3; color: var(--header-title); display: flex; align-items: baseline; gap: 10px; }
+.pl-count { font-size: 15px; font-weight: 600; color: var(--header-sub); font-variant-numeric: tabular-nums; }
+.pl-seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--bg); border: 1px solid var(--panel-border); }
+.pl-seg button { min-height: 36px; padding: 0 14px; border: 0; border-radius: 7px; background: none; font: inherit; font-size: 15px; font-weight: 600; color: var(--header-sub); cursor: pointer; white-space: nowrap; }
+.pl-seg button[aria-pressed="true"] { background: var(--band-bg); color: var(--header-title); box-shadow: 0 1px 2px rgba(24,33,44,.12); }
+.pl-seg button:focus-visible { outline: 2px solid var(--header-accent); outline-offset: 1px; }
+.pl-warn { margin: 0; padding: 8px 16px; font-size: 14px; background: var(--imp-bg); color: var(--imp-text); border-bottom: 1px solid var(--imp-border); }
+.pl-scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow: auto; padding: 0 8px 12px; overscroll-behavior: contain; }
+.pl-grp { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; margin: 0; padding: 8px 10px;
+  border: 0; border-bottom: 1px solid var(--panel-border); background: var(--band-bg); font: inherit; text-align: left; cursor: pointer; color: var(--header-title); }
+.pl-grp:hover .pl-gname { text-decoration: underline; }
+.pl-grp:focus-visible { outline: 2px solid var(--header-accent); outline-offset: -2px; border-radius: 8px; }
+.pl-grp svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--header-sub); transition: transform .2s ease; transform: rotate(-90deg); }
+.pl-grp[aria-expanded="true"] svg { transform: none; }
+.pl-gname { font-size: 16px; font-weight: 700; overflow-wrap: anywhere; }
+.pl-gn { margin-left: auto; padding-left: 12px; font-size: 14px; color: var(--header-sub); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pl-letter { position: sticky; top: 0; z-index: 2; padding: 10px 10px 6px; font-size: 15px; font-weight: 700; color: var(--header-sub); background: var(--band-bg); border-bottom: 1px solid var(--panel-border); }
+.pl-row { display: flex; align-items: flex-start; gap: 8px; width: 100%; min-height: 44px; margin: 1px 0; padding: 7px 10px 7px calc(10px + var(--d, 0) * 20px);
+  border: 0; border-radius: 10px; background: none; font: inherit; text-align: left; cursor: pointer; color: var(--header-title); }
+.pl-row:hover { background: var(--btn-bg-hover); }
+.pl-row:hover .pl-name { text-decoration: underline; }
+.pl-row:focus-visible { outline: 2px solid var(--header-accent); outline-offset: -2px; }
+.pl-row.is-sel { background: var(--accent-tint); }
+.pl-gen { flex: 0 0 auto; min-width: 1.9em; padding-top: 1px; font-size: 14px; color: var(--header-sub); font-variant-numeric: tabular-nums; text-align: right; }
+.pl-sp .pl-gen::before { content: '└'; }
+.pl-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
+.pl-dot-m { background: var(--male-primary); }
+.pl-dot-f { background: var(--female-primary); }
+.pl-main { display: flex; flex-direction: column; min-width: 0; }
+.pl-line { font-size: 16px; line-height: 1.4; overflow-wrap: anywhere; }
+.pl-name { font-weight: 600; }
+.pl-sp .pl-name { font-weight: 500; }
+.pl-yrs { color: var(--header-sub); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pl-see { margin-left: 8px; font-size: 14px; color: var(--header-sub); font-style: italic; }
+.pl-place { font-size: 14px; line-height: 1.4; color: var(--header-sub); overflow-wrap: anywhere; }
+.pl-more { height: 1px; }
+.pp-view svg { width: 18px; height: 18px; }
+/* Menu is taller now (Help first): it scrolls inside the window instead of running off the screen */
+.settings-menu { max-height: calc(100vh - 96px); overflow-y: auto; overscroll-behavior: contain; }
+
+/* ═══ V6.1 ═══ */
+/* Earliest / Latest born: label above, the same row as in the list */
+.found-range { gap: 10px; margin: 6px 0 20px; }
+.found-range > div { display: block; }
+.found-range dt { min-width: 0; margin-bottom: 2px; }
+.found-range .pl-row { margin: 0 0 0 -10px; padding: 6px 10px; width: calc(100% + 20px); }
+/* search gets the first look; Open another file is quieter; no sample link after loading */
+.empty-state.is-loaded #searchSlot .person-input { border: 2px solid var(--header-accent); box-shadow: 0 6px 18px rgba(110,66,96,0.16); }
+.start-another { color: var(--header-title); border: 1px solid var(--panel-border); font-weight: 600; }
+.start-another svg { color: var(--header-sub); }
+.start-another:hover { border-color: var(--header-sub); background: var(--btn-bg-hover); }
+.empty-state.is-loaded .sample-btn { display: none; }
+/* list: each generation its own background; generation number like on the timeline (smaller) */
+.pl-row { border-radius: 0; margin: 0; }
+.pl-row.pl-gen-even { background: color-mix(in srgb, var(--header-accent) 6%, var(--band-bg)); }
+.pl-row:hover { background: var(--btn-bg-hover); }
+.pl-row.is-sel { background: var(--accent-tint); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--header-accent) 45%, transparent); }
+.pl-gen { min-width: 22px; padding-top: 0; text-align: center; }
+.pl-gnum { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; box-sizing: border-box;
+  background: linear-gradient(135deg, #6E4260 0%, #8E5468 45%, #A85D46 100%); color: #FFFFFF; font-size: 11.5px; font-weight: 700; line-height: 1; margin-top: 1px; }
+.pl-sp .pl-gen::before { display: inline-block; width: 20px; }
+/* profile: Pin + List / Timeline are the main buttons, Open on … is secondary */
+.pp-actions .pp-pin { background: var(--sunset-btn); color: #FFFFFF; border: 0; }
+.pp-actions .pp-pin:hover { color: #FFFFFF; filter: brightness(1.08); }
+.pp-actions .pp-pin[aria-pressed="true"] { background: var(--sunset-btn); color: #FFFFFF; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.75); }
+.pp-actions .pp-pin[aria-pressed="true"] svg { fill: #FFFFFF; }
+.pp-actions .pp-ext { background: transparent; color: var(--header-title); border: 1px solid var(--panel-border); }
+.pp-actions .pp-ext svg { color: var(--header-sub); }
+.pp-actions .pp-ext:hover { filter: none; background: var(--btn-bg-hover); border-color: var(--header-sub); }
+
+/* ═══ V6.2 ═══ */
+/* start page: Open another file as wide as the search; Are people missing? centred under it */
+.empty-state.is-loaded .start-another { display: flex; width: 100%; }
+.miss-help { text-align: center; }
+.miss-help summary { margin-left: 0; }
+.miss-help .gh-body { text-align: left; }
+/* list: plain generation number; generation background = the light grey inside the timeline boxes (century stripe) */
+.pl-gen { min-width: 1.9em; padding-top: 1px; text-align: right; }
+.pl-sp .pl-gen::before { width: auto; }
+.pl-row.pl-gen-even { background: linear-gradient(var(--stripe), var(--stripe)), var(--band-bg); }
+.pl-row.pl-gen-even:hover, .pl-row:hover { background: var(--btn-bg-hover); }
+.pl-row.is-sel { background: var(--accent-tint); }
+/* About: one section with its own heading */
+.ab-gh .ab-author { margin-top: 10px; padding-top: 0; border-top: 0; }
+.ab-label-top { margin: 0 0 8px; }
+/* profile: active Pin keeps its size; ring outside the button (wider gap so the ring has room) */
+.pp-actions { gap: 12px; padding-left: 5px; }
+.pp-actions .pp-pin[aria-pressed="true"] { box-shadow: none; outline: 2px solid var(--header-accent); outline-offset: 3px; }
+
+/* ═══ V6.3 — design system: secondary button = Sunset brown (--header-accent) text + border, accent tint on hover.
+   Used by: Open another file (start page), Open on … (profile), Families / A–Z switch. ═══ */
+.start-another, .pp-actions .pp-ext {
+  color: var(--header-accent); background: transparent; font-weight: 700;
+  border: 1.5px solid color-mix(in srgb, var(--header-accent) 55%, transparent); }
+.start-another svg, .pp-actions .pp-ext svg { color: var(--header-accent); }
+.start-another:hover, .pp-actions .pp-ext:hover { background: var(--accent-tint); border-color: var(--header-accent); filter: none; }
+.pl-seg { background: transparent; border: 1.5px solid color-mix(in srgb, var(--header-accent) 55%, transparent); }
+.pl-seg button { color: var(--header-accent); font-weight: 700; }
+.pl-seg button:hover { background: var(--accent-tint); }
+.pl-seg button[aria-pressed="true"] { background: var(--accent-tint); color: var(--header-accent); box-shadow: inset 0 0 0 1px var(--header-accent); }
+/* About: TreeLine section as a bullet list */
+.ab-links { color: var(--header-sub); margin-top: 4px; }
+
+/* ═══ V6.4 — Are people missing?: one section per service; Geni help link closes the Geni section ═══ */
+.miss-sec { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--panel-border); }
+.miss-body .miss-sec h4 { margin: 0 0 4px; font-size: 16px; }
+.miss-body h5 { margin: 10px 0 4px; font-size: 14px; font-weight: 700; color: var(--header-title); }
+.miss-body .miss-src { margin: 8px 0 0; }
+.menu-help-body.miss-body .miss-sec h4 { font-size: 15px; }
+
+/* ═══ V6.5 — start card never overflows sideways ═══
+   Choose GEDCOM file: fits its column (was min-width 300px → ran out of a narrow left column, page got a sideways scrollbar). */
+.hero-copy { overflow-x: hidden; min-width: 0; }
+.empty-state .load-ged-btn { min-width: 0; width: 100%; max-width: 360px; white-space: normal; text-align: center; line-height: 1.2; height: auto; min-height: 52px; padding: 10px 22px; }
+.empty-state .search-slot { padding-left: 16px; padding-right: 16px; }
+/* 901–1200 px: 40 / 60 leaves the left column too narrow → even split */
+@media (max-width: 1200px) and (min-width: 901px) { .empty-state { grid-template-columns: 1fr 1fr; } }
+
+/* ═══ V6.6 — search also finds people mentioned in notes (one component: start page + header) ═══ */
+.person-group-notes { border-top: 1px solid var(--panel-border); margin-top: 6px; padding-top: 12px; }
+.person-group-notes.is-first { border-top: none; margin-top: 0; position: sticky; top: 0; background: var(--panel-bg); }
+.person-option.po-note { flex-direction: column; align-items: stretch; justify-content: center; gap: 3px; }
+.po-note-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.po-snippet { font-size: 14px; line-height: 1.45; color: var(--header-sub); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+.po-snippet b { color: var(--btn-text); font-weight: 700; }
+.person-option.person-more { font-size: 14px; font-weight: 600; color: var(--header-accent); justify-content: flex-start; }
+.person-dropdown { max-height: min(70vh, 640px); }   /* V6.7: room for both groups */
+mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transparent); color: inherit; border-radius: 3px; padding: 0 2px; }
+/* ═══ V6.8 — design system: ONE hover colour on light surfaces = the Find gaps row tint (--accent-tint); no grey hovers ═══ */
+.person-option:hover, .person-option.kbd-active,
+.menu-item:hover, .theme-option:hover, .menu-help summary:hover,
+.pl-grp:hover, .pl-row:hover, .pl-row.pl-gen-even:hover { background: var(--accent-tint); }
+/* Families / A–Z: the outer frame is the only border */
+.pl-seg button[aria-pressed="true"] { box-shadow: none; }
+/* start page: Earliest / Latest born = name + years only */
+.found-range .pl-place { display: none; }
 </style>
 </head>
 <body class="is-start">
@@ -1138,7 +1375,7 @@ html[data-tl-theme="dark"] { --imp-bg: #3a2e17; --imp-border: #8a6a2a; --imp-tex
 
 <div class="header">
   <div class="header-titles">
-    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V5.45</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
+    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V6.9</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
     <div class="about-pop" id="aboutPop" role="dialog" aria-label="About TreeLine" data-i18n-aria="about.aria" hidden></div>
   </div>
   <div class="header-focal" id="headerFocal"></div>
@@ -1150,6 +1387,7 @@ html[data-tl-theme="dark"] { --imp-bg: #3a2e17; --imp-border: #8a6a2a; --imp-tex
       <div class="person-dropdown" id="personDropdown"></div>
     </div>
     <input type="file" id="gedFileInput" accept=".ged" style="display:none">
+    <button class="settings-btn view-btn pre-render" id="viewBtn" type="button" title="Show all people in this file as a list" data-i18n-title="view.list.title"><svg class="vb-ic vb-ic-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.2" fill="currentColor"/><circle cx="4.5" cy="12" r="1.2" fill="currentColor"/><circle cx="4.5" cy="18" r="1.2" fill="currentColor"/></svg><svg class="vb-ic vb-ic-tl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M3 7h11M8 12h13M5 17h9"/></svg><span data-i18n="view.list">List view</span></button>
     <div class="gaps-wrap pre-render" id="gapsWrap">
       <button class="settings-btn" id="gapsBtn" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16l-6 7.5V19l-4 1.5v-8z"/></svg><span data-i18n="gaps.btn">Find gaps</span></button>
       <div class="gaps-pop" id="gapsPop" role="dialog" aria-label="Find gaps" data-i18n-aria="gaps.btn" hidden>
@@ -1169,16 +1407,18 @@ html[data-tl-theme="dark"] { --imp-bg: #3a2e17; --imp-border: #8a6a2a; --imp-tex
         <span data-i18n="menu.btn">Menu</span>
       </button>
       <div class="settings-menu" id="settingsMenu" role="menu">
-        <div class="settings-section-label" data-i18n="menu.appearance">Appearance</div>
-        <button class="theme-option" data-theme="dark"><span class="dot"></span><span data-i18n="menu.dark">Dark mode</span></button>
-        <button class="theme-option active" data-theme="light"><span class="dot"></span><span data-i18n="menu.light">Light mode</span></button>
+        <div class="settings-section-label" data-i18n="menu.help">Help</div>
+        <details class="menu-help" id="menuHelp"><summary class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.8.9c0 1.7-2.3 2.1-2.3 3.6M12 17v.5"/></svg><span data-i18n="menu.gedHelp">How do I get a GEDCOM file?</span><svg class="menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="menu-help-body" id="menuHelpBody"></div></details>
+        <details class="menu-help" id="menuMissing"><summary class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><path d="M16 9h5"/></svg><span data-i18n="miss.title">Are people missing?</span><svg class="menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="menu-help-body miss-body" id="menuMissingBody"></div></details>
+        <details class="menu-help" id="menuBars"><summary class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h11M8 12h12M6 17h9"/></svg><span data-i18n="menu.bars">What do the bars mean?</span><svg class="menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="menu-help-body bar-legend"><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="anc-bar-m" x="14" y="5" width="62" height="14" rx="7"/><circle class="anc-bar-m" cx="14" cy="12" r="6" stroke="var(--band-bg)" stroke-width="3"/></svg><p><b data-i18n="legend.sel.t">Selected person and direct line.</b> <span data-i18n="legend.sel.d">Strong colour. The dot marks the birth.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-m" x="4" y="1" width="72" height="9" rx="4.5"/><rect class="sib-bar-f" x="4" y="14" width="58" height="9" rx="4.5"/></svg><p><b data-i18n="legend.other.t">Other relatives.</b> <span data-i18n="legend.other.d">Light colour. Blue is a man, pink is a woman.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-m" x="8" y="5" width="64" height="14" rx="7"/></svg><p><b data-i18n="legend.exact.t">Exact dates.</b> <span data-i18n="legend.exact.d">The bar starts at the birth and stops at the death.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="8" y="5" width="64" height="14" rx="7" style="fill:url(#lgSoft)"/></svg><p><b data-i18n="legend.about.t">~1837 (about).</b> <span data-i18n="legend.about.d">The ends are soft, about ±3 years.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgFadeIn)"/></svg><p><b data-i18n="legend.bef.t">&lt;1837, &gt;1837, 1830/37.</b> <span data-i18n="legend.bef.d">Before, after, between. The bar fades in or out over that time.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgOpenEnd)"/></svg><p><b data-i18n="legend.deathUnk.t">Death unknown.</b> <span data-i18n="legend.deathUnk.d">Solid up to the last known event (a child’s birth, a marriage), then it fades out.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-f" x="4" y="5" width="62" height="14" rx="7"/><line class="today-line" x1="66" y1="1" x2="66" y2="23"/></svg><p><b data-i18n="legend.living.t">Living.</b> <span data-i18n="legend.living.d">The bar runs up to today (dashed line).</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgHaze)"/></svg><p><b data-i18n="legend.nodates.t">(?–?) No dates.</b> <span data-i18n="legend.nodates.d">The place on the timeline is an estimate from the parents or children.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><line x1="40" y1="0" x2="40" y2="24" stroke="var(--connector-m)" stroke-width="1.5"/></svg><p><b data-i18n="legend.vline.t">Vertical line.</b> <span data-i18n="legend.vline.d">Goes from a parent’s bar to the birth of each child.</span></p></div><div class="bl-row"><span class="bl-mark">↳</span><p><b data-i18n="legend.kids.t">Has children or a partner.</b> <span data-i18n="legend.kids.d">Click the name to see their family.</span></p></div><div class="bl-row"><span class="bl-mark">⧉</span><p><b data-i18n="legend.partner.t">Partner with their own family.</b> <span data-i18n="legend.partner.d">Click to open the partner’s tree.</span></p></div></div></details>
         <div class="settings-divider"></div>
         <div class="settings-section-label"><label for="langSel" data-i18n="menu.language">Language</label></div>
         <div class="menu-lang"><select id="langSel" class="lang-sel"><option value="en" selected>English</option><option value="es">Español</option><option value="et">Eesti</option><option value="lv">Latviešu</option><option value="lt">Lietuvių</option><option value="fi">Suomi</option><option value="sv">Svenska</option><option value="de">Deutsch</option><option value="fr">Français</option><option value="no">Norsk</option><option value="da">Dansk</option><option value="nl">Nederlands</option></select>
           <p class="menu-note" id="langNote" hidden data-i18n="menu.langNote">Translation is coming. TreeLine is shown in English for now.</p></div>
         <div class="settings-divider"></div>
-        <details class="menu-help" id="menuHelp"><summary class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.8.9c0 1.7-2.3 2.1-2.3 3.6M12 17v.5"/></svg><span data-i18n="menu.gedHelp">How do I get a GEDCOM file?</span><svg class="menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="menu-help-body" id="menuHelpBody"></div></details>
-        <details class="menu-help" id="menuBars"><summary class="menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h11M8 12h12M6 17h9"/></svg><span data-i18n="menu.bars">What do the bars mean?</span><svg class="menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="menu-help-body bar-legend"><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="anc-bar-m" x="14" y="5" width="62" height="14" rx="7"/><circle class="anc-bar-m" cx="14" cy="12" r="6" stroke="var(--band-bg)" stroke-width="3"/></svg><p><b data-i18n="legend.sel.t">Selected person and direct line.</b> <span data-i18n="legend.sel.d">Strong colour. The dot marks the birth.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-m" x="4" y="1" width="72" height="9" rx="4.5"/><rect class="sib-bar-f" x="4" y="14" width="58" height="9" rx="4.5"/></svg><p><b data-i18n="legend.other.t">Other relatives.</b> <span data-i18n="legend.other.d">Light colour. Blue is a man, pink is a woman.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-m" x="8" y="5" width="64" height="14" rx="7"/></svg><p><b data-i18n="legend.exact.t">Exact dates.</b> <span data-i18n="legend.exact.d">The bar starts at the birth and stops at the death.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="8" y="5" width="64" height="14" rx="7" style="fill:url(#lgSoft)"/></svg><p><b data-i18n="legend.about.t">~1837 (about).</b> <span data-i18n="legend.about.d">The ends are soft, about ±3 years.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgFadeIn)"/></svg><p><b data-i18n="legend.bef.t">&lt;1837, &gt;1837, 1830/37.</b> <span data-i18n="legend.bef.d">Before, after, between. The bar fades in or out over that time.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgOpenEnd)"/></svg><p><b data-i18n="legend.deathUnk.t">Death unknown.</b> <span data-i18n="legend.deathUnk.d">Solid up to the last known event (a child’s birth, a marriage), then it fades out.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="sib-bar-f" x="4" y="5" width="62" height="14" rx="7"/><line class="today-line" x1="66" y1="1" x2="66" y2="23"/></svg><p><b data-i18n="legend.living.t">Living.</b> <span data-i18n="legend.living.d">The bar runs up to today (dashed line).</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><rect class="" x="4" y="5" width="72" height="14" rx="7" style="fill:url(#lgHaze)"/></svg><p><b data-i18n="legend.nodates.t">(?–?) No dates.</b> <span data-i18n="legend.nodates.d">The place on the timeline is an estimate from the parents or children.</span></p></div><div class="bl-row"><svg class="bl-ex" viewBox="0 0 80 24" aria-hidden="true"><line x1="40" y1="0" x2="40" y2="24" stroke="var(--connector-m)" stroke-width="1.5"/></svg><p><b data-i18n="legend.vline.t">Vertical line.</b> <span data-i18n="legend.vline.d">Goes from a parent’s bar to the birth of each child.</span></p></div><div class="bl-row"><span class="bl-mark">↳</span><p><b data-i18n="legend.kids.t">Has children or a partner.</b> <span data-i18n="legend.kids.d">Click the name to see their family.</span></p></div><div class="bl-row"><span class="bl-mark">⧉</span><p><b data-i18n="legend.partner.t">Partner with their own family.</b> <span data-i18n="legend.partner.d">Click to open the partner’s tree.</span></p></div></div></details>
+        <div class="settings-section-label" data-i18n="menu.appearance">Appearance</div>
+        <button class="theme-option" data-theme="dark"><span class="dot"></span><span data-i18n="menu.dark">Dark mode</span></button>
+        <button class="theme-option active" data-theme="light"><span class="dot"></span><span data-i18n="menu.light">Light mode</span></button>
       </div>
     </div>
   </div>
@@ -1192,7 +1432,11 @@ html[data-tl-theme="dark"] { --imp-bg: #3a2e17; --imp-border: #8a6a2a; --imp-tex
     <span data-i18n="start.lead">Every life in your family tree, side by side on one timeline. Open the GEDCOM file (.ged) you exported from your genealogy service.</span>
   </div>
   <div class="err" id="loadError" role="alert"></div>
-  <div class="search-slot" id="searchSlot"><span class="drop-hint" data-i18n="start.drop">Drop the file here, or</span><button class="load-ged-btn" id="loadGedBtn" data-i18n="start.choose">Choose GEDCOM file</button></div>
+  <div class="search-slot" id="searchSlot"><span class="drop-hint" data-i18n="start.drop">Drop the file here, or</span><button class="load-ged-btn" id="loadGedBtn" data-i18n="start.choose">Choose GEDCOM file</button><div class="load-status" id="loadStatus" role="status" aria-live="polite" hidden><span class="ls-spin" aria-hidden="true"></span><span class="ls-text"><span class="ls-title" id="loadTitle">Reading file…</span><span class="ls-file" id="loadFile"></span></span><span class="ls-bar" id="loadBar" hidden><span class="ls-fill" id="loadFill"></span></span><span class="ls-pct" id="loadPct" hidden></span></div></div>
+  <div class="loaded-extra" id="loadedExtra">
+    <button class="start-another" id="startAnotherBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 18v-6"/><path d="M9 15l3-3 3 3"/></svg><span data-i18n="hdr.openAnother">Open another file</span></button>
+    <details class="miss-help" id="missingHelp"><summary><span data-i18n="miss.title">Are people missing?</span><svg class="gh-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="gh-body miss-body" id="missingBody"></div></details>
+  </div>
   <details class="gedcom-help" id="gedcomHelp">
     <summary><span data-i18n="menu.gedHelp">How do I get a GEDCOM file?</span><svg class="gh-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
     <div class="gh-body">
@@ -1205,6 +1449,7 @@ html[data-tl-theme="dark"] { --imp-bg: #3a2e17; --imp-border: #8a6a2a; --imp-tex
   </div>
   <div class="hero-visual">
     <svg class="hero-tl" viewBox="0 0 580 453" role="img" aria-label="Example timeline from the sample family: Albert Brandt and his siblings, the chosen person Arthur Brandt with his siblings, and Arthur’s children" data-i18n-aria="start.heroAria" data-i18n-vars='{"a":"Albert Brandt","b":"Arthur Brandt","c":"Arthur"}'><path class="hv-band" d="M20 62H536.6V164H20A12 12 0 0 1 8 152V74A12 12 0 0 1 20 62Z"/><path class="hv-band" d="M20 214H536.6V316H20A12 12 0 0 1 8 304V226A12 12 0 0 1 20 214Z"/><path class="hv-band" d="M20 366H536.6V443H20A12 12 0 0 1 8 431V378A12 12 0 0 1 20 366Z"/><rect x="12" y="214" width="517.2" height="40" rx="8" class="hv-focal-m"/><rect x="246" y="30" width="230.60000000000002" height="423" class="hv-stripe"/><line x1="246" y1="30" x2="246" y2="453" class="hv-grid"/><text x="246" y="18" text-anchor="middle" class="hv-axis">1900</text><line x1="361.3" y1="30" x2="361.3" y2="453" class="hv-grid"/><text x="361.3" y="18" text-anchor="middle" class="hv-axis">1950</text><line x1="476.6" y1="30" x2="476.6" y2="453" class="hv-grid"/><text x="476.6" y="18" text-anchor="middle" class="hv-axis">2000</text><line x1="536.6" y1="26" x2="536.6" y2="453" class="hv-today"/><line x1="0" y1="30" x2="580" y2="30" class="hv-rule"/><line x1="292.1" y1="88" x2="292.1" y2="228" class="hv-conn-m"/><line x1="356.7" y1="240" x2="356.7" y2="380" class="hv-conn-child hv-conn-m"/><line x1="361.3" y1="240" x2="361.3" y2="403" class="hv-conn-child hv-conn-m"/><line x1="368.2" y1="240" x2="368.2" y2="426" class="hv-conn-child hv-conn-m"/><rect x="222.9" y="76" width="156.9" height="12" rx="6" class="hv-heir-m "/><circle cx="222.9" cy="82" r="5" class="hv-node hv-node-m"/><rect x="232.2" y="98" width="172.9" height="6" rx="3" class="hv-heir-f"/><rect x="229.9" y="124" width="193.7" height="8" rx="4" class="hv-sib-f"/><rect x="236.8" y="147" width="170.6" height="8" rx="4" class="hv-sib-f"/><rect x="292.1" y="228" width="170.7" height="12" rx="6" class="hv-heir-m "/><circle cx="292.1" cy="234" r="5" class="hv-node hv-node-m"/><rect x="294.4" y="250" width="235.3" height="6" rx="3" class="hv-sib-f"/><rect x="296.7" y="276" width="212.2" height="8" rx="4" class="hv-sib-m"/><rect x="299" y="299" width="203" height="8" rx="4" class="hv-sib-f"/><rect x="356.7" y="380" width="163.8" height="8" rx="4" class="hv-sib-f"/><rect x="361.3" y="403" width="175.3" height="8" rx="4" class="hv-sib-m"/><rect x="368.2" y="426" width="168.4" height="8" rx="4" class="hv-sib-m"/><text x="210.9" y="87" text-anchor="end" class="hv-heir-name">Albert Brandt (1890–1958)</text><text x="224.2" y="104" text-anchor="end" class="hv-spouse">+Florence Pickering (1894–1969)</text><text x="221.9" y="132" text-anchor="end" class="hv-sib">Edith Brandt (1893–1977)</text><text x="228.8" y="155" text-anchor="end" class="hv-sib">Maja Brandt (1896–1970)</text><text x="280.1" y="239" text-anchor="end" class="hv-heir-name">Arthur Brandt (1920–1994)</text><text x="286.4" y="256" text-anchor="end" class="hv-spouse">+Dorothy Whitaker (1921–2023)</text><text x="288.7" y="284" text-anchor="end" class="hv-sib">Henry Brandt (1922–2014)</text><text x="291" y="307" text-anchor="end" class="hv-sib">Joan Brandt (1923–2011)</text><text x="348.7" y="388" text-anchor="end" class="hv-sib">Margaret Brandt (1948–2019) ↳</text><text x="353.3" y="411" text-anchor="end" class="hv-sib">Peter Brandt (1950–) ↳</text><text x="360.2" y="434" text-anchor="end" class="hv-sib">Paul Brandt (1953–) ↳</text><circle cx="20" cy="48" r="11" class="hv-num"/><text x="20" y="51.5" text-anchor="middle" class="hv-num-t">7</text><text x="38" y="52" class="hv-head" data-i18n="tl.childrenOf" data-i18n-vars='{"name":"Axel Brandt"}'>Children of Axel Brandt</text><circle cx="20" cy="200" r="11" class="hv-num"/><text x="20" y="203.5" text-anchor="middle" class="hv-num-t">8</text><text x="38" y="204" class="hv-head" data-i18n="tl.childrenOf" data-i18n-vars='{"name":"Albert Brandt"}'>Children of Albert Brandt</text><circle cx="20" cy="352" r="11" class="hv-num"/><text x="20" y="355.5" text-anchor="middle" class="hv-num-t">9</text><text x="38" y="356" class="hv-head" data-i18n="tl.childrenOf" data-i18n-vars='{"name":"Arthur Brandt"}'>Children of Arthur Brandt</text></svg>
+    <div class="start-list" id="startListHost"></div>
     <button class="sample-btn" id="sampleBtn" type="button"><span data-i18n="start.sample">Try it with a sample family</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
   </div>
 </div>
@@ -1221,6 +1466,9 @@ html[data-tl-theme="dark"] { --imp-bg: #3a2e17; --imp-border: #8a6a2a; --imp-tex
   </div>
   <svg class="main-svg" id="mainSvg" viewBox="0 0 1680 100" xmlns="http://www.w3.org/2000/svg"></svg>
 </div>
+
+<main class="list-view" id="listView" aria-label="All people" data-i18n-aria="list.title" hidden></main>
+<div class="tl-busy" id="tlBusy" role="status" aria-live="polite" hidden><span class="ls-spin" aria-hidden="true"></span><span data-i18n="busy.draw">Drawing the timeline…</span></div>
 
 <div class="parse-progress-wrap" id="parseProgressWrap">
   <div class="parse-progress-bar" id="parseProgressBar"></div>
@@ -1251,6 +1499,9 @@ I18N.en = {
   'search.noResults': 'No results',
   'search.pinned': 'Starting point',                                // small group heading in the search list: the person you return to
   'search.recent': 'Recent',                                        // small group heading in the search list
+  'search.placeholderNotes': "Search names and notes…",   // search field once a file is loaded
+  'search.inNotes': "Mentioned in notes",   // group heading: people whose notes contain the search words
+  'search.showAll': "Show all ({n})",   // last row of that group; {n} = all hits
   'common.people': { one: '{n} person', other: '{n} people' },      // counts: search list, Find gaps
   'name.unknown': 'Unknown',                                        // person without a name in the file
   // ── Find gaps (popover) ──
@@ -1348,7 +1599,46 @@ I18N.en = {
   'start.sample': 'Try it with a sample family',                    // button under the example picture
   'start.privacy': 'Your file stays on this computer. Nothing is uploaded and saved online. No cookies and no tracking.',
   'start.found': { one: '{n} person found', other: '{n} people found' },   // heading after a file is loaded
-  'start.whose': 'Whose timeline do you want to see? Type a name, then pick the person from the list.',
+  // ── V6.0 — start page after loading, All people list, List view, help, loading ──
+  'start.whose': 'Whose timeline do you want to see? Search for a name, or pick a person from the list on the right.',   // under the found count (wide screen)
+  'start.whoseBelow': 'Whose timeline do you want to see? Search for a name, or pick a person from the list below.',     // same, narrow screen (list is below)
+  'start.earliest': 'Earliest born',                                // label before a name, short
+  'start.latest': 'Latest born',                                    // label before a name, short
+  'start.reading': 'Reading file…',                                 // status while a file loads
+  'start.readPct': '{n} %',                                         // progress next to the bar
+  'list.title': 'All people',                                       // list heading, short
+  'list.tree': 'Families',                                          // switch: grouped tree, short
+  'list.az': 'A–Z',                                                 // switch: alphabetical, short
+  'list.switch': 'How to sort the list',                            // screen reader label of the switch
+  'list.family': '{name} family',                                   // group heading; et puts the name after a colon
+  'list.notLinked': 'Not linked to anyone',                         // group of people with no parents, partner or children
+  'list.seeIn': 'more in: {family}',                                // after a name already shown in another group
+  'list.unplaced': '{n} people could not be placed in the list. Please report this on GitHub.',   // should never show
+  'list.noName': 'No name',                                         // A–Z letter group for people without a name
+  'view.list': 'List view',                                         // header button, short
+  'view.timeline': 'Timeline view',                                 // header button, short
+  'view.list.title': 'Show all people in this file as a list',      // tooltip
+  'view.timeline.title': 'Back to the timeline',                    // tooltip
+  'pp.showList': 'Show in the list: {name}',                        // tooltip of the profile icon button
+  'pp.showTimeline': 'Show on the timeline: {name}',                // tooltip of the profile icon button
+  'busy.draw': 'Drawing the timeline…',                             // shows only if drawing takes long
+  'menu.help': 'Help',                                              // menu section label
+  'miss.title': 'Are people missing?',                              // start page link + menu item
+  'miss.intro': 'Your file holds only what your genealogy service exported. Some services limit what goes into the export.',
+  'miss.geni': 'Geni',
+  'miss.geniTypeH': 'Export type',                                  // subheading under Geni
+  'miss.geniSizeH': 'Size limit',                                   // subheading under Geni
+  'miss.geniType': 'Geni asks which group of people to export. The groups are different in size:',
+  'miss.blood': 'Blood Relatives: your blood relatives and the people married to them. The parents and siblings of those spouses are not included.',
+  'miss.forest': 'Forest: also the blood relatives of everyone who married into the family. The file is bigger. The export can take several days.',
+  'miss.oneWay': 'Ancestors or Descendants: only one direction, up or down.',
+  'miss.geniSize': 'Geni: size limit',
+  'miss.basic': 'Basic account: up to 4 times the number of profiles you added yourself, max. 5,000 people.',
+  'miss.pro': 'Pro account: up to 4 times the number of profiles you added yourself, max. 50,000 people.',
+  'miss.others': 'Ancestry and MyHeritage',
+  'miss.oneTree': 'One export holds one tree. If you have more than one tree, export each tree.',
+  'miss.owner': 'On Ancestry, only the owner of a tree can export it. Ask the owner for the file.',
+  'miss.source': 'Geni help: How can I export my GEDCOM?',          // link text, opens in a new tab
   'start.heroAria': 'Example timeline from the sample family: {a} and his siblings, the chosen person {b} with his siblings, and {c}’s children',   // screen reader only
   'err.notGed': 'That is not a GEDCOM file. Choose a file that ends in .ged.',
   'err.cannotRead': 'This file could not be read. Check that it is a GEDCOM (.ged) export and try again.',
@@ -1439,6 +1729,7 @@ I18N.en = {
   'about.released': 'Released {date}',
   'about.close': 'Close',
   'about.new': 'What’s new',
+  'about.project': 'The project',                                  // V6.2: About heading over download, feedback, author
   'about.gh1': 'Want TreeLine on your own computer? {link}. It works offline in your browser.',
   'about.gh1link': 'Download a copy from GitHub',                   // link text inside about.gh1
   'about.gh2': 'Ideas or feedback? Add them under {link}.',
@@ -1480,6 +1771,9 @@ I18N.et = {
   'search.noResults': 'Tulemusi pole',
   'search.pinned': 'Lähteisik',
   'search.recent': 'Viimati vaadatud',
+  'search.placeholderNotes': "Otsi nimest või märkmetest…",
+  'search.inNotes': "Mainitud märkmetes",
+  'search.showAll': "Näita kõiki ({n})",
   'common.people': { one: '{n} inimene', other: '{n} inimest' },
   'name.unknown': 'Tundmatu',
   'gaps.btn': 'Leia lüngad',
@@ -1573,7 +1867,46 @@ I18N.et = {
   'start.sample': 'Proovi näidisperega',
   'start.privacy': 'Sinu fail jääb sellesse arvutisse. Midagi ei laadita üles ega salvestata internetti. Küpsiseid ja jälgimist ei ole.',
   'start.found': { one: 'Leitud {n} inimene', other: 'Leitud {n} inimest' },
-  'start.whose': 'Kelle ajajoont soovid näha? Kirjuta nimi ja vali inimene nimekirjast.',
+  // ── V6.0 ──
+  'start.whose': 'Kelle ajajoont soovid näha? Otsi nime järgi või vali inimene paremal olevast nimekirjast.',
+  'start.whoseBelow': 'Kelle ajajoont soovid näha? Otsi nime järgi või vali inimene allolevast nimekirjast.',
+  'start.earliest': 'Varaseim sündinu',
+  'start.latest': 'Hiliseim sündinu',
+  'start.reading': 'Loen faili…',
+  'start.readPct': '{n} %',
+  'list.title': 'Kõik inimesed',
+  'list.tree': 'Pered',
+  'list.az': 'A–Z',
+  'list.switch': 'Kuidas nimekirja järjestada',
+  'list.family': 'Pere: {name}',
+  'list.notLinked': 'Pole kellegagi seotud',
+  'list.seeIn': 'vaata ka: {family}',
+  'list.unplaced': '{n} inimest ei õnnestunud nimekirja paigutada. Palun teata sellest GitHubis.',
+  'list.noName': 'Nimeta',
+  'view.list': 'Nimekirja vaade',
+  'view.timeline': 'Ajajoone vaade',
+  'view.list.title': 'Näita kõiki selle faili inimesi nimekirjana',
+  'view.timeline.title': 'Tagasi ajajoonele',
+  'pp.showList': 'Näita nimekirjas: {name}',
+  'pp.showTimeline': 'Näita ajajoonel: {name}',
+  'busy.draw': 'Joonistan ajajoont…',
+  'menu.help': 'Abi',
+  'miss.title': 'Kas inimesi on puudu?',
+  'miss.intro': 'Failis on ainult see, mida sinu sugupuuteenus eksportis. Mõni teenus piirab, mis ekspordi sisse läheb.',
+  'miss.geni': 'Geni',
+  'miss.geniTypeH': 'Ekspordi tüüp',
+  'miss.geniSizeH': 'Mahupiirang',
+  'miss.geniType': 'Geni küsib, millise inimeste grupi eksportida. Grupid on erineva suurusega:',
+  'miss.blood': 'Blood Relatives: sinu veresugulased ja nende abikaasad. Nende abikaasade vanemaid ja õdesid-vendi failis ei ole.',
+  'miss.forest': 'Forest: ka kõigi perre abiellunute veresugulased. Fail on suurem. Eksport võib võtta mitu päeva.',
+  'miss.oneWay': 'Ancestors või Descendants: ainult üks suund, üles või alla.',
+  'miss.geniSize': 'Geni: mahupiirang',
+  'miss.basic': 'Basic konto: kuni 4 korda nii palju profiile, kui oled ise lisanud, kuni 5000 inimest.',
+  'miss.pro': 'Pro konto: kuni 4 korda nii palju profiile, kui oled ise lisanud, kuni 50 000 inimest.',
+  'miss.others': 'Ancestry ja MyHeritage',
+  'miss.oneTree': 'Üks eksport sisaldab ühte puud. Kui sul on mitu puud, ekspordi iga puu eraldi.',
+  'miss.owner': 'Ancestrys saab puud eksportida ainult selle omanik. Küsi faili omanikult.',
+  'miss.source': 'Geni abi: How can I export my GEDCOM?',
   'start.heroAria': 'Näidisajajoon näidisperest: {a} ja tema õed-vennad, valitud inimene {b} koos õdede-vendadega ning tema lapsed',
   'err.notGed': 'See ei ole GEDCOM-fail. Vali fail, mille nimi lõpeb laiendiga .ged.',
   'err.cannotRead': 'Faili ei õnnestunud lugeda. Kontrolli, et see on GEDCOM-eksport (.ged), ja proovi uuesti.',
@@ -1655,6 +1988,7 @@ I18N.et = {
   'about.released': 'Avaldatud {date}',
   'about.close': 'Sulge',
   'about.new': 'Mis on uut',
+  'about.project': 'Projektist',
   'about.gh1': 'Soovid TreeLine’i oma arvutisse? {link}. See töötab sinu brauseris ka ilma internetita.',
   'about.gh1link': 'Laadi koopia alla GitHubist',
   'about.gh2': 'Ideed või tagasiside? Lisa need siia: {link}.',
@@ -1690,6 +2024,49 @@ I18N.de = {
   'search.placeholderEmpty': 'GEDCOM laden, um zu suchen…',
   'search.placeholder': { one: '{n} Person durchsuchen…', other: '{n} Personen durchsuchen…' },
   'search.noResults': 'Keine Treffer', 'search.pinned': 'Ausgangsperson', 'search.recent': 'Zuletzt angesehen',
+  'search.placeholderNotes': "Namen und Notizen durchsuchen…",
+  'search.inNotes': "In Notizen erwähnt",
+  'search.showAll': "Alle anzeigen ({n})",
+  // V6.9: V6.0–V6.4 texts (list, List view, loading, Are people missing?)
+  'start.whoseBelow': "Wessen Zeitstrahl möchten Sie sehen? Suchen Sie nach einem Namen oder wählen Sie eine Person in der Liste unten.",
+  'start.earliest': "Am frühesten geboren",
+  'start.latest': "Zuletzt geboren",
+  'start.reading': "Datei wird gelesen…",
+  'start.readPct': "{n} %",
+  'list.title': "Alle Personen",
+  'list.tree': "Familien",
+  'list.az': "A–Z",
+  'list.switch': "Sortierung der Liste",
+  'list.family': "Familie: {name}",
+  'list.notLinked': "Mit niemandem verbunden",
+  'list.seeIn': "mehr in: {family}",
+  'list.unplaced': "{n} Personen konnten nicht in die Liste eingeordnet werden. Bitte melden Sie das auf GitHub.",
+  'list.noName': "Ohne Namen",
+  'view.list': "Listenansicht",
+  'view.timeline': "Zeitstrahl-Ansicht",
+  'view.list.title': "Alle Personen dieser Datei als Liste zeigen",
+  'view.timeline.title': "Zurück zum Zeitstrahl",
+  'pp.showList': "In der Liste zeigen: {name}",
+  'pp.showTimeline': "Auf dem Zeitstrahl zeigen: {name}",
+  'busy.draw': "Zeitstrahl wird gezeichnet…",
+  'menu.help': "Hilfe",
+  'miss.title': "Fehlen Personen?",
+  'miss.intro': "Ihre Datei enthält nur, was Ihr Genealogie-Dienst exportiert hat. Manche Dienste begrenzen den Inhalt des Exports.",
+  'miss.geni': "Geni",
+  'miss.geniTypeH': "Exporttyp",
+  'miss.geniSizeH': "Größenlimit",
+  'miss.geniType': "Geni fragt, welche Personengruppe exportiert werden soll. Die Gruppen sind unterschiedlich groß:",
+  'miss.blood': "Blood Relatives: Ihre Blutsverwandten und deren Ehepartner. Eltern und Geschwister dieser Ehepartner sind nicht enthalten.",
+  'miss.forest': "Forest: auch die Blutsverwandten aller Eingeheirateten. Die Datei ist größer. Der Export kann mehrere Tage dauern.",
+  'miss.oneWay': "Ancestors oder Descendants: nur eine Richtung, nach oben oder nach unten.",
+  'miss.geniSize': "Geni: Größenlimit",
+  'miss.basic': "Basic-Konto: bis zum 4-Fachen der Profile, die Sie selbst angelegt haben, max. 5.000 Personen.",
+  'miss.pro': "Pro-Konto: bis zum 4-Fachen der Profile, die Sie selbst angelegt haben, max. 50.000 Personen.",
+  'miss.others': "Ancestry und MyHeritage",
+  'miss.oneTree': "Ein Export enthält einen Stammbaum. Haben Sie mehrere Stammbäume, exportieren Sie jeden einzeln.",
+  'miss.owner': "Bei Ancestry kann nur der Eigentümer eines Stammbaums ihn exportieren. Bitten Sie den Eigentümer um die Datei.",
+  'miss.source': "Geni-Hilfe: How can I export my GEDCOM?",
+  'about.project': "Das Projekt",
   'common.people': { one: '{n} Person', other: '{n} Personen' }, 'name.unknown': 'Unbekannt',
   'gaps.btn': 'Lücken finden', 'gaps.title': 'Personen finden, bei denen fehlt…',
   'gaps.crit.bdate': 'Geburtsdatum', 'gaps.crit.ddate': 'Sterbedatum', 'gaps.crit.bplace': 'Geburtsort', 'gaps.crit.dplace': 'Sterbeort',
@@ -1733,7 +2110,7 @@ I18N.de = {
   'start.sample': 'Mit einer Beispielfamilie ausprobieren',
   'start.privacy': 'Ihre Datei bleibt auf diesem Computer. Nichts wird hochgeladen oder online gespeichert. Keine Cookies, kein Tracking.',
   'start.found': { one: '{n} Person gefunden', other: '{n} Personen gefunden' },
-  'start.whose': 'Wessen Zeitstrahl möchten Sie sehen? Geben Sie einen Namen ein und wählen Sie die Person aus der Liste.',
+  'start.whose': "Wessen Zeitstrahl möchten Sie sehen? Suchen Sie nach einem Namen oder wählen Sie eine Person in der Liste rechts.",
   'start.heroAria': 'Beispiel-Zeitstrahl der Beispielfamilie: {a} und seine Geschwister, die gewählte Person {b} mit Geschwistern und seine Kinder',
   'err.notGed': 'Das ist keine GEDCOM-Datei. Wählen Sie eine Datei, die auf .ged endet.',
   'err.cannotRead': 'Diese Datei konnte nicht gelesen werden. Prüfen Sie, ob es ein GEDCOM-Export (.ged) ist, und versuchen Sie es erneut.',
@@ -1810,6 +2187,49 @@ I18N.fi = {
   'hdr.openAnother': 'Avaa toinen tiedosto', 'hdr.openAnother.title': 'Sulje tämä puu ja avaa toinen GEDCOM-tiedosto',
   'search.placeholderEmpty': 'Lataa GEDCOM hakeaksesi…', 'search.placeholder': 'Hae {n} henkilöstä…',
   'search.noResults': 'Ei tuloksia', 'search.pinned': 'Lähtöhenkilö', 'search.recent': 'Viimeksi katsotut',
+  'search.placeholderNotes': "Hae nimistä ja muistiinpanoista…",
+  'search.inNotes': "Mainittu muistiinpanoissa",
+  'search.showAll': "Näytä kaikki ({n})",
+  // V6.9: V6.0–V6.4 texts (list, List view, loading, Are people missing?)
+  'start.whoseBelow': "Kenen aikajanan haluat nähdä? Hae nimellä tai valitse henkilö alla olevasta luettelosta.",
+  'start.earliest': "Varhaisin syntynyt",
+  'start.latest': "Viimeisin syntynyt",
+  'start.reading': "Luetaan tiedostoa…",
+  'start.readPct': "{n} %",
+  'list.title': "Kaikki henkilöt",
+  'list.tree': "Perheet",
+  'list.az': "A–Ö",
+  'list.switch': "Luettelon järjestys",
+  'list.family': "Perhe: {name}",
+  'list.notLinked': "Ei yhteyttä keneenkään",
+  'list.seeIn': "lisää: {family}",
+  'list.unplaced': "Henkilöitä ei voitu sijoittaa luetteloon: {n}. Ilmoita tästä GitHubissa.",
+  'list.noName': "Ei nimeä",
+  'view.list': "Luettelonäkymä",
+  'view.timeline': "Aikajananäkymä",
+  'view.list.title': "Näytä tiedoston kaikki henkilöt luettelona",
+  'view.timeline.title': "Takaisin aikajanalle",
+  'pp.showList': "Näytä luettelossa: {name}",
+  'pp.showTimeline': "Näytä aikajanalla: {name}",
+  'busy.draw': "Piirretään aikajanaa…",
+  'menu.help': "Ohje",
+  'miss.title': "Puuttuuko henkilöitä?",
+  'miss.intro': "Tiedostossa on vain se, minkä sukututkimuspalvelusi vei. Jotkin palvelut rajaavat viennin sisältöä.",
+  'miss.geni': "Geni",
+  'miss.geniTypeH': "Viennin tyyppi",
+  'miss.geniSizeH': "Kokoraja",
+  'miss.geniType': "Geni kysyy, minkä henkilöryhmän se vie. Ryhmät ovat erikokoisia:",
+  'miss.blood': "Blood Relatives: verisukulaisesi ja heidän puolisonsa. Näiden puolisoiden vanhemmat ja sisarukset eivät ole mukana.",
+  'miss.forest': "Forest: myös kaikkien sukuun naineiden verisukulaiset. Tiedosto on suurempi. Vienti voi kestää useita päiviä.",
+  'miss.oneWay': "Ancestors tai Descendants: vain yksi suunta, ylös tai alas.",
+  'miss.geniSize': "Geni: kokoraja",
+  'miss.basic': "Basic-tili: enintään 4 kertaa itse lisäämiesi profiilien määrä, enintään 5 000 henkilöä.",
+  'miss.pro': "Pro-tili: enintään 4 kertaa itse lisäämiesi profiilien määrä, enintään 50 000 henkilöä.",
+  'miss.others': "Ancestry ja MyHeritage",
+  'miss.oneTree': "Yksi vienti sisältää yhden puun. Jos sinulla on useita puita, vie jokainen erikseen.",
+  'miss.owner': "Ancestryssä vain puun omistaja voi viedä sen. Pyydä tiedosto omistajalta.",
+  'miss.source': "Genin ohje: How can I export my GEDCOM?",
+  'about.project': "Projekti",
   'common.people': { one: '{n} henkilö', other: '{n} henkilöä' }, 'name.unknown': 'Tuntematon',
   'gaps.btn': 'Etsi puutteet', 'gaps.title': 'Etsi henkilöt, joilta puuttuu…',
   'gaps.crit.bdate': 'Syntymäaika', 'gaps.crit.ddate': 'Kuolinaika', 'gaps.crit.bplace': 'Syntymäpaikka', 'gaps.crit.dplace': 'Kuolinpaikka',
@@ -1852,7 +2272,7 @@ I18N.fi = {
   'start.sample': 'Kokeile esimerkkisuvulla',
   'start.privacy': 'Tiedostosi pysyy tällä tietokoneella. Mitään ei ladata eikä tallenneta verkkoon. Ei evästeitä eikä seurantaa.',
   'start.found': { one: 'Löytyi {n} henkilö', other: 'Löytyi {n} henkilöä' },
-  'start.whose': 'Kenen aikajanan haluat nähdä? Kirjoita nimi ja valitse henkilö luettelosta.',
+  'start.whose': "Kenen aikajanan haluat nähdä? Hae nimellä tai valitse henkilö oikealla olevasta luettelosta.",
   'start.heroAria': 'Esimerkkiaikajana esimerkkisuvusta: {a} ja hänen sisaruksensa, valittu henkilö {b} sisaruksineen sekä hänen lapsensa',
   'err.notGed': 'Tämä ei ole GEDCOM-tiedosto. Valitse tiedosto, jonka pääte on .ged.',
   'err.cannotRead': 'Tiedostoa ei voitu lukea. Tarkista, että se on GEDCOM-vienti (.ged), ja yritä uudelleen.',
@@ -1930,6 +2350,49 @@ I18N.sv = {
   'search.placeholderEmpty': 'Läs in en GEDCOM för att söka…',
   'search.placeholder': { one: 'Sök bland {n} person…', other: 'Sök bland {n} personer…' },
   'search.noResults': 'Inga träffar', 'search.pinned': 'Utgångsperson', 'search.recent': 'Senast visade',
+  'search.placeholderNotes': "Sök i namn och anteckningar…",
+  'search.inNotes': "Nämnd i anteckningar",
+  'search.showAll': "Visa alla ({n})",
+  // V6.9: V6.0–V6.4 texts (list, List view, loading, Are people missing?)
+  'start.whoseBelow': "Vems tidslinje vill du se? Sök efter ett namn eller välj en person i listan nedan.",
+  'start.earliest': "Tidigast född",
+  'start.latest': "Senast född",
+  'start.reading': "Läser filen…",
+  'start.readPct': "{n} %",
+  'list.title': "Alla personer",
+  'list.tree': "Familjer",
+  'list.az': "A–Ö",
+  'list.switch': "Hur listan sorteras",
+  'list.family': "Familj: {name}",
+  'list.notLinked': "Inte kopplad till någon",
+  'list.seeIn': "mer i: {family}",
+  'list.unplaced': "{n} personer kunde inte placeras i listan. Rapportera det på GitHub.",
+  'list.noName': "Utan namn",
+  'view.list': "Listvy",
+  'view.timeline': "Tidslinjevy",
+  'view.list.title': "Visa alla personer i filen som en lista",
+  'view.timeline.title': "Tillbaka till tidslinjen",
+  'pp.showList': "Visa i listan: {name}",
+  'pp.showTimeline': "Visa på tidslinjen: {name}",
+  'busy.draw': "Ritar tidslinjen…",
+  'menu.help': "Hjälp",
+  'miss.title': "Saknas personer?",
+  'miss.intro': "Filen innehåller bara det som din släktforskningstjänst exporterade. Vissa tjänster begränsar vad som ingår i exporten.",
+  'miss.geni': "Geni",
+  'miss.geniTypeH': "Exporttyp",
+  'miss.geniSizeH': "Storleksgräns",
+  'miss.geniType': "Geni frågar vilken grupp av personer som ska exporteras. Grupperna är olika stora:",
+  'miss.blood': "Blood Relatives: dina blodsläktingar och deras makar. Makarnas föräldrar och syskon ingår inte.",
+  'miss.forest': "Forest: även blodsläktingarna till alla som gift in sig i familjen. Filen blir större. Exporten kan ta flera dagar.",
+  'miss.oneWay': "Ancestors eller Descendants: bara en riktning, uppåt eller nedåt.",
+  'miss.geniSize': "Geni: storleksgräns",
+  'miss.basic': "Basic-konto: upp till 4 gånger antalet profiler du själv har lagt till, högst 5 000 personer.",
+  'miss.pro': "Pro-konto: upp till 4 gånger antalet profiler du själv har lagt till, högst 50 000 personer.",
+  'miss.others': "Ancestry och MyHeritage",
+  'miss.oneTree': "En export innehåller ett träd. Har du flera träd, exportera vart och ett.",
+  'miss.owner': "På Ancestry kan bara trädets ägare exportera det. Be ägaren om filen.",
+  'miss.source': "Genis hjälp: How can I export my GEDCOM?",
+  'about.project': "Projektet",
   'common.people': { one: '{n} person', other: '{n} personer' }, 'name.unknown': 'Okänd',
   'gaps.btn': 'Hitta luckor', 'gaps.title': 'Hitta personer som saknar…',
   'gaps.crit.bdate': 'Födelsedatum', 'gaps.crit.ddate': 'Dödsdatum', 'gaps.crit.bplace': 'Födelseort', 'gaps.crit.dplace': 'Dödsort',
@@ -1972,7 +2435,7 @@ I18N.sv = {
   'start.sample': 'Prova med en exempelfamilj',
   'start.privacy': 'Din fil stannar på den här datorn. Inget laddas upp eller sparas på nätet. Inga cookies och ingen spårning.',
   'start.found': { one: '{n} person hittades', other: '{n} personer hittades' },
-  'start.whose': 'Vems tidslinje vill du se? Skriv ett namn och välj personen i listan.',
+  'start.whose': "Vems tidslinje vill du se? Sök efter ett namn eller välj en person i listan till höger.",
   'start.heroAria': 'Exempeltidslinje från exempelfamiljen: {a} och hans syskon, den valda personen {b} med syskon och hans barn',
   'err.notGed': 'Det är inte en GEDCOM-fil. Välj en fil som slutar på .ged.',
   'err.cannotRead': 'Filen kunde inte läsas. Kontrollera att det är en GEDCOM-export (.ged) och försök igen.',
@@ -2054,6 +2517,49 @@ I18N.es = {
   'search.noResults': "Sin resultados",
   'search.pinned': "Persona de partida",
   'search.recent': "Recientes",
+  'search.placeholderNotes': "Buscar en nombres y notas…",
+  'search.inNotes': "Mencionado en notas",
+  'search.showAll': "Mostrar todos ({n})",
+  // V6.9: V6.0–V6.4 texts (list, List view, loading, Are people missing?)
+  'start.whoseBelow': "¿De quién quiere ver la línea de tiempo? Busque un nombre o elija a una persona en la lista de abajo.",
+  'start.earliest': "Nacimiento más antiguo",
+  'start.latest': "Nacimiento más reciente",
+  'start.reading': "Leyendo el archivo…",
+  'start.readPct': "{n} %",
+  'list.title': "Todas las personas",
+  'list.tree': "Familias",
+  'list.az': "A–Z",
+  'list.switch': "Cómo ordenar la lista",
+  'list.family': "Familia: {name}",
+  'list.notLinked': "Sin vínculos con nadie",
+  'list.seeIn': "más en: {family}",
+  'list.unplaced': "No se pudo colocar en la lista a {n} personas. Por favor, infórmelo en GitHub.",
+  'list.noName': "Sin nombre",
+  'view.list': "Vista de lista",
+  'view.timeline': "Vista de línea de tiempo",
+  'view.list.title': "Mostrar a todas las personas de este archivo en una lista",
+  'view.timeline.title': "Volver a la línea de tiempo",
+  'pp.showList': "Mostrar en la lista: {name}",
+  'pp.showTimeline': "Mostrar en la línea de tiempo: {name}",
+  'busy.draw': "Dibujando la línea de tiempo…",
+  'menu.help': "Ayuda",
+  'miss.title': "¿Faltan personas?",
+  'miss.intro': "Su archivo contiene solo lo que exportó su servicio de genealogía. Algunos servicios limitan lo que entra en la exportación.",
+  'miss.geni': "Geni",
+  'miss.geniTypeH': "Tipo de exportación",
+  'miss.geniSizeH': "Límite de tamaño",
+  'miss.geniType': "Geni pregunta qué grupo de personas exportar. Los grupos tienen distinto tamaño:",
+  'miss.blood': "Blood Relatives: sus parientes de sangre y sus cónyuges. Los padres y hermanos de esos cónyuges no se incluyen.",
+  'miss.forest': "Forest: también los parientes de sangre de todos los que se casaron con alguien de la familia. El archivo es mayor. La exportación puede tardar varios días.",
+  'miss.oneWay': "Ancestors o Descendants: solo una dirección, hacia arriba o hacia abajo.",
+  'miss.geniSize': "Geni: límite de tamaño",
+  'miss.basic': "Cuenta Basic: hasta 4 veces el número de perfiles que usted añadió, máx. 5000 personas.",
+  'miss.pro': "Cuenta Pro: hasta 4 veces el número de perfiles que usted añadió, máx. 50 000 personas.",
+  'miss.others': "Ancestry y MyHeritage",
+  'miss.oneTree': "Una exportación contiene un árbol. Si tiene varios árboles, exporte cada uno.",
+  'miss.owner': "En Ancestry, solo el propietario de un árbol puede exportarlo. Pida el archivo al propietario.",
+  'miss.source': "Ayuda de Geni: How can I export my GEDCOM?",
+  'about.project': "El proyecto",
   'common.people': {"one": "{n} persona", "other": "{n} personas"},
   'name.unknown': "Desconocido",
   'gaps.btn': "Buscar lagunas",
@@ -2147,7 +2653,7 @@ I18N.es = {
   'start.sample': "Probar con una familia de ejemplo",
   'start.privacy': "Su archivo se queda en este equipo. No se sube ni se guarda nada en internet. Sin cookies y sin seguimiento.",
   'start.found': {"one": "Se encontró {n} persona", "other": "Se encontraron {n} personas"},
-  'start.whose': "¿De quién quiere ver la línea de tiempo? Escriba un nombre y elija a la persona en la lista.",
+  'start.whose': "¿De quién quiere ver la línea de tiempo? Busque un nombre o elija a una persona en la lista de la derecha.",
   'start.heroAria': "Línea de tiempo de ejemplo de la familia de ejemplo: {a} y sus hermanos, la persona elegida {b} con sus hermanos, y sus hijos",
   'err.notGed': "No es un archivo GEDCOM. Elija un archivo que termine en .ged.",
   'err.cannotRead': "No se pudo leer este archivo. Compruebe que es una exportación GEDCOM (.ged) e inténtelo de nuevo.",
@@ -2323,6 +2829,49 @@ I18N.fr = {
   'search.noResults': "Aucun résultat",
   'search.pinned': "Personne de départ",
   'search.recent': "Récents",
+  'search.placeholderNotes': "Rechercher dans les noms et les notes…",
+  'search.inNotes': "Mentionné dans les notes",
+  'search.showAll': "Tout afficher ({n})",
+  // V6.9: V6.0–V6.4 texts (list, List view, loading, Are people missing?)
+  'start.whoseBelow': "Quelle frise voulez-vous voir ? Cherchez un nom ou choisissez une personne dans la liste ci-dessous.",
+  'start.earliest': "Naissance la plus ancienne",
+  'start.latest': "Naissance la plus récente",
+  'start.reading': "Lecture du fichier…",
+  'start.readPct': "{n} %",
+  'list.title': "Toutes les personnes",
+  'list.tree': "Familles",
+  'list.az': "A–Z",
+  'list.switch': "Ordre de la liste",
+  'list.family': "Famille : {name}",
+  'list.notLinked': "Liée à personne",
+  'list.seeIn': "suite dans : {family}",
+  'list.unplaced': "{n} personnes n’ont pas pu être placées dans la liste. Merci de le signaler sur GitHub.",
+  'list.noName': "Sans nom",
+  'view.list': "Vue liste",
+  'view.timeline': "Vue frise",
+  'view.list.title': "Afficher toutes les personnes de ce fichier sous forme de liste",
+  'view.timeline.title': "Retour à la frise",
+  'pp.showList': "Afficher dans la liste : {name}",
+  'pp.showTimeline': "Afficher sur la frise : {name}",
+  'busy.draw': "Dessin de la frise…",
+  'menu.help': "Aide",
+  'miss.title': "Des personnes manquent ?",
+  'miss.intro': "Votre fichier contient uniquement ce que votre service de généalogie a exporté. Certains services limitent le contenu de l’export.",
+  'miss.geni': "Geni",
+  'miss.geniTypeH': "Type d’export",
+  'miss.geniSizeH': "Limite de taille",
+  'miss.geniType': "Geni demande quel groupe de personnes exporter. Les groupes n’ont pas la même taille :",
+  'miss.blood': "Blood Relatives : vos parents par le sang et leurs conjoints. Les parents, frères et sœurs de ces conjoints ne sont pas inclus.",
+  'miss.forest': "Forest : aussi les parents par le sang de toutes les personnes entrées dans la famille par mariage. Le fichier est plus grand. L’export peut prendre plusieurs jours.",
+  'miss.oneWay': "Ancestors ou Descendants : une seule direction, vers le haut ou vers le bas.",
+  'miss.geniSize': "Geni : limite de taille",
+  'miss.basic': "Compte Basic : jusqu’à 4 fois le nombre de profils que vous avez ajoutés, 5 000 personnes au maximum.",
+  'miss.pro': "Compte Pro : jusqu’à 4 fois le nombre de profils que vous avez ajoutés, 50 000 personnes au maximum.",
+  'miss.others': "Ancestry et MyHeritage",
+  'miss.oneTree': "Un export contient un arbre. Si vous avez plusieurs arbres, exportez chacun d’eux.",
+  'miss.owner': "Sur Ancestry, seul le propriétaire d’un arbre peut l’exporter. Demandez le fichier au propriétaire.",
+  'miss.source': "Aide Geni : How can I export my GEDCOM?",
+  'about.project': "Le projet",
   'common.people': {"one": "{n} personne", "other": "{n} personnes"},
   'name.unknown': "Inconnu",
   'gaps.btn': "Trouver les lacunes",
@@ -2416,7 +2965,7 @@ I18N.fr = {
   'start.sample': "Essayer avec une famille d’exemple",
   'start.privacy': "Votre fichier reste sur cet ordinateur. Rien n’est envoyé ni enregistré en ligne. Ni cookies, ni pistage.",
   'start.found': {"one": "{n} personne trouvée", "other": "{n} personnes trouvées"},
-  'start.whose': "Quelle frise voulez-vous voir ? Tapez un nom, puis choisissez la personne dans la liste.",
+  'start.whose': "Quelle frise voulez-vous voir ? Cherchez un nom ou choisissez une personne dans la liste à droite.",
   'start.heroAria': "Frise d’exemple de la famille d’exemple : {a} et ses frères et sœurs, la personne choisie {b} avec ses frères et sœurs, et ses enfants",
   'err.notGed': "Ce n’est pas un fichier GEDCOM. Choisissez un fichier qui se termine par .ged.",
   'err.cannotRead': "Impossible de lire ce fichier. Vérifiez qu’il s’agit d’un export GEDCOM (.ged) et réessayez.",
@@ -2592,6 +3141,49 @@ I18N.nl = {
   'search.noResults': "Geen resultaten",
   'search.pinned': "Startpersoon",
   'search.recent': "Recent bekeken",
+  'search.placeholderNotes': "Zoek in namen en notities…",
+  'search.inNotes': "Genoemd in notities",
+  'search.showAll': "Alles tonen ({n})",
+  // V6.9: V6.0–V6.4 texts (list, List view, loading, Are people missing?)
+  'start.whoseBelow': "Wiens tijdlijn wilt u zien? Zoek een naam of kies een persoon in de lijst hieronder.",
+  'start.earliest': "Vroegst geboren",
+  'start.latest': "Laatst geboren",
+  'start.reading': "Bestand wordt gelezen…",
+  'start.readPct': "{n} %",
+  'list.title': "Alle personen",
+  'list.tree': "Families",
+  'list.az': "A–Z",
+  'list.switch': "Sortering van de lijst",
+  'list.family': "Familie: {name}",
+  'list.notLinked': "Met niemand verbonden",
+  'list.seeIn': "meer in: {family}",
+  'list.unplaced': "{n} personen konden niet in de lijst worden geplaatst. Meld dit op GitHub.",
+  'list.noName': "Zonder naam",
+  'view.list': "Lijstweergave",
+  'view.timeline': "Tijdlijnweergave",
+  'view.list.title': "Alle personen in dit bestand als lijst tonen",
+  'view.timeline.title': "Terug naar de tijdlijn",
+  'pp.showList': "In de lijst tonen: {name}",
+  'pp.showTimeline': "Op de tijdlijn tonen: {name}",
+  'busy.draw': "Tijdlijn wordt getekend…",
+  'menu.help': "Hulp",
+  'miss.title': "Ontbreken er personen?",
+  'miss.intro': "Uw bestand bevat alleen wat uw genealogiedienst heeft geëxporteerd. Sommige diensten beperken wat in de export komt.",
+  'miss.geni': "Geni",
+  'miss.geniTypeH': "Soort export",
+  'miss.geniSizeH': "Groottelimiet",
+  'miss.geniType': "Geni vraagt welke groep personen geëxporteerd wordt. De groepen verschillen in grootte:",
+  'miss.blood': "Blood Relatives: uw bloedverwanten en hun echtgenoten. Ouders, broers en zussen van die echtgenoten zitten er niet in.",
+  'miss.forest': "Forest: ook de bloedverwanten van iedereen die in de familie is getrouwd. Het bestand is groter. De export kan dagen duren.",
+  'miss.oneWay': "Ancestors of Descendants: maar één richting, omhoog of omlaag.",
+  'miss.geniSize': "Geni: groottelimiet",
+  'miss.basic': "Basic-account: tot 4 keer het aantal profielen dat u zelf hebt toegevoegd, max. 5.000 personen.",
+  'miss.pro': "Pro-account: tot 4 keer het aantal profielen dat u zelf hebt toegevoegd, max. 50.000 personen.",
+  'miss.others': "Ancestry en MyHeritage",
+  'miss.oneTree': "Eén export bevat één stamboom. Hebt u meer stambomen, exporteer dan elke stamboom apart.",
+  'miss.owner': "Bij Ancestry kan alleen de eigenaar een stamboom exporteren. Vraag de eigenaar om het bestand.",
+  'miss.source': "Geni-hulp: How can I export my GEDCOM?",
+  'about.project': "Het project",
   'common.people': {"one": "{n} persoon", "other": "{n} personen"},
   'name.unknown': "Onbekend",
   'gaps.btn': "Hiaten zoeken",
@@ -2685,7 +3277,7 @@ I18N.nl = {
   'start.sample': "Probeer het met een voorbeeldfamilie",
   'start.privacy': "Uw bestand blijft op deze computer. Er wordt niets geüpload of online opgeslagen. Geen cookies en geen tracking.",
   'start.found': {"one": "{n} persoon gevonden", "other": "{n} personen gevonden"},
-  'start.whose': "Wiens tijdlijn wilt u zien? Typ een naam en kies de persoon uit de lijst.",
+  'start.whose': "Wiens tijdlijn wilt u zien? Zoek een naam of kies een persoon in de lijst rechts.",
   'start.heroAria': "Voorbeeldtijdlijn van de voorbeeldfamilie: {a} en zijn broers en zussen, de gekozen persoon {b} met broers en zussen, en zijn kinderen",
   'err.notGed': "Dit is geen GEDCOM-bestand. Kies een bestand dat eindigt op .ged.",
   'err.cannotRead': "Dit bestand kon niet worden gelezen. Controleer of het een GEDCOM-export (.ged) is en probeer het opnieuw.",
@@ -2861,6 +3453,49 @@ I18N.lv = {
   'search.noResults': "Nav rezultātu",
   'search.pinned': "Sākumpersona",
   'search.recent': "Nesen skatītie",
+  'search.placeholderNotes': "Meklēt vārdos un piezīmēs…",
+  'search.inNotes': "Minēts piezīmēs",
+  'search.showAll': "Rādīt visus ({n})",
+  // V6.9: V6.0–V6.4 texts (list, List view, loading, Are people missing?)
+  'start.whoseBelow': "Kura cilvēka laika līniju vēlaties redzēt? Meklējiet vārdu vai izvēlieties cilvēku sarakstā zemāk.",
+  'start.earliest': "Agrāk dzimušais",
+  'start.latest': "Vēlāk dzimušais",
+  'start.reading': "Lasa failu…",
+  'start.readPct': "{n} %",
+  'list.title': "Visi cilvēki",
+  'list.tree': "Ģimenes",
+  'list.az': "A–Z",
+  'list.switch': "Saraksta kārtošana",
+  'list.family': "Ģimene: {name}",
+  'list.notLinked': "Nav saistīts ne ar vienu",
+  'list.seeIn': "vairāk: {family}",
+  'list.unplaced': "Sarakstā neizdevās ievietot cilvēkus: {n}. Lūdzu, ziņojiet par to GitHub.",
+  'list.noName': "Bez vārda",
+  'view.list': "Saraksta skats",
+  'view.timeline': "Laika līnijas skats",
+  'view.list.title': "Rādīt visus šī faila cilvēkus sarakstā",
+  'view.timeline.title': "Atpakaļ uz laika līniju",
+  'pp.showList': "Rādīt sarakstā: {name}",
+  'pp.showTimeline': "Rādīt laika līnijā: {name}",
+  'busy.draw': "Zīmē laika līniju…",
+  'menu.help': "Palīdzība",
+  'miss.title': "Vai trūkst cilvēku?",
+  'miss.intro': "Failā ir tikai tas, ko eksportēja jūsu ģenealoģijas pakalpojums. Daži pakalpojumi ierobežo eksporta saturu.",
+  'miss.geni': "Geni",
+  'miss.geniTypeH': "Eksporta veids",
+  'miss.geniSizeH': "Apjoma ierobežojums",
+  'miss.geniType': "Geni jautā, kuru cilvēku grupu eksportēt. Grupas ir dažāda lieluma:",
+  'miss.blood': "Blood Relatives: jūsu asinsradinieki un viņu laulātie. Šo laulāto vecāki, brāļi un māsas nav iekļauti.",
+  'miss.forest': "Forest: arī visu ģimenē ieprecējušos asinsradinieki. Fails ir lielāks. Eksports var aizņemt vairākas dienas.",
+  'miss.oneWay': "Ancestors vai Descendants: tikai viens virziens, uz augšu vai uz leju.",
+  'miss.geniSize': "Geni: apjoma ierobežojums",
+  'miss.basic': "Basic konts: līdz 4 reizēm vairāk nekā jūsu pašu pievienotie profili, ne vairāk kā 5000 cilvēku.",
+  'miss.pro': "Pro konts: līdz 4 reizēm vairāk nekā jūsu pašu pievienotie profili, ne vairāk kā 50 000 cilvēku.",
+  'miss.others': "Ancestry un MyHeritage",
+  'miss.oneTree': "Viens eksports satur vienu koku. Ja jums ir vairāki koki, eksportējiet katru atsevišķi.",
+  'miss.owner': "Ancestry koku var eksportēt tikai tā īpašnieks. Palūdziet failu īpašniekam.",
+  'miss.source': "Geni palīdzība: How can I export my GEDCOM?",
+  'about.project': "Projekts",
   'common.people': {"zero": "{n} cilvēku", "one": "{n} cilvēks", "other": "{n} cilvēki"},
   'name.unknown': "Nezināms",
   'gaps.btn': "Atrast robus",
@@ -2954,7 +3589,7 @@ I18N.lv = {
   'start.sample': "Izmēģināt ar parauga ģimeni",
   'start.privacy': "Jūsu fails paliek šajā datorā. Nekas netiek augšupielādēts vai saglabāts tiešsaistē. Bez sīkdatnēm un bez izsekošanas.",
   'start.found': "Cilvēki failā: {n}",
-  'start.whose': "Kura cilvēka laika līniju vēlaties redzēt? Ierakstiet vārdu un izvēlieties cilvēku sarakstā.",
+  'start.whose': "Kura cilvēka laika līniju vēlaties redzēt? Meklējiet vārdu vai izvēlieties cilvēku sarakstā pa labi.",
   'start.heroAria': "Parauga laika līnija no parauga ģimenes: {a} un viņa brāļi un māsas, izvēlētais cilvēks {b} ar brāļiem un māsām un viņa bērni",
   'err.notGed': "Tas nav GEDCOM fails. Izvēlieties failu, kura nosaukums beidzas ar .ged.",
   'err.cannotRead': "Šo failu neizdevās nolasīt. Pārbaudiet, vai tas ir GEDCOM eksports (.ged), un mēģiniet vēlreiz.",
@@ -3130,6 +3765,49 @@ I18N.lt = {
   'search.noResults': "Rezultatų nėra",
   'search.pinned': "Pradinis asmuo",
   'search.recent': "Neseniai peržiūrėti",
+  'search.placeholderNotes': "Ieškoti varduose ir pastabose…",
+  'search.inNotes': "Paminėta pastabose",
+  'search.showAll': "Rodyti visus ({n})",
+  // V6.9: V6.0–V6.4 texts (list, List view, loading, Are people missing?)
+  'start.whoseBelow': "Kieno laiko juostą norite pamatyti? Ieškokite vardo arba pasirinkite asmenį sąraše žemiau.",
+  'start.earliest': "Anksčiausiai gimęs",
+  'start.latest': "Vėliausiai gimęs",
+  'start.reading': "Skaitomas failas…",
+  'start.readPct': "{n} %",
+  'list.title': "Visi asmenys",
+  'list.tree': "Šeimos",
+  'list.az': "A–Ž",
+  'list.switch': "Sąrašo rikiavimas",
+  'list.family': "Šeima: {name}",
+  'list.notLinked': "Su niekuo nesusietas",
+  'list.seeIn': "daugiau: {family}",
+  'list.unplaced': "Nepavyko įtraukti į sąrašą asmenų: {n}. Praneškite apie tai GitHub.",
+  'list.noName': "Be vardo",
+  'view.list': "Sąrašo rodinys",
+  'view.timeline': "Laiko juostos rodinys",
+  'view.list.title': "Rodyti visus šio failo asmenis sąraše",
+  'view.timeline.title': "Atgal į laiko juostą",
+  'pp.showList': "Rodyti sąraše: {name}",
+  'pp.showTimeline': "Rodyti laiko juostoje: {name}",
+  'busy.draw': "Piešiama laiko juosta…",
+  'menu.help': "Pagalba",
+  'miss.title': "Ar trūksta asmenų?",
+  'miss.intro': "Faile yra tik tai, ką eksportavo jūsų genealogijos paslauga. Kai kurios paslaugos riboja eksporto turinį.",
+  'miss.geni': "Geni",
+  'miss.geniTypeH': "Eksporto tipas",
+  'miss.geniSizeH': "Dydžio riba",
+  'miss.geniType': "Geni klausia, kurią asmenų grupę eksportuoti. Grupės yra skirtingo dydžio:",
+  'miss.blood': "Blood Relatives: jūsų kraujo giminaičiai ir jų sutuoktiniai. Tų sutuoktinių tėvai, broliai ir seserys neįtraukiami.",
+  'miss.forest': "Forest: taip pat visų į šeimą įsituokusiųjų kraujo giminaičiai. Failas didesnis. Eksportas gali trukti kelias dienas.",
+  'miss.oneWay': "Ancestors arba Descendants: tik viena kryptis, aukštyn arba žemyn.",
+  'miss.geniSize': "Geni: dydžio riba",
+  'miss.basic': "Basic paskyra: iki 4 kartų daugiau nei jūsų pačių pridėtų profilių, ne daugiau kaip 5000 asmenų.",
+  'miss.pro': "Pro paskyra: iki 4 kartų daugiau nei jūsų pačių pridėtų profilių, ne daugiau kaip 50 000 asmenų.",
+  'miss.others': "Ancestry ir MyHeritage",
+  'miss.oneTree': "Viename eksporte yra vienas medis. Jei turite kelis medžius, eksportuokite kiekvieną atskirai.",
+  'miss.owner': "Ancestry medį gali eksportuoti tik jo savininkas. Paprašykite failo savininko.",
+  'miss.source': "Geni pagalba: How can I export my GEDCOM?",
+  'about.project': "Projektas",
   'common.people': {"one": "{n} asmuo", "few": "{n} asmenys", "many": "{n} asmens", "other": "{n} asmenų"},
   'name.unknown': "Nežinomas",
   'gaps.btn': "Rasti spragas",
@@ -3223,7 +3901,7 @@ I18N.lt = {
   'start.sample': "Išbandyti su pavyzdine šeima",
   'start.privacy': "Jūsų failas lieka šiame kompiuteryje. Niekas neįkeliama ir nesaugoma internete. Jokių slapukų ir jokio sekimo.",
   'start.found': "Asmenų faile: {n}",
-  'start.whose': "Kieno laiko juostą norite pamatyti? Įrašykite vardą ir pasirinkite asmenį iš sąrašo.",
+  'start.whose': "Kieno laiko juostą norite pamatyti? Ieškokite vardo arba pasirinkite asmenį sąraše dešinėje.",
   'start.heroAria': "Pavyzdinė laiko juosta iš pavyzdinės šeimos: {a} ir jo broliai bei seserys, pasirinktas asmuo {b} su broliais ir seserimis bei jo vaikai",
   'err.notGed': "Tai ne GEDCOM failas. Pasirinkite failą, kurio pavadinimas baigiasi .ged.",
   'err.cannotRead': "Šio failo nepavyko perskaityti. Patikrinkite, ar tai GEDCOM eksportas (.ged), ir bandykite dar kartą.",
@@ -3399,6 +4077,49 @@ I18N.no = {
   'search.noResults': "Ingen treff",
   'search.pinned': "Startperson",
   'search.recent': "Sist vist",
+  'search.placeholderNotes': "Søk i navn og notater…",
+  'search.inNotes': "Nevnt i notater",
+  'search.showAll': "Vis alle ({n})",
+  // V6.9: V6.0–V6.4 texts (list, List view, loading, Are people missing?)
+  'start.whoseBelow': "Hvem sin tidslinje vil du se? Søk etter et navn eller velg en person i listen nedenfor.",
+  'start.earliest': "Tidligst født",
+  'start.latest': "Sist født",
+  'start.reading': "Leser filen…",
+  'start.readPct': "{n} %",
+  'list.title': "Alle personer",
+  'list.tree': "Familier",
+  'list.az': "A–Å",
+  'list.switch': "Hvordan listen sorteres",
+  'list.family': "Familie: {name}",
+  'list.notLinked': "Ikke koblet til noen",
+  'list.seeIn': "mer i: {family}",
+  'list.unplaced': "{n} personer kunne ikke plasseres i listen. Meld fra om dette på GitHub.",
+  'list.noName': "Uten navn",
+  'view.list': "Listevisning",
+  'view.timeline': "Tidslinjevisning",
+  'view.list.title': "Vis alle personer i filen som en liste",
+  'view.timeline.title': "Tilbake til tidslinjen",
+  'pp.showList': "Vis i listen: {name}",
+  'pp.showTimeline': "Vis på tidslinjen: {name}",
+  'busy.draw': "Tegner tidslinjen…",
+  'menu.help': "Hjelp",
+  'miss.title': "Mangler det personer?",
+  'miss.intro': "Filen inneholder bare det slektstjenesten din eksporterte. Noen tjenester begrenser hva som kommer med i eksporten.",
+  'miss.geni': "Geni",
+  'miss.geniTypeH': "Eksporttype",
+  'miss.geniSizeH': "Størrelsesgrense",
+  'miss.geniType': "Geni spør hvilken gruppe personer som skal eksporteres. Gruppene er ulikt store:",
+  'miss.blood': "Blood Relatives: blodslektningene dine og ektefellene deres. Foreldre og søsken til disse ektefellene er ikke med.",
+  'miss.forest': "Forest: også blodslektningene til alle som har giftet seg inn i familien. Filen blir større. Eksporten kan ta flere dager.",
+  'miss.oneWay': "Ancestors eller Descendants: bare én retning, opp eller ned.",
+  'miss.geniSize': "Geni: størrelsesgrense",
+  'miss.basic': "Basic-konto: opptil 4 ganger antallet profiler du selv har lagt til, maks. 5 000 personer.",
+  'miss.pro': "Pro-konto: opptil 4 ganger antallet profiler du selv har lagt til, maks. 50 000 personer.",
+  'miss.others': "Ancestry og MyHeritage",
+  'miss.oneTree': "Én eksport inneholder ett tre. Har du flere trær, eksporter hvert av dem.",
+  'miss.owner': "På Ancestry kan bare eieren av et tre eksportere det. Be eieren om filen.",
+  'miss.source': "Geni-hjelp: How can I export my GEDCOM?",
+  'about.project': "Prosjektet",
   'common.people': {"one": "{n} person", "other": "{n} personer"},
   'name.unknown': "Ukjent",
   'gaps.btn': "Finn hull",
@@ -3492,7 +4213,7 @@ I18N.no = {
   'start.sample': "Prøv med en eksempelfamilie",
   'start.privacy': "Filen din blir på denne datamaskinen. Ingenting lastes opp eller lagres på nettet. Ingen informasjonskapsler og ingen sporing.",
   'start.found': {"one": "{n} person funnet", "other": "{n} personer funnet"},
-  'start.whose': "Hvem sin tidslinje vil du se? Skriv et navn og velg personen i listen.",
+  'start.whose': "Hvem sin tidslinje vil du se? Søk etter et navn eller velg en person i listen til høyre.",
   'start.heroAria': "Eksempeltidslinje fra eksempelfamilien: {a} og søsknene hans, den valgte personen {b} med søsken, og barna hans",
   'err.notGed': "Dette er ikke en GEDCOM-fil. Velg en fil som slutter på .ged.",
   'err.cannotRead': "Filen kunne ikke leses. Sjekk at det er en GEDCOM-eksport (.ged), og prøv igjen.",
@@ -3668,6 +4389,49 @@ I18N.da = {
   'search.noResults': "Ingen resultater",
   'search.pinned': "Startperson",
   'search.recent': "Senest vist",
+  'search.placeholderNotes': "Søg i navne og noter…",
+  'search.inNotes': "Nævnt i noter",
+  'search.showAll': "Vis alle ({n})",
+  // V6.9: V6.0–V6.4 texts (list, List view, loading, Are people missing?)
+  'start.whoseBelow': "Hvis tidslinje vil du se? Søg efter et navn, eller vælg en person på listen nedenfor.",
+  'start.earliest': "Tidligst født",
+  'start.latest': "Senest født",
+  'start.reading': "Læser filen…",
+  'start.readPct': "{n} %",
+  'list.title': "Alle personer",
+  'list.tree': "Familier",
+  'list.az': "A–Å",
+  'list.switch': "Hvordan listen sorteres",
+  'list.family': "Familie: {name}",
+  'list.notLinked': "Ikke knyttet til nogen",
+  'list.seeIn': "mere i: {family}",
+  'list.unplaced': "{n} personer kunne ikke placeres på listen. Meld det på GitHub.",
+  'list.noName': "Uden navn",
+  'view.list': "Listevisning",
+  'view.timeline': "Tidslinjevisning",
+  'view.list.title': "Vis alle personer i filen som en liste",
+  'view.timeline.title': "Tilbage til tidslinjen",
+  'pp.showList': "Vis på listen: {name}",
+  'pp.showTimeline': "Vis på tidslinjen: {name}",
+  'busy.draw': "Tegner tidslinjen…",
+  'menu.help': "Hjælp",
+  'miss.title': "Mangler der personer?",
+  'miss.intro': "Filen indeholder kun det, din slægtstjeneste eksporterede. Nogle tjenester begrænser, hvad der kommer med i eksporten.",
+  'miss.geni': "Geni",
+  'miss.geniTypeH': "Eksporttype",
+  'miss.geniSizeH': "Størrelsesgrænse",
+  'miss.geniType': "Geni spørger, hvilken gruppe personer der skal eksporteres. Grupperne er forskellige i størrelse:",
+  'miss.blood': "Blood Relatives: dine blodslægtninge og deres ægtefæller. Ægtefællernes forældre og søskende er ikke med.",
+  'miss.forest': "Forest: også blodslægtningene til alle, der er gift ind i familien. Filen er større. Eksporten kan tage flere dage.",
+  'miss.oneWay': "Ancestors eller Descendants: kun én retning, op eller ned.",
+  'miss.geniSize': "Geni: størrelsesgrænse",
+  'miss.basic': "Basic-konto: op til 4 gange det antal profiler, du selv har tilføjet, maks. 5.000 personer.",
+  'miss.pro': "Pro-konto: op til 4 gange det antal profiler, du selv har tilføjet, maks. 50.000 personer.",
+  'miss.others': "Ancestry og MyHeritage",
+  'miss.oneTree': "Én eksport indeholder ét træ. Har du flere træer, så eksporter hvert træ.",
+  'miss.owner': "På Ancestry kan kun ejeren af et træ eksportere det. Bed ejeren om filen.",
+  'miss.source': "Geni-hjælp: How can I export my GEDCOM?",
+  'about.project': "Projektet",
   'common.people': {"one": "{n} person", "other": "{n} personer"},
   'name.unknown': "Ukendt",
   'gaps.btn': "Find huller",
@@ -3761,7 +4525,7 @@ I18N.da = {
   'start.sample': "Prøv med en eksempelfamilie",
   'start.privacy': "Din fil bliver på denne computer. Intet uploades eller gemmes online. Ingen cookies og ingen sporing.",
   'start.found': {"one": "{n} person fundet", "other": "{n} personer fundet"},
-  'start.whose': "Hvis tidslinje vil du se? Skriv et navn, og vælg personen på listen.",
+  'start.whose': "Hvis tidslinje vil du se? Søg efter et navn, eller vælg en person på listen til højre.",
   'start.heroAria': "Eksempeltidslinje fra eksempelfamilien: {a} og hans søskende, den valgte person {b} med søskende og hans børn",
   'err.notGed': "Det er ikke en GEDCOM-fil. Vælg en fil, der ender på .ged.",
   'err.cannotRead': "Filen kunne ikke læses. Kontrollér, at det er en GEDCOM-eksport (.ged), og prøv igen.",
@@ -3969,6 +4733,8 @@ I18N.da = {
   // Dates: GEDCOM month (1–12), day may be 0 (unknown)
   window.tDate = function(y, m, d){ var mn = window.t('month.' + m); return d ? window.t('date.dmy', { d: d, m: mn, y: y }) : window.t('date.my', { m: mn, y: y }); };
   window.tLang = function(){ return lang; };
+  // V6.0: does the current language have its own text for this key? (en always does)
+  window.tHas = function(key){ if (lang === 'en' || lang === 'xx') return true; var d = I18N[lang]; return !!(d && d[key] != null); };
   window.tReady = function(l){ return l === 'xx' || I18N_READY.indexOf(l) >= 0; };
   // Static HTML: data-i18n (text), data-i18n-title, data-i18n-aria (aria-label), data-i18n-ph (placeholder); data-i18n-vars = JSON
   window.applyI18n = function(root){
@@ -4627,6 +5393,7 @@ window.TLPops = (function(){
     if (psw.parentNode !== hr) { hr.insertBefore(psw, hr.firstChild); psw.classList.remove('pre-render'); }
     document.getElementById('openAnotherBtn').classList.remove('pre-render');
     document.getElementById('gapsWrap').classList.remove('pre-render');
+    document.getElementById('viewBtn').classList.remove('pre-render');
     var bd = document.getElementById('heroBackdrop'); if (bd) bd.style.display = 'none';
     document.getElementById('timelineOuter').style.display = 'block';
     animateIn(document.getElementById('mainSvg'), rowYOf, barTopOf);
@@ -4722,6 +5489,8 @@ window.TLPops = (function(){
   // REVERT / EXPERIMENT: set PROFILE_MODE = 'off' to remove the panel entirely (behaves like V4.26).
   // Other variants (e.g. 'B': bar click opens profile) can be added here without touching render().
   var PROFILE_MODE = 'D';
+  var pendingHit = null;   // V6.6: search words to highlight in the next profile's notes
+  var ppShown = null, listOn = false;   // V6.0: person in the profile panel; List view on/off
   var ppCollapsed = false;
   // V5.33 — Pin: one pinned person per session. Search pick (and the file's opening person) pins automatically;
   // clicking around the tree does not. Recent = people shown as focal, newest first.
@@ -4745,13 +5514,15 @@ window.TLPops = (function(){
     }
   }
   var PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>';
+  // V6.0: the pin belongs to the profile on screen — in List view that is the picked person, not the timeline's focal person
+  function pinTarget() { return listOn ? ppShown : (state && state.focal); }
   function updatePinUI() {
     var b = document.getElementById('pinBackBtn'), hr = document.querySelector('.header-right'), psw = document.getElementById('personSelectorWrap');
     if (psw.parentNode === hr && b.nextSibling !== psw) hr.insertBefore(b, psw);
     var away = !!(G && state && pinId && P(pinId) && pinId !== state.focal);
     b.hidden = !away;
     if (away) { var bt = t('pin.back', { name: nameOf(P(pinId)) }); b.title = bt; b.setAttribute('aria-label', bt); }
-    var on = !!(state && pinId === state.focal), nm = state && P(state.focal) ? nameOf(P(state.focal)) : '';
+    var tg = pinTarget(), on = !!(tg && pinId === tg), nm = tg && P(tg) ? nameOf(P(tg)) : '';
     document.querySelectorAll('[data-pin]').forEach(function(x){
       x.setAttribute('aria-pressed', String(on));
       x.title = on ? t('pin.pinned') : t('pin.pinTitle', { name: nm });
@@ -4760,7 +5531,8 @@ window.TLPops = (function(){
   }
   document.addEventListener('click', function(e){
     if (!e.target.closest('[data-pin]') || !state) return;
-    pinId = pinId === state.focal ? null : state.focal;
+    var tg = pinTarget(); if (!tg) return;
+    pinId = pinId === tg ? null : tg;
     updatePinUI();
   });
   document.getElementById('pinBackBtn').addEventListener('click', function(){
@@ -5048,6 +5820,7 @@ window.TLPops = (function(){
     var panel = document.getElementById('profilePanel');
     if (PROFILE_MODE !== 'D' || !id || !P(id)) { panel.hidden = true; document.body.classList.remove('has-profile', 'profile-collapsed'); return; }
     renderGapsBar(id);
+    ppShown = id;
     var p = P(id), bl = blocks(p), h = '', miss = gaps && gaps.ids.indexOf(id) >= 0 ? missingOf(id) : [];
     function MISS(lab) { return '<div class="pp-row pp-miss"><dt>' + esc(lab) + '</dt><dd><span class="pp-miss-tag">⚠ ' + esc(t('pp.missing')) + '</span></dd></div>'; }
     function MTAG(key) { return '<span class="pp-miss-tag">⚠ ' + esc(t(key)) + '</span>'; }
@@ -5118,7 +5891,7 @@ window.TLPops = (function(){
     var links = providerLinks(p);
     // V5.34: pin + 'Open on …' share one row; 'Added by' moved to the header, styled as 'Also known as'
     h = h.replace('@@ADDEDBY@@', addedBy ? '<div class="pp-aka"><span>' + esc(t('pp.addedBy')) + '</span> ' + esc(addedBy) + '</div>' : '');
-    h += '<section class="pp-sec pp-orig"><div class="pp-actions"><button class="pp-pin" type="button" data-pin aria-pressed="false">' + PIN_SVG + '</button>' + links.map(function(l){ return '<a class="pp-ext" href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer">' + esc(t('pp.openOn', { name: l.name })) + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>'; }).join('') + '</div></section>';
+    h += '<section class="pp-sec pp-orig"><div class="pp-actions"><button class="pp-pin" type="button" data-pin aria-pressed="false">' + PIN_SVG + '</button>' + viewSwitchBtn(id) + links.map(function(l){ return '<a class="pp-ext" href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer">' + esc(t('pp.openOn', { name: l.name })) + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>'; }).join('') + '</div></section>';
     // 4. Sources
     var srcs = [];
     (p.raw || []).forEach(function(t){ if (t.tag === 'SOUR' && t.value) { var tt = /^@.+@$/.test(t.value) ? (G.sources && G.sources.get(t.value)) : t.value; if (tt && srcs.indexOf(tt) < 0) srcs.push(tt); } });
@@ -5134,7 +5907,41 @@ window.TLPops = (function(){
     document.body.classList.toggle('profile-collapsed', ppCollapsed);
     document.getElementById('ppToggle').setAttribute('aria-expanded', String(!ppCollapsed));
     updatePinUI();
+    if (pendingHit) { var hk = pendingHit; pendingHit = null; markNoteHits(body, hk); }
   }
+  // V6.6: highlight the search words inside the profile's notes and bring the first one into view
+  function markNoteHits(body, toks) {
+    function nrm(x) { return String(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+    toks = toks.filter(function(q){ return q.length >= 2; }); if (!toks.length) return;
+    function hit(w) { return nrm(w).split(' ').some(function(x){ return x && toks.some(function(q){ return x.indexOf(q) === 0; }); }); }
+    var first = null;
+    body.querySelectorAll('.pp-note').forEach(function(el){
+      var tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), nodes = [], n;
+      while ((n = tw.nextNode())) nodes.push(n);
+      nodes.forEach(function(node){
+        var parts = node.nodeValue.split(/(\s+)/); if (!parts.some(hit)) return;
+        var f = document.createDocumentFragment();
+        parts.forEach(function(pt){
+          if (pt && !/^\s+$/.test(pt) && hit(pt)) { var m = document.createElement('mark'); m.className = 'pp-hit'; m.textContent = pt; f.appendChild(m); if (!first) first = m; }
+          else if (pt) f.appendChild(document.createTextNode(pt));
+        });
+        node.parentNode.replaceChild(f, node);
+      });
+    });
+    if (first) requestAnimationFrame(function(){ var top = first.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop; body.scrollTop = Math.max(0, top - body.clientHeight / 3); });
+  }
+  // V6.0: icon-only button in the profile: timeline → "show in the list"; List view → "show on the timeline"
+  var VS_LIST = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.2" fill="currentColor"/><circle cx="4.5" cy="12" r="1.2" fill="currentColor"/><circle cx="4.5" cy="18" r="1.2" fill="currentColor"/></svg>';
+  var VS_TL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M3 7h11M8 12h13M5 17h9"/></svg>';
+  function viewSwitchBtn(id) {
+    var lab = t(listOn ? 'pp.showTimeline' : 'pp.showList', { name: nameOf(P(id)) });
+    return '<button class="pp-pin pp-view" type="button" data-viewswitch title="' + esc(lab) + '" aria-label="' + esc(lab) + '">' + (listOn ? VS_TL : VS_LIST) + '</button>';
+  }
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('[data-viewswitch]') || !G || !ppShown || !P(ppShown)) return;
+    if (listOn) window.TreeLine.show(ppShown, true);   // rule 2: open on the timeline, pin is set (same as search)
+    else enterList(ppShown);                         // rule 4: list, person highlighted
+  });
   function cleanNm(s) { return GEDCOMParser.cleanName(s); } // V5.45: one rule for every name (parser §3.1)
   function sec(title, inner) { return '<section class="pp-sec"><h3>' + esc(title) + '</h3>' + inner + '</section>'; }
   (function(){
@@ -5156,6 +5963,7 @@ window.TLPops = (function(){
   document.getElementById('ppBody').addEventListener('click', function(e){
     var b = e.target.closest('[data-goto]'); if (!b) return;
     var id = b.getAttribute('data-goto'); if (!P(id)) return;
+    if (listOn) { listPick(id, true); return; }
     go({ focal: id, ov: {} }, true);
   });
 
@@ -5222,14 +6030,24 @@ window.TLPops = (function(){
 
   // ── Navigation (history.pushState, spec §7) ──
   function go(st, push) {
+    if (listOn) exitList();
     state = st;
+    if (G && G.individuals.size > BUSY_FROM) {
+      var b = document.getElementById('tlBusy'); b.hidden = false;
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ if (state === st) goDraw(st, push); b.hidden = true; }); });
+      return;
+    }
+    goDraw(st, push);
+  }
+  var BUSY_FROM = 3000;   // V6.0: smaller files draw in well under 300 ms, so they skip the extra frame
+  function goDraw(st, push) {
     render();
     var h = '#f=' + encodeURIComponent(st.focal);
     if (push) history.pushState({ focal: st.focal, ov: st.ov }, '', h);
     else history.replaceState({ focal: st.focal, ov: st.ov }, '', h);
   }
   window.addEventListener('popstate', function(e){
-    if (G && e.state && e.state.focal && P(e.state.focal)) { state = { focal: e.state.focal, ov: e.state.ov || {} }; render(); }
+    if (G && e.state && e.state.focal && P(e.state.focal)) { if (listOn) exitList(); state = { focal: e.state.focal, ov: e.state.ov || {} }; render(); }
   });
 
   document.getElementById('mainSvg').addEventListener('click', function(e){
@@ -5272,11 +6090,248 @@ window.TLPops = (function(){
     if (!G) return;
     renderRuler();
     if (state) { var sc = document.getElementById('timelineOuter'), sl = sc.scrollLeft, stp = sc.scrollTop, pb = document.getElementById('ppBody').scrollTop;
-      navMode = 'none'; render(); sc.scrollLeft = sl; sc.scrollTop = stp; document.getElementById('ppBody').scrollTop = pb; }
+      navMode = 'none'; render(); sc.scrollLeft = sl; sc.scrollTop = stp; document.getElementById('ppBody').scrollTop = pb;
+      if (listOn) { var sp0 = PL.sel(); if (sp0 && P(sp0)) renderProfile(sp0); else hideProfile(); } }
   });
+
+  // ═══ V6.0 — All people: one list component, used on the start page (after loading) and in List view.
+  // Tree mode groups everyone by family so nobody is left out:
+  //   1. a "top" = a person with no known parents whose partners have no known parents either (married-in
+  //      partners with their own parents are not tops — they are shown as +partner and in their own family);
+  //   2. the top with the most descendants is the main family; each family shows a person, their +partners,
+  //      then the children (Geni style: generation number + indent);
+  //   3. someone already shown with their family in an earlier group is shown once more, without their
+  //      family, with "more in: …";
+  //   4. anyone still not placed → their highest unplaced ancestor starts a new group; people with no links → "Not linked".
+  //   Check: every person in the file is in some group (otherwise a warning line shows).
+  var PL = (function(){
+    var root = null, scroller = null, segBtns = null, warnEl = null, mode = 'tree', data = null, rows = [], shown = 0, open = {}, sel = null, ctx = 'start', BATCH = 400;
+    var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+    function hasParent(id) { var pr = parents(id); return !!(pr && (pr.father || pr.mother)); }
+    function linked(id) { return hasParent(id) || spousesOf(id).length > 0 || childrenOf(id).length > 0; }
+    function build() {
+      var ids = [], isRoot = {}, n = G.individuals.size;
+      G.individuals.forEach(function(p, id){ ids.push(id); });
+      ids.forEach(function(id){ isRoot[id] = !hasParent(id); });
+      var cand = ids.filter(function(id){ return isRoot[id] && linked(id) && spousesOf(id).every(function(x){ return isRoot[x]; }); });
+      cand.sort(function(a, b){ var sa = P(a).sex === 'M' ? 0 : 1, sb = P(b).sex === 'M' ? 0 : 1; return sa - sb; });   // a couple of two tops is named after the man, like Geni
+      var taken = {}, tops = [];
+      cand.forEach(function(id){ if (taken[id]) return; taken[id] = 1; spousesOf(id).forEach(function(x){ taken[x] = 1; }); tops.push(id); });
+      function descCount(id) {
+        var seen = {}, q = [id], c = 0; seen[id] = 1;
+        while (q.length) { var x = q.pop(); c++; spousesOf(x).forEach(function(z){ if (!seen[z]) { seen[z] = 1; c++; } }); childrenOf(x).forEach(function(z){ if (!seen[z]) { seen[z] = 1; q.push(z); } }); }
+        return c;
+      }
+      var size = {}, est = {};
+      tops.forEach(function(id){ var b = by(P(id)); est[id] = b != null ? b : (estBirth(id) != null ? estBirth(id) : 9999); });
+      if (tops.length * n <= 40e6) tops.forEach(function(id){ size[id] = descCount(id); });   // very big files: oldest first instead
+      tops.sort(function(a, b){ return (size[b] || 0) - (size[a] || 0) || est[a] - est[b]; });
+      var expanded = {}, inGroup = {}, groups = [];
+      function mark(g, id) { if (!inGroup[id]) inGroup[id] = g; if (!g.ids[id]) { g.ids[id] = 1; g.n++; } }
+      function walk(g, id, gen, d) {
+        if (expanded[id]) { g.rows.push({ k: 'p', id: id, gen: gen, d: d, stub: expanded[id] }); mark(g, id); return; }
+        expanded[id] = g; mark(g, id);
+        g.rows.push({ k: 'p', id: id, gen: gen, d: d });
+        var loose = [];
+        P(id).fams.forEach(function(fid){
+          var f = G.families.get(fid); if (!f) return;
+          var sp = f.husb === id ? f.wife : f.husb;
+          if (sp && P(sp)) { g.rows.push({ k: 's', id: sp, gen: gen, d: d }); mark(g, sp); }
+          knownFirst(f.children.filter(function(c){ return P(c); })).forEach(function(c){ walk(g, c, gen + 1, d + 1); });
+        });
+      }
+      function group(top) { var g = { top: top, rows: [], ids: {}, n: 0 }; walk(g, top, 1, 0); groups.push(g); }
+      tops.forEach(function(top){ if (!expanded[top]) group(top); });
+      ids.forEach(function(id){
+        if (inGroup[id] || !linked(id)) return;
+        var top = id, seen = {}; seen[id] = 1;
+        for (var guard = 0; guard < 500; guard++) {
+          var pr = parents(top), up = pr ? [pr.father, pr.mother].filter(function(x){ return x && !inGroup[x] && !seen[x]; })[0] : null;
+          if (!up) break; seen[up] = 1; top = up;
+        }
+        group(top);
+      });
+      groups.sort(function(a, b){ return b.n - a.n; });
+      var lone = ids.filter(function(id){ return !inGroup[id]; });
+      if (lone.length) {
+        var lg = { lone: true, rows: [], ids: {}, n: 0 };
+        lone.sort(function(a, b){ return nameOf(P(a)).localeCompare(nameOf(P(b))); }).forEach(function(id){ lg.rows.push({ k: 'p', id: id, gen: 0, d: 0 }); mark(lg, id); });
+        groups.push(lg);
+      }
+      var placed = 0; for (var k in inGroup) placed++;
+      // earliest / latest born (by birth year; uncertain dates use their year as written)
+      var early = null, late = null, eb = 0, lb = 0;
+      ids.forEach(function(id){ var b = by(P(id)); if (b == null) return; if (early == null || b < eb) { early = id; eb = b; } if (late == null || b > lb) { late = id; lb = b; } });
+      return { groups: groups, unplaced: n - placed, early: early, late: late, az: null };
+    }
+    function ensure() { if (!data && G) { data = build(); open = {}; } return data; }
+    function gName(g) { return g.lone ? t('list.notLinked') : t('list.family', { name: nameOf(P(g.top)) }); }
+    function azRows() {
+      if (data.az) return data.az;
+      var ids = []; G.individuals.forEach(function(p, id){ ids.push(id); });
+      var coll = new Intl.Collator(tLang() === 'xx' ? 'en' : tLang(), { sensitivity: 'base' });
+      ids.sort(function(a, b){ var na = P(a).name, nb = P(b).name; if (!na !== !nb) return na ? -1 : 1; return coll.compare(na || '', nb || '') || (by(P(a)) || 0) - (by(P(b)) || 0); });
+      var out = [], last = null;
+      ids.forEach(function(id){
+        var nm = P(id).name, ch = nm ? nm.charAt(0).toLocaleUpperCase() : '';
+        if (nm && !/\p{L}/u.test(ch)) ch = '#';
+        var key = nm ? ch : '\u0000';
+        if (key !== last) { out.push({ k: 'L', ch: nm ? ch : t('list.noName') }); last = key; }
+        out.push({ k: 'p', id: id, gen: 0, d: 0 });
+      });
+      return (data.az = out);
+    }
+    function flat() {
+      if (mode === 'az') return azRows();
+      var out = [];
+      data.groups.forEach(function(g, gi){ out.push({ k: 'g', gi: gi }); if (open[gi]) Array.prototype.push.apply(out, g.rows); });
+      return out;
+    }
+    function rowHtml(r) {
+      if (r.k === 'g') { var g = data.groups[r.gi]; return '<button class="pl-grp" type="button" data-gi="' + r.gi + '" aria-expanded="' + (open[r.gi] ? 'true' : 'false') + '">' + CHEV + '<span class="pl-gname">' + esc(gName(g)) + '</span><span class="pl-gn">' + esc(tn('common.people', g.n)) + '</span></button>'; }
+      if (r.k === 'L') return '<div class="pl-letter">' + esc(r.ch) + '</div>';
+      var p = P(r.id), pl = p.birth && p.birth.place, sp = r.k === 's', gtag = mode === 'tree' && r.gen ? ' pl-gen-' + (r.gen % 2 ? 'odd' : 'even') : '';
+      return '<button class="pl-row' + gtag + (sp ? ' pl-sp' : '') + (r.id === sel ? ' is-sel' : '') + '" type="button" data-id="' + esc(r.id) + '" style="--d:' + (r.d || 0) + '">' +
+        (mode === 'tree' && (r.gen || sp) ? '<span class="pl-gen" aria-hidden="true">' + (sp ? '' : r.gen + '.') + '</span>' : '') +
+        '<span class="pl-dot pl-dot-' + (p.sex === 'F' ? 'f' : 'm') + '"></span><span class="pl-main"><span class="pl-line"><span class="pl-name">' + (sp ? '+' : '') + esc(nameOf(p)) + '</span> <span class="pl-yrs">' + esc(yearsLabel(p)) + '</span>' +
+        (r.stub ? '<span class="pl-see">' + esc(t('list.seeIn', { family: gName(r.stub) })) + '</span>' : '') + '</span>' +
+        (pl ? '<span class="pl-place">' + esc(pl) + '</span>' : '') + '</span></button>';
+    }
+    function more(upto) {
+      var end = Math.min(rows.length, Math.max(shown + BATCH, upto != null ? upto + 60 : 0));
+      if (end <= shown) return;
+      var h = ''; for (var i = shown; i < end; i++) h += rowHtml(rows[i]);
+      scroller.insertAdjacentHTML('beforeend', h); shown = end;
+    }
+    function paint(upto, keepTop) {
+      var top = scroller.scrollTop;
+      rows = flat(); shown = 0; scroller.innerHTML = ''; more(upto);
+      scroller.scrollTop = keepTop ? top : 0;
+    }
+    function head() {
+      root.querySelector('.pl-title').innerHTML = esc(t('list.title')) + ' <span class="pl-count">' + esc(num(G.individuals.size)) + '</span>';
+      segBtns[0].textContent = t('list.tree'); segBtns[1].textContent = t('list.az');
+      segBtns[0].setAttribute('aria-pressed', String(mode === 'tree')); segBtns[1].setAttribute('aria-pressed', String(mode === 'az'));
+      root.querySelector('.pl-seg').setAttribute('aria-label', t('list.switch'));
+      warnEl.hidden = !data.unplaced; if (data.unplaced) warnEl.textContent = t('list.unplaced', { n: data.unplaced });
+    }
+    function num(n) { try { return n.toLocaleString(tLang() === 'xx' ? 'en' : tLang() === 'no' ? 'nb' : tLang()); } catch (_) { return String(n); } }
+    function create() {
+      root = document.createElement('section'); root.className = 'plist';
+      root.innerHTML = '<div class="pl-head"><h2 class="pl-title"></h2><div class="pl-seg" role="group"><button type="button" data-mode="tree"></button><button type="button" data-mode="az"></button></div></div>' +
+        '<p class="pl-warn" hidden></p><div class="pl-scroll"></div>';
+      scroller = root.querySelector('.pl-scroll'); warnEl = root.querySelector('.pl-warn'); segBtns = root.querySelectorAll('.pl-seg button');
+      root.querySelector('.pl-seg').addEventListener('click', function(e){
+        var b = e.target.closest('button[data-mode]'); if (!b || b.getAttribute('data-mode') === mode) return;
+        mode = b.getAttribute('data-mode'); head(); paint(); if (sel) reveal(sel);
+      });
+      scroller.addEventListener('scroll', function(){ if (shown < rows.length && scroller.scrollTop + scroller.clientHeight > scroller.scrollHeight - 900) more(); }, { passive: true });
+      scroller.addEventListener('click', function(e){
+        var g = e.target.closest('.pl-grp');
+        if (g) { var gi = +g.getAttribute('data-gi'); open[gi] = !open[gi]; var at = rows.indexOf(rows.filter(function(r){ return r.k === 'g' && r.gi === gi; })[0]); paint(Math.max(shown, at + BATCH), true); return; }
+        var r = e.target.closest('.pl-row'); if (!r) return;
+        var id = r.getAttribute('data-id'); if (!P(id)) return;
+        if (ctx === 'start') window.TreeLine.show(id, true);   // start page: straight to the timeline, pin set (decision 2026-10-21)
+        else listPick(id, false);
+      });
+    }
+    function highlight() {
+      scroller.querySelectorAll('.pl-row.is-sel').forEach(function(x){ x.classList.remove('is-sel'); });
+      if (sel) scroller.querySelectorAll('.pl-row[data-id="' + (window.CSS && CSS.escape ? CSS.escape(sel) : sel) + '"]').forEach(function(x){ x.classList.add('is-sel'); });
+    }
+    function reveal(id) {
+      var idx = -1;
+      if (mode === 'tree') {
+        var gi = -1, best = null;
+        data.groups.forEach(function(g, i){ if (best === 'p' || !g.ids[id]) return; g.rows.forEach(function(r){ if (r.id !== id) return; if (r.k === 'p' && !r.stub) { if (best !== 'p') { best = 'p'; gi = i; } } else if (best == null) { best = 'o'; gi = i; } }); });
+        if (gi < 0) return;
+        if (!open[gi]) { open[gi] = true; rows = flat(); shown = 0; scroller.innerHTML = ''; }
+        rows = flat();
+        for (var j = 0; j < rows.length; j++) { var r = rows[j]; if (r.id === id && (r.k === 'p' && !r.stub)) { idx = j; break; } }
+        if (idx < 0) for (j = 0; j < rows.length; j++) if (rows[j].id === id) { idx = j; break; }
+      } else {
+        rows = flat();
+        for (var k = 0; k < rows.length; k++) if (rows[k].id === id) { idx = k; break; }
+      }
+      if (idx < 0) return;
+      if (!scroller.children.length) more(idx); else if (idx >= shown) more(idx);
+      highlight();
+      var target = scroller.children[idx];   // rendered rows map 1:1 to rows[0 … shown)
+      if (target) scroller.scrollTop = Math.max(0, target.offsetTop - scroller.clientHeight / 2 + target.offsetHeight);
+    }
+    return {
+      reset: function(){ data = null; sel = null; mode = 'tree'; if (scroller) scroller.innerHTML = ''; rows = []; shown = 0; },
+      range: function(){ return ensure() ? { early: data.early, late: data.late } : {}; },
+      row: function(id){ var m = mode; mode = 'az'; var h = rowHtml({ k: 'p', id: id, gen: 0, d: 0 }); mode = m; return h.replace(' is-sel', ''); },   // V6.1: same look for Earliest / Latest born
+      mount: function(host, c){
+        if (!ensure()) return;
+        ctx = c; if (!root) create();
+        var fresh = root.parentNode !== host || !scroller.children.length;
+        host.appendChild(root); head();
+        if (fresh && !scroller.children.length) paint();
+        highlight();
+      },
+      select: function(id){ sel = id; highlight(); },
+      sel: function(){ return sel; },
+      reveal: function(id){ sel = id; reveal(id); },
+      scrollTop: function(v){ if (!scroller) return 0; if (v != null) scroller.scrollTop = v; return scroller.scrollTop; },
+      relabel: function(){ if (!root || !data) return; data.az = null; head(); var tp = scroller.scrollTop, n = shown; rows = flat(); shown = 0; scroller.innerHTML = ''; more(n); scroller.scrollTop = tp; }
+    };
+  })();
+
+  // ── List view (decisions 2026-10-21) ──
+  // 1 click in list → person picked, profile opens, view stays; pin unchanged
+  // 2 profile ⟶ timeline icon, or "Timeline view" after a pick → that person's timeline, pin set (same as search)
+  // 3 "Timeline view" with no pick → timeline exactly where it was; pin unchanged
+  // 4 timeline profile ⟶ list icon → List view, person highlighted
+  // 5 back in the list → scroll position and pick are kept
+  var listPicked = false, listTop = 0;
+  function setViewBtn() {
+    var b = document.getElementById('viewBtn'), sp = b.querySelector('span[data-i18n]'), k = listOn ? 'view.timeline' : 'view.list';
+    sp.setAttribute('data-i18n', k); sp.textContent = t(k);
+    b.setAttribute('data-i18n-title', k + '.title'); b.title = t(k + '.title');
+    b.classList.toggle('is-list', listOn);
+  }
+  function hideProfile() { document.getElementById('profilePanel').hidden = true; document.body.classList.remove('has-profile', 'profile-collapsed'); ppShown = null; }
+  function listPick(id, reveal) {
+    listPicked = true;
+    if (reveal) PL.reveal(id); else PL.select(id);
+    renderProfile(id);
+  }
+  function enterList(selId) {
+    if (!G) return;
+    listOn = true; listPicked = false;
+    document.body.classList.add('is-listview');
+    var host = document.getElementById('listView'); host.hidden = false;
+    PL.mount(host, 'view'); setViewBtn();
+    if (selId && P(selId)) { PL.reveal(selId); renderProfile(selId); }
+    else { var s0 = PL.sel(); PL.scrollTop(listTop); if (s0 && P(s0)) renderProfile(s0); else hideProfile(); }
+  }
+  function exitList() {
+    listTop = PL.scrollTop(); listOn = false;
+    document.body.classList.remove('is-listview');
+    document.getElementById('listView').hidden = true;
+    setViewBtn();
+  }
+  document.getElementById('viewBtn').addEventListener('click', function(){
+    if (!G || !state) return;
+    if (!listOn) { enterList(null); return; }
+    var s1 = PL.sel();
+    if (listPicked && s1 && P(s1)) { window.TreeLine.show(s1, true); return; }
+    exitList(); renderProfile(state.focal);
+  });
+  document.addEventListener('tl-lang', function(){ PL.relabel(); if (document.getElementById('viewBtn')) setViewBtn(); });
   window.TreeLine = {
-    setData: function(g){ G = g; renderRuler(); },
+    setData: function(g){ G = g; PL.reset(); pinId = null; recent = []; if (listOn) exitList(); listTop = 0; renderRuler(); },
+    range: function(){ return PL.range(); },
+    row: function(id){ return P(id) ? PL.row(id) : ''; },
+    mountStartList: function(host){ PL.mount(host, 'start'); },
+    person: function(id){ var p = P(id); if (!p) return null; var r = rawDate(p, 'BIRT'); return { name: nameOf(p), born: r ? niceDate(r) : (by(p) != null ? String(by(p)) : '') }; },
     show: function(id, pin){ if (pin) pinId = id; go({ focal: id, ov: {} }, true); },
+    // V6.6: notes search
+    notesOf: function(p){ return blocks(p).filter(function(b){ return b.tag === 'NOTE' && b.value && !/^@.+@$/.test(b.value); }).map(function(b){ return String(b.value).replace(/\{geni:[a-z_]+\}\s*/gi, ''); }); },
+    hasPin: function(){ return !!pinId; },
+    noteHit: function(toks){ pendingHit = toks; },
     genFirst: function(){ genFirst = true; },
     scrollToFocalGen: function(){ genFirst = false; requestAnimationFrame(scrollToFocalGen); },   // render (incl. its one re-draw) is done by now
     recent: function(){ var f = state && state.focal; return { pin: pinId, list: recent.filter(function(x){ return x !== f && x !== pinId; }).slice(0, 5) }; }
@@ -5347,6 +6402,7 @@ window.TLPops = (function(){
   // ── Person selector ──────────────────────────────────────────────────────────
   var gedData      = null;
   var searchIndex  = [];
+  var noteIndex    = [], lastPeople = [], lastNotes = [];   // V6.6: notes search
   var selectedId   = null;
   var kbdIdx       = -1;
 
@@ -5406,6 +6462,45 @@ window.TLPops = (function(){
       });
     });
     searchIndex.sort(function(a, b) { return a.name.localeCompare(b.name); });
+    // V6.6: every note split into words; each word kept as written (for the snippet) and normalised (for matching)
+    noteIndex = [];
+    gedData.individuals.forEach(function(indi, id) {
+      TreeLine.notesOf(indi).forEach(function(n){
+        n = n.replace(/\[(https?:\/\/\S+)\s+([^\]]+)\]/g, '$2').replace(/'{2,3}/g, '').replace(/-{4,}/g, ' ');
+        var words = n.split(/\s+/).filter(Boolean);
+        if (!words.length) return;
+        noteIndex.push({ id: id, name: indi.name || t('name.unknown'),
+          birth: indi.birth ? indi.birth.year : null, death: indi.death ? indi.death.year : null,
+          words: words, nw: words.map(function(w){ return norm(w).split(' ').filter(Boolean); }) });
+      });
+    });
+  }
+  // V6.6: notes search — all search words in one note, close together (max 6 words apart); word-start match, no typo tolerance
+  var NOTE_WIN = 6, NOTE_SHOW = 5, PEOPLE_SHOW = 8;   // V6.7: both groups capped, each with "Show all"
+  function searchNotes(q) {
+    var qt = norm(q).split(' ').filter(Boolean);
+    if (!qt.length || qt.join('').length < 3) return [];
+    var seen = {}, out = [];
+    noteIndex.forEach(function(e){
+      if (seen[e.id]) return;
+      var pos = qt.map(function(q){ var r = []; e.nw.forEach(function(sub, i){ if (sub.some(function(x){ return x.indexOf(q) === 0; })) r.push(i); }); return r; });
+      if (pos.some(function(r){ return !r.length; })) return;
+      var all = [].concat.apply([], pos).sort(function(a, b){ return a - b; }), win = null;
+      for (var k = 0; k < all.length && !win; k++) {
+        var a = all[k], picks = [];
+        if (pos.every(function(r){ var p = r.filter(function(i){ return i >= a && i <= a + NOTE_WIN; }); if (p.length) picks.push(p[0]); return p.length; })) win = { a: a, b: Math.max.apply(null, picks), hits: picks };
+      }
+      if (!win) return;
+      seen[e.id] = 1;
+      var from = Math.max(0, win.a - 6), to = Math.min(e.words.length, win.b + 8), sn = '';
+      for (var i = from; i < to; i++) {
+        var hitW = qt.some(function(q){ return e.nw[i].some(function(x){ return x.indexOf(q) === 0; }); }) && i >= win.a && i <= win.b;
+        sn += (i > from ? ' ' : '') + (hitW ? '<b>' + escHtml(e.words[i]) + '</b>' : escHtml(e.words[i]));
+      }
+      out.push({ p: e, snip: (from > 0 ? '… ' : '') + sn + (to < e.words.length ? ' …' : '') });
+    });
+    out.sort(function(a, b){ return (a.p.birth || 9999) - (b.p.birth || 9999) || a.p.name.localeCompare(b.p.name); });
+    return out;
   }
   function tokScore(q, toks, p) {
     if (/^\d{3,4}$/.test(q)) return (String(p.birth) === q || String(p.death) === q) ? 0 : (String(p.birth || '').indexOf(q) === 0 ? 1 : null);
@@ -5437,20 +6532,52 @@ window.TLPops = (function(){
     return res.map(function(r){ return r.p; });
   }
 
-  function renderDropdown(results) {
+  var showAll = { people: false, notes: false };
+  function renderDropdown(results, notes) {
     kbdIdx = -1;
-    if (!results.length) {
+    notes = notes || [];
+    var plim = showAll.people ? results.length : PEOPLE_SHOW;
+    if (!results.length && !notes.length) {
       personDropdown.innerHTML = '<div class="person-no-results">' + escHtml(t('search.noResults')) + '</div>';
     } else {
-      personDropdown.innerHTML = '<div class="person-count">' + escHtml(tn('common.people', results.length)) + '</div>' + results.map(function(p) {
+      personDropdown.innerHTML = (results.length ? '<div class="person-count">' + escHtml(tn('common.people', results.length)) + '</div>' : '') + results.slice(0, plim).map(function(p) {
         var y = p.birth ? (p.birth + (p.death ? '–' + p.death : '')) : '';
         return '<div class="person-option" data-id="' + escHtml(p.id) + '">' +
           '<span class="person-option-name">' + escHtml(p.name) + '</span>' +
           (y ? '<span class="person-option-years">' + y + '</span>' : '') +
           '</div>';
-      }).join('');
+      }).join('') +
+      (results.length > plim ? '<div class="person-option person-more" data-more="people">' + escHtml(t('search.showAll', { n: results.length })) + '</div>' : '') +
+      renderNotes(notes, showAll.notes, !results.length);
     }
     personDropdown.classList.add('open');
+  }
+  // V6.6: second group — people whose notes mention the search words (owner name + years, then a short piece of the note)
+  function renderNotes(notes, all, first) {
+    if (!notes.length) return '';
+    var lim = all ? notes.length : NOTE_SHOW;
+    return '<div class="person-group person-group-notes' + (first ? ' is-first' : '') + '">' + escHtml(t('search.inNotes')) + ' · ' + notes.length + '</div>' +
+      notes.slice(0, lim).map(function(r){
+        var p = r.p, y = p.birth ? (p.birth + (p.death ? '–' + p.death : '')) : '';
+        return '<div class="person-option po-note" data-id="' + escHtml(p.id) + '" data-note="1"><div class="po-note-head">' +
+          '<span class="person-option-name">' + escHtml(p.name) + '</span>' + (y ? '<span class="person-option-years">' + y + '</span>' : '') +
+          '</div><div class="po-snippet">' + r.snip + '</div></div>';
+      }).join('') +
+      (notes.length > lim ? '<div class="person-option person-more" data-more="notes">' + escHtml(t('search.showAll', { n: notes.length })) + '</div>' : '');
+  }
+  // one place for picking a row (mouse + keyboard)
+  function pickOption(opt) {
+    if (opt.dataset.more) {
+      showAll[opt.dataset.more] = true;
+      var keep = personDropdown.scrollTop;
+      renderDropdown(lastPeople, lastNotes); personDropdown.scrollTop = keep; personInput.focus(); return;
+    }
+    if (opt.dataset.note) {   // notes hit: highlight in the profile; pin only when there is none yet (decision 2026-10-21)
+      TreeLine.noteHit(norm(personInput.value).split(' ').filter(Boolean));
+      selectPerson(opt.dataset.id, null, TreeLine.hasPin());
+      return;
+    }
+    selectPerson(opt.dataset.id, opt.querySelector('.person-option-name').textContent, opt.dataset.nopin);
   }
 
   function closeDropdown() {
@@ -5490,7 +6617,9 @@ window.TLPops = (function(){
   personInput.addEventListener('input', function() {
     var q = personInput.value.trim();
     if (!q) { renderRecent(); return; }
-    renderDropdown(searchPersons(q));
+    lastPeople = searchPersons(q); lastNotes = searchNotes(q);
+    showAll.people = showAll.notes = false;
+    renderDropdown(lastPeople, lastNotes);
   });
 
   personInput.addEventListener('keydown', function(e) {
@@ -5503,8 +6632,8 @@ window.TLPops = (function(){
       e.preventDefault();
       kbdIdx = Math.max(kbdIdx - 1, 0);
     } else if (e.key === 'Enter' && kbdIdx >= 0) {
-      var opt = opts[kbdIdx];
-      selectPerson(opt.dataset.id, opt.querySelector('.person-option-name').textContent, opt.dataset.nopin);
+      e.preventDefault();
+      pickOption(opts[kbdIdx]);
       return;
     } else if (e.key === 'Escape') {
       closeDropdown(); return;
@@ -5515,7 +6644,7 @@ window.TLPops = (function(){
 
   personDropdown.addEventListener('mousedown', function(e) {
     var opt = e.target.closest('.person-option');
-    if (opt) selectPerson(opt.dataset.id, opt.querySelector('.person-option-name').textContent, opt.dataset.nopin);
+    if (opt) { if (opt.dataset.more) e.preventDefault(); pickOption(opt); }
   });
 
   document.addEventListener('click', function(e) {
@@ -5525,47 +6654,83 @@ window.TLPops = (function(){
   // V5.37: texts that depend on the loaded state are re-written when the language changes
   var errKey = '', foundShown = false;
   function setFoundCopy() {
-    document.getElementById('emptyCopy').innerHTML = '<strong class="ok">' + escHtml(tn('start.found', gedData.individuals.size)) + '</strong>' + escHtml(t('start.whose'));
+    var r = TreeLine.range(), h = '<strong class="ok">' + escHtml(tn('start.found', gedData.individuals.size)) + '</strong>';
+    function who(key, id) {
+      var row = id && TreeLine.row(id); if (!row) return '';
+      return '<div><dt>' + escHtml(t(key)) + '</dt><dd>' + row + '</dd></div>';
+    }
+    if (r.early) h += '<dl class="found-range">' + who('start.earliest', r.early) + (r.late && r.late !== r.early ? who('start.latest', r.late) : '') + '</dl>';
+    var narrow = tHas('start.whoseBelow');
+    h += '<span class="whose' + (narrow ? ' has-narrow' : '') + '"><span class="whose-wide">' + escHtml(t('start.whose')) + '</span>' + (narrow ? '<span class="whose-narrow">' + escHtml(t('start.whoseBelow')) + '</span>' : '') + '</span>';
+    document.getElementById('emptyCopy').innerHTML = h;
   }
+  // earliest / latest name → that person's timeline (pin set, like a search pick)
+  document.getElementById('emptyCopy').addEventListener('click', function(e){
+    var b = e.target.closest('.pl-row[data-id]'); if (b && gedData) selectPerson(b.getAttribute('data-id'));
+  });
   document.addEventListener('tl-lang', function(){
     var errEl = document.getElementById('loadError'); if (errKey && errEl.textContent) errEl.textContent = t(errKey);
-    if (gedData) { personInput.placeholder = tn('search.placeholder', gedData.individuals.size); if (foundShown) setFoundCopy(); }
+    if (gedData) { personInput.placeholder = t('search.placeholderNotes'); if (foundShown) setFoundCopy(); }
     closeDropdown();
   });
   async function loadGedcom(file) {
     var errEl = document.getElementById('loadError');
     errEl.textContent = ''; errKey = '';
     if (!/\.ged$/i.test(file.name)) { errEl.textContent = t('err.notGed'); errKey = 'err.notGed'; return; }
-    await loadText(function(){ return file.text(); }, null);
+    document.getElementById('sampleBadge').hidden = true;
+    await loadText(function(){ return file.text(); }, null, file.name);
+  }
+  // V6.0 loading status (decision 2026-10-21): < 300 ms nothing · > 300 ms "Reading file…" + file name · > 5,000 people + progress bar with %
+  var BIG_FILE = 5000, statusTimer = null, statusBig = false;
+  function statusShow(name) {
+    document.getElementById('loadTitle').textContent = t(tHas('start.reading') ? 'start.reading' : 'start.parsing');
+    document.getElementById('loadFile').textContent = name || '';
+    document.getElementById('loadStatus').hidden = false;
+    document.getElementById('emptyState').classList.add('is-reading');
+  }
+  function statusPct(pct) {
+    if (!statusBig) return;
+    var n = Math.round(pct * 100);
+    document.getElementById('loadFill').style.width = n + '%';
+    document.getElementById('loadPct').textContent = t('start.readPct', { n: n });
+  }
+  function statusHide() {
+    clearTimeout(statusTimer); statusTimer = null; statusBig = false;
+    document.getElementById('loadStatus').hidden = true; document.getElementById('loadBar').hidden = true; document.getElementById('loadPct').hidden = true;
+    document.getElementById('loadFill').style.width = '0';
+    document.getElementById('emptyState').classList.remove('is-reading');
   }
 
   // V5.28: one load path for a user's file and the built-in sample family (same parser, same checks)
-  async function loadText(getText, focalPick) {
-    var errEl = document.getElementById('loadError');
-    loadGedBtn.textContent = t('start.parsing');
-    loadGedBtn.disabled = true; sampleBtn.disabled = true;
-    showProgress(0);
+  async function loadText(getText, focalPick, fileName) {
+    var errEl = document.getElementById('loadError'), another = document.getElementById('startAnotherBtn');
+    loadGedBtn.disabled = true; sampleBtn.disabled = true; another.disabled = true;
+    statusHide();
+    statusTimer = setTimeout(function(){ statusShow(fileName); }, 300);
     try {
       var text = await getText();
-      gedData = await GEDCOMParser.parseAsync(text, function(pct) { showProgress(pct); });
+      var indi = (text.match(/^0 @[^@\r\n]+@ INDI\b/gm) || []).length;
+      if (indi > BIG_FILE) { statusBig = true; clearTimeout(statusTimer); statusShow(fileName); document.getElementById('loadBar').hidden = false; document.getElementById('loadPct').hidden = false; statusPct(0); }
+      gedData = await GEDCOMParser.parseAsync(text, statusPct);
       if (!gedData.individuals.size) throw new Error('No individuals found');
     } catch (err) {
-      hideProgress();
-      loadGedBtn.textContent = t('start.choose');
-      loadGedBtn.disabled = false; sampleBtn.disabled = false;
+      statusHide();
+      loadGedBtn.disabled = false; sampleBtn.disabled = false; another.disabled = false;
       errEl.textContent = t('err.cannotRead'); errKey = 'err.cannotRead';
       return;
     }
-    hideProgress();
+    statusHide();
+    sampleBtn.disabled = false; another.disabled = false; loadGedBtn.disabled = false;
     buildSearchIndex();
     TreeLine.setData(gedData);
     var impText = text;   // V5.44: import check runs once the start page / timeline is in place
     personInput.disabled = false;
-    personInput.placeholder = tn('search.placeholder', gedData.individuals.size);
+    personInput.placeholder = t('search.placeholderNotes');
     if (focalPick) { var fid = focalPick(gedData); if (fid) { document.getElementById('personSelectorWrap').classList.remove('pre-render'); TreeLine.genFirst(); selectPerson(fid); TreeLine.scrollToFocalGen(); ImpCheck.run(impText, gedData); return; } }
     if (!document.getElementById('mainSvg').childNodes.length) {
       setFoundCopy(); foundShown = true;
       document.getElementById('emptyState').classList.add('is-loaded');
+      TreeLine.mountStartList(document.getElementById('startListHost'));
       var psw = document.getElementById('personSelectorWrap');
       document.getElementById('searchSlot').appendChild(psw);
       psw.classList.remove('pre-render');
@@ -5587,13 +6752,15 @@ window.TLPops = (function(){
     });
   });
 
-  loadGedBtn.addEventListener('click', function() { gedFileInput.click(); });
+  loadGedBtn.addEventListener('click', function() { gedFileInput.value = ''; gedFileInput.click(); });
+  // V6.0: "Open another file" under the search on the start page (wrong file → pick again right here)
+  document.getElementById('startAnotherBtn').addEventListener('click', function() { gedFileInput.value = ''; gedFileInput.click(); });
   // V4.3: back to start screen; full reset clears the loaded tree from memory
   document.getElementById('openAnotherBtn').addEventListener('click', function() { location.href = location.pathname + location.search; });
   // V5.36: logo / name → start page (same as "Open another file"); on the start page it does nothing
   document.getElementById('homeLink').addEventListener('click', function(e) {
     e.preventDefault();
-    if (!document.body.classList.contains('is-start')) location.href = location.pathname + location.search;
+    if (!document.body.classList.contains('is-start') || document.getElementById('emptyState').classList.contains('is-loaded')) location.href = location.pathname + location.search;
   });
   gedFileInput.addEventListener('change', function(e) {
     var file = e.target.files[0];
@@ -5663,11 +6830,18 @@ window.TLPops = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V5.45', date: [2026, 10, 16],   // y, m, d — shown in the UI language (I18N date.dmy)
-  // Rule (spec §2.1c): ONLY the changes that came with THIS version. Replace — never append — on every release.
+  version: 'V6.9', date: [2026, 10, 21],   // y, m, d — shown in the UI language (I18N date.dmy)
+  // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
   notes: [
-    'Only one menu or panel opens at a time: opening one closes the other (About, Find gaps, Menu, search list, Export, file warning).'
+    "This is a summary of the biggest changes since V5.45.",
+    "All people: after you open a file, a list shows everyone in it, grouped by family or sorted A–Z. Pick a person to open their timeline.",
+    "List view: the header switches between List view and Timeline view. In the profile, one button shows the person in the list or on the timeline.",
+    "Start page after loading: the number of people, the earliest and latest born person, the search, Open another file, and the help “Are people missing?” (why an export can hold fewer people).",
+    "Search also finds people mentioned in notes. Name results and notes results are shown in two groups. Click a notes result to see the note with the words highlighted.",
+    "Big files: a status with progress is shown while a big file is read and drawn.",
+    "One clear design: one style for each button level and one hover colour everywhere.",
+    "All new texts are available in all 12 languages."
   ],
   repoUrl: 'https://github.com/hseeberg/TreeLine', issuesUrl: 'https://github.com/hseeberg/TreeLine/issues',
   authorName: 'Hannes Seeberg', authorUrl: 'https://www.linkedin.com/in/seeberg/'
@@ -5680,9 +6854,9 @@ var RELEASE = {
     var d = RELEASE.date;
     pop.innerHTML = '<div class="ab-head"><div><div class="ab-title">TreeLine ' + e(RELEASE.version) + '</div><div class="ab-date">' + e(t('about.released', { date: tDate(d[0], d[1], d[2]) })) + '</div></div><button class="ab-close" aria-label="' + e(t('about.close')) + '">✕</button></div>' +
       '<div class="ab-label">' + e(t('about.new')) + '</div><ul class="ab-notes">' + RELEASE.notes.map(function(n){ return '<li>' + e(n) + '</li>'; }).join('') + '</ul>' +
-      '<div class="ab-gh"><p>' + tRich('about.gh1', { link: { html: A(RELEASE.repoUrl, t('about.gh1link')) } }) + '</p>' +
-      '<p>' + tRich('about.gh2', { link: { html: A(RELEASE.issuesUrl, t('about.gh2link')) } }) + '</p></div>' +
-      '<p class="ab-author">' + tRich('about.author', { name: { html: A(RELEASE.authorUrl, RELEASE.authorName) } }) + '</p>';
+      '<div class="ab-gh"><div class="ab-label ab-label-top">TreeLine</div><ul class="ab-notes ab-links"><li>' + tRich('about.gh1', { link: { html: A(RELEASE.repoUrl, t('about.gh1link')) } }) + '</li>' +
+      '<li>' + tRich('about.gh2', { link: { html: A(RELEASE.issuesUrl, t('about.gh2link')) } }) + '</li>' +
+      '<li>' + tRich('about.author', { name: { html: A(RELEASE.authorUrl, RELEASE.authorName) } }) + '</li></ul></div>';
   }
   build(); document.addEventListener('tl-lang', build);
   function open(o){ pop.hidden = !o; btn.setAttribute('aria-expanded', String(o)); }
@@ -5781,7 +6955,21 @@ window.ImpCheck = (function(){
 (function(){
   var sel = document.getElementById('langSel'), note = document.getElementById('langNote');
   document.getElementById('settingsMenu').addEventListener('click', function(e){ if (e.target.closest('.menu-lang')) e.stopPropagation(); });
-  function copyHelp() { var src = document.querySelector('#gedcomHelp .gh-body'); if (src) document.getElementById('menuHelpBody').innerHTML = src.innerHTML; }   // V5.24: same GEDCOM help as on the start page
+  function copyHelp() {
+    var src = document.querySelector('#gedcomHelp .gh-body'); if (src) document.getElementById('menuHelpBody').innerHTML = src.innerHTML;   // V5.24: same GEDCOM help as on the start page
+    var m = missHtml(); document.getElementById('missingBody').innerHTML = m; document.getElementById('menuMissingBody').innerHTML = m;   // V6.0
+  }
+  // V6.0 — why people can be missing from a file (source: Geni help, export page)
+  function missHtml() {
+    function E(x) { return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function li(keys) { return '<ul>' + keys.map(function(k){ return '<li>' + E(t(k)) + '</li>'; }).join('') + '</ul>'; }
+    return '<p>' + E(t('miss.intro')) + '</p>' +
+      '<section class="miss-sec"><h4>' + E(t('miss.geni')) + '</h4>' +
+        '<h5>' + E(t('miss.geniTypeH')) + '</h5><p>' + E(t('miss.geniType')) + '</p>' + li(['miss.blood', 'miss.forest', 'miss.oneWay']) +
+        '<h5>' + E(t('miss.geniSizeH')) + '</h5>' + li(['miss.basic', 'miss.pro']) +
+        '<p class="miss-src"><a href="https://help.geni.com/hc/en-us/articles/229705167-How-can-I-export-my-GEDCOM" target="_blank" rel="noopener noreferrer">' + E(t('miss.source')) + '</a></p></section>' +
+      '<section class="miss-sec"><h4>' + E(t('miss.others')) + '</h4>' + li(['miss.oneTree', 'miss.owner']) + '</section>';
+  }
   document.addEventListener('tl-lang', function(e){
     var l = e.detail; note.hidden = tReady(l); document.documentElement.setAttribute('data-tl-lang', l); copyHelp();
     if (l === 'xx' && !sel.querySelector('option[value="xx"]')) sel.insertAdjacentHTML('beforeend', '<option value="xx">Pseudo (test)</option>');
@@ -5791,7 +6979,7 @@ window.ImpCheck = (function(){
   // V5.37: header buttons fall back to icon-only when the texts do not fit (checked on every size or text change)
   (function(){
     var hd = document.querySelector('.header'), hr = hd.querySelector('.header-right');
-    var btns = ['gapsBtn', 'settingsBtn'].map(function(id){ return document.getElementById(id); });
+    var btns = ['viewBtn', 'gapsBtn', 'settingsBtn'].map(function(id){ return document.getElementById(id); });
     // V5.44: the search hint must stay readable too — if it would be cut, the buttons give way first
     var cv = document.createElement('canvas').getContext('2d');
     function phFits() {
@@ -5805,7 +6993,7 @@ window.ImpCheck = (function(){
       hd.classList.toggle('hdr-compact', tight);
       btns.forEach(function(b){ var sp = b.querySelector('span[data-i18n]'); if (!sp) return;
         b.setAttribute('aria-label', sp.textContent);
-        if (tight) b.title = sp.textContent; else b.removeAttribute('title'); });
+        if (tight) b.title = sp.textContent; else if (b.id === 'viewBtn') b.title = t(b.getAttribute('data-i18n-title')); else b.removeAttribute('title'); });
     }
     if (window.ResizeObserver) new ResizeObserver(function(){ requestAnimationFrame(fit); }).observe(hd);
     window.addEventListener('resize', fit); document.addEventListener('tl-lang', function(){ requestAnimationFrame(fit); });
