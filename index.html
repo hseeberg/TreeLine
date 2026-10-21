@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.15</title>
+<title>TreeLine V6.16</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -1406,6 +1406,59 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
 .pl-seg button[aria-pressed="true"] { box-shadow: none; }
 /* start page: Earliest / Latest born = name + years only */
 .found-range .pl-place { display: none; }
+
+/* ═══ V6.16 — phone and tablet (spec §21) ═══ */
+/* Root cause of the blank timeline (V5.7 rule, line "body.has-profile { padding-right: 380px }") came AFTER the ≤1100 px overlay rule and cancelled it. */
+@media (max-width: 1100px) {
+  body.has-profile, body.has-profile.profile-collapsed { padding-right: 24px; }
+  body.has-profile .header, body.has-profile.profile-collapsed .header { width: calc(100% + 48px); margin-right: -24px; }
+}
+@supports (height: 100dvh) {
+  body:not(.is-start) { height: 100dvh; }
+  body:not(.is-start) .timeline-outer { height: calc(100dvh - 72px); }
+}
+@media (max-width: 700px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
+  /* one pane at a time: the profile is a full-screen layer; closing it shows the timeline */
+  .profile-panel { position: fixed; top: 0 !important; left: 0; right: 0; bottom: 0; width: 100% !important; max-width: none; height: 100dvh; z-index: 90; box-shadow: none; }
+  body.profile-collapsed .profile-panel, body.profile-collapsed .profile-panel[hidden] { display: none; }
+  .pp-toggle { top: 10px; left: 10px; transform: none; width: 44px; height: 44px; z-index: 3; }
+  .pp-toggle svg { width: 20px; height: 20px; transform: rotate(180deg); }
+  .pp-scroll { padding: 68px 20px 40px; }
+}
+@media (max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
+  /* header: row 1 = logo + About + Menu; row 2 = search + icon buttons. Never wider than the screen (spec §21.3) */
+  .header { flex-wrap: wrap; gap: 8px 8px; padding: 10px 16px; min-height: 0; justify-content: flex-start; }
+  .header-right { display: contents; }
+  .header-titles { order: 1; flex: 0 1 auto; min-width: 0; }
+  .header .settings-wrap { order: 2; margin-left: auto; }
+  .header .pin-back { order: 3; }
+  .header .person-selector-wrap { order: 4; flex: 1 1 160px; width: auto; min-width: 0; }
+  .header .view-btn { order: 5; }
+  .header .gaps-wrap { order: 6; }
+  .header #openAnotherBtn, .header-focal, .sample-badge { display: none !important; }   /* logo link = same as Open another file (§2.1b) */
+  .header .settings-btn:not(.pin-back) { min-width: 48px; min-height: 48px; }
+  body:not(.is-start) { display: flex; flex-direction: column; }
+  body:not(.is-start) .timeline-outer { height: auto; flex: 1 1 0; min-height: 0; }
+  .gaps-pop { position: fixed; left: 8px; right: 8px; top: auto; width: auto; max-height: 80dvh; overflow: auto; }
+}
+@media (pointer: coarse) { .pp-toggle { width: 44px; height: 44px; } .about-btn { min-height: 44px; } .header .settings-btn { min-height: 48px; } .gaps-pop { max-width: calc(100vw - 16px); } }
+@media (max-width: 900px) { .empty-state .person-selector-wrap { width: 100%; max-width: none; } }   /* start page: search = same width as the buttons under it (§21.3) */
+@media (pointer: coarse) { .drop-hint { display: none; } }   /* a phone or tablet has no drag-and-drop */
+@media (max-width: 900px) { .about-pop { position: fixed; left: 8px; right: 8px; top: 64px; width: auto; max-height: calc(100dvh - 80px); overflow: auto; } }
+@media (pointer: coarse) { .ab-close { width: 44px; height: 44px; } .pl-seg button { min-height: 44px; } }
+@media (min-width: 701px) and (max-width: 900px) { .header-titles { flex: 1 1 calc(100% - 130px); } .header .person-selector-wrap { flex: 1 1 240px; } }
+@media (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
+  /* landscape phone: one-row header, as low as possible (spec §21.3 rule 9) */
+  .header { flex-wrap: nowrap; padding-top: 4px; padding-bottom: 4px; gap: 8px; }
+  .header-titles { flex: 0 1 auto; }
+  .header .settings-wrap { order: 7; margin-left: 0; }
+  .header .person-selector-wrap { flex: 1 1 200px; }
+  .header .person-input { height: 48px; }
+}
+/* V6.16: pop-ups never run off the screen — they scroll inside (same as the Menu). Seen on a 1280 px tablet: About and Find gaps could not be scrolled. */
+.about-pop, .gaps-pop { max-height: calc(100vh - 120px); max-height: calc(100dvh - 120px); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+@media (max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) { .gaps-pop { max-height: calc(100vh - 150px); max-height: calc(100dvh - 150px); } }
+.ab-since { margin: 6px 0 0; font-size: 15px; color: var(--header-sub); }
 </style>
 </head>
 <body class="is-start">
@@ -1417,7 +1470,7 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
 
 <div class="header">
   <div class="header-titles">
-    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V6.15</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
+    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V6.16</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
     <div class="about-pop" id="aboutPop" role="dialog" aria-label="About TreeLine" data-i18n-aria="about.aria" hidden></div>
   </div>
   <div class="header-focal" id="headerFocal"></div>
@@ -4853,8 +4906,8 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 
   // V5.45: names are shown exactly as written in the file. Only the two GEDCOM surname delimiters are removed:
   // opening "/" = at start or after a space, followed by a non-space; closing "/" = the last "/" that is
-  // followed by a space or the end ("Mare /Talviste/Tömp/" → "Mare Talviste/Tömp"; "Ene Mall //" → "Ene Mall").
-  // Every other "/" ("Els / Elts", "Anne/Anna", "Rabasaare / Wina / Laeva Mart") and all brackets are name content — kept.
+  // followed by a space or the end ("Mary /Hale/Moore/" → "Mary Hale/Moore"; "Edith //" → "Edith").
+  // Every other "/" ("Ann / Anne", "Anne/Anna", "Brandt / Hale / Moore Mary") and all brackets are name content — kept.
   function cleanName(s) {
     s = String(s || '');
     let o = -1, c = -1;
@@ -4917,7 +4970,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     }
     indi.raw=rec.children; // V5.0: full record kept for the profile panel
     { // V6.13: Geni export builds GIVN as (First + Birth Surname) minus the last word, so a multi-word birth surname leaks into GIVN:
-      // First "Liine" + Birth "Akilina Seeberg" -> GIVN "Liine Akilina". Remove the leaked words when GIVN ends with them.
+      // First "Mary" + Birth "Anne Ashworth" -> GIVN "Mary Anne". Remove the leaked words when GIVN ends with them.
       const gw=(indi.givn||'').trim().split(/\s+/).filter(Boolean), sw=(indi.surn||'').trim().split(/\s+/).filter(Boolean);
       if (sw.length>1&&gw.length>=sw.length) {
         const lead=sw.slice(0,-1), tail=gw.slice(gw.length-lead.length);
@@ -4925,12 +4978,12 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       }
     }
     indi.birthName=indi.name; indi.nameShort=indi.name;
-    if (indi.marnm) { // V6.12: show the later name first, the birth surname in brackets (Geni style): Jaan Seljamäe (Nikolai Seeberg)
+    if (indi.marnm) { // V6.12: show the later name first, the birth surname in brackets (Geni style): Mary Brandt (Ashworth)
       const raw=String((rec.children.find(c=>c.level===1&&c.tag==='NAME')||{}).value||'');
       const o=raw.search(/(^|\s)\/\S/), op=o<0?-1:raw.indexOf('/',o), cl=raw.lastIndexOf('/'); // same delimiter rule as cleanName: first opening, last closing slash
-      const giv=(indi.givn||(op>=0?raw.slice(0,op):raw.split(' ')[0])).replace(/\s+/g,' ').trim(); // GIVN/SURN tags win: names may hold extra slashes (Mare /Talviste/Tömp/)
+      const giv=(indi.givn||(op>=0?raw.slice(0,op):raw.split(' ')[0])).replace(/\s+/g,' ').trim(); // GIVN/SURN tags win: names may hold extra slashes (Mary /Hale/Moore/)
       const sur=(indi.surn||(op>=0&&cl>op?raw.slice(op+1,cl):'')).replace(/\s+/g,' ').trim();
-      const key=x=>x.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,''); // "Terk / Tärk" = "Terk (Tärk)" → no brackets
+      const key=x=>x.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,''); // "Hale / Hail" = "Hale (Hail)" → no brackets
       if (sur&&key(indi.marnm)!==key(sur)) {
         indi.nameShort=[giv,indi.marnm].filter(Boolean).join(' ');
         indi.name=indi.nameShort+' ('+sur+')';
@@ -5556,6 +5609,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   var pendingHit = null;   // V6.6: search words to highlight in the next profile's notes
   var ppShown = null, listOn = false;   // V6.0: person in the profile panel; List view on/off
   var ppCollapsed = false;
+  var NARROW = window.matchMedia('(max-width: 700px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse)'), wantProfile = false, ppPush = false, ppPushed = false;   // V6.16: phone = one pane at a time (spec §21.3)
   // V5.33 — Pin: one pinned person per session. Search pick (and the file's opening person) pins automatically;
   // clicking around the tree does not. Recent = people shown as focal, newest first.
   var pinId = null, recent = [];
@@ -5652,7 +5706,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   function geniSlug(p) {
     var raw = ''; (p.raw || []).some(function(t){ if (t.level === 1 && t.tag === 'NAME') { raw = t.value || ''; return true; } return false; });
     var m = /^(.*?)\/(.*?)\//.exec(raw), given = m ? m[1].trim() : raw.trim(), sur = m ? m[2].trim() : '';
-    var slug = [given, sur].filter(Boolean).join(' ').replace(/[^\p{L}\p{N}\s-]/gu, ' ').trim().replace(/\s+/g, '-');   // V5.31: every given name + surname, e.g. Tõnis-Anton-Seeberg-Seep
+    var slug = [given, sur].filter(Boolean).join(' ').replace(/[^\p{L}\p{N}\s-]/gu, ' ').trim().replace(/\s+/g, '-');   // V5.31: every given name + surname, e.g. Edward-Albert-Brandt
     return encodeURIComponent(slug || 'person').replace(/%2D/g, '-');
   }
   function providerLinks(p) {
@@ -5883,6 +5937,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   function renderProfile(id) {
     var panel = document.getElementById('profilePanel');
     if (PROFILE_MODE !== 'D' || !id || !P(id)) { panel.hidden = true; document.body.classList.remove('has-profile', 'profile-collapsed'); return; }
+    var wasOpen = document.body.classList.contains('has-profile') && !document.body.classList.contains('profile-collapsed');
     renderGapsBar(id);
     ppShown = id;
     var p = P(id), bl = blocks(p), h = '', miss = gaps && gaps.ids.indexOf(id) >= 0 ? missingOf(id) : [];
@@ -5967,6 +6022,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     body.innerHTML = h; body.scrollTop = 0;
     body.classList.remove('pp-in'); void body.offsetWidth; body.classList.add('pp-in');
     panel.hidden = false;
+    if (NARROW.matches) { ppCollapsed = !(wantProfile || wasOpen); if (!ppCollapsed && !wasOpen) ppPush = true; wantProfile = false; }
     document.body.classList.add('has-profile');
     document.body.classList.toggle('profile-collapsed', ppCollapsed);
     document.getElementById('ppToggle').setAttribute('aria-expanded', String(!ppCollapsed));
@@ -6015,6 +6071,29 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     window.addEventListener('resize', place);
     place();
   })();
+  (function(){   // V6.16: the header can change height (two rows on narrow screens) → keep the profile panel top under it
+    var panel = document.getElementById('profilePanel'), hd = document.querySelector('.header');
+    if (window.ResizeObserver) new ResizeObserver(function(){ panel.style.top = Math.max(0, hd.getBoundingClientRect().bottom) + 'px'; }).observe(hd);
+  })();
+  // V6.16 phone: close = back to the timeline (button, Esc, system Back); tap on a name or a list row opens the profile
+  function closeProfileNarrow() {
+    if (ppPushed) { ppPushed = false; history.back(); return; }
+    ppCollapsed = true; document.body.classList.add('profile-collapsed');
+  }
+  document.getElementById('ppToggle').addEventListener('click', function(e){
+    if (!NARROW.matches) return;
+    e.stopImmediatePropagation(); closeProfileNarrow();
+  }, true);
+  document.getElementById('mainSvg').addEventListener('click', function(e){ if (e.target.closest('[data-act]')) wantProfile = true; }, true);
+  document.getElementById('listView').addEventListener('click', function(e){ if (e.target.closest('.pl-row')) wantProfile = true; }, true);
+  window.addEventListener('popstate', function(){
+    if (!NARROW.matches) return;
+    ppPushed = false;
+    if (document.body.classList.contains('has-profile') && !document.body.classList.contains('profile-collapsed')) { ppCollapsed = true; document.body.classList.add('profile-collapsed'); }
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && NARROW.matches && document.body.classList.contains('has-profile') && !document.body.classList.contains('profile-collapsed')) closeProfileNarrow();
+  });
   document.getElementById('ppToggle').addEventListener('click', function(){
     ppCollapsed = !ppCollapsed;
     document.body.classList.toggle('profile-collapsed', ppCollapsed);
@@ -6109,6 +6188,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var h = '#f=' + encodeURIComponent(st.focal);
     if (push) history.pushState({ focal: st.focal, ov: st.ov }, '', h);
     else history.replaceState({ focal: st.focal, ov: st.ov }, '', h);
+    if (ppPush) { ppPush = false; if (!ppPushed) { history.pushState({ focal: st.focal, ov: st.ov, pp: 1 }, '', h); ppPushed = true; } }
   }
   window.addEventListener('popstate', function(e){
     if (G && e.state && e.state.focal && P(e.state.focal)) { if (listOn) exitList(); state = { focal: e.state.focal, ov: e.state.ov || {} }; render(); }
@@ -6894,22 +6974,16 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.15', date: [2026, 10, 21],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.16', since: 'V5.45', date: [2026, 10, 21],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
   notes: [
-    "This is a summary of the biggest changes since V5.45.",
-    "Names after marriage or a name change: the later name is shown first, the birth surname in brackets, e.g. Maria Kuuli (Seeberg), the same way as on Geni. Search finds both names.",
-    "Half-sibling groups have a shorter label: the shared parent + the other parent.",
-    "Sex unknown: a person with no sex in the file is shown in grey, not in blue. “What do the bars mean?” explains it.",
+    "Phone and tablet: the timeline now works on small screens. On a phone, tap a name to open the profile full screen; the arrow button brings you back to the timeline.",
     "All people: after you open a file, a list shows everyone in it, grouped by family or sorted A–Z. Pick a person to open their timeline.",
-    "List view: the header switches between List view and Timeline view. In the profile, one button shows the person in the list or on the timeline.",
-    "Start page after loading: the number of people, the earliest and latest born person, the search, Open another file, and the help “Are people missing?” (why an export can hold fewer people).",
-    "Search also finds people mentioned in notes. Name results and notes results are shown in two groups. Click a notes result to see the note with the words highlighted.",
-    "Big files: a status with progress is shown while a big file is read and drawn.",
-    "One clear design: one style for each button level and one hover colour everywhere.",
-    "All new texts are available in all 12 languages."
+    "Search also finds people mentioned in notes, with the search words highlighted in the note.",
+    "Names after marriage or a name change: the later name first, the birth surname in brackets, e.g. Mary Brandt (Ashworth), the same way as on Geni. Search finds both names.",
+    "Start page after loading: the number of people, the earliest and latest born, and help for “Are people missing?” (why an export can hold fewer people)."
   ],
   repoUrl: 'https://github.com/hseeberg/TreeLine', issuesUrl: 'https://github.com/hseeberg/TreeLine/issues',
   authorName: 'Hannes Seeberg', authorUrl: 'https://www.linkedin.com/in/seeberg/'
@@ -6921,7 +6995,7 @@ var RELEASE = {
   function build() {
     var d = RELEASE.date;
     pop.innerHTML = '<div class="ab-head"><div><div class="ab-title">TreeLine ' + e(RELEASE.version) + '</div><div class="ab-date">' + e(t('about.released', { date: tDate(d[0], d[1], d[2]) })) + '</div></div><button class="ab-close" aria-label="' + e(t('about.close')) + '">✕</button></div>' +
-      '<div class="ab-label">' + e(t('about.new')) + '</div><ul class="ab-notes">' + RELEASE.notes.map(function(n){ return '<li>' + e(n) + '</li>'; }).join('') + '</ul>' +
+      '<div class="ab-label">' + e(t('about.new')) + '</div><p class="ab-since">This is a summary of the biggest changes since ' + e(RELEASE.since) + '.</p><ul class="ab-notes">' + RELEASE.notes.map(function(n){ return '<li>' + e(n) + '</li>'; }).join('') + '</ul>' +
       '<div class="ab-gh"><div class="ab-label ab-label-top">TreeLine</div><ul class="ab-notes ab-links"><li>' + tRich('about.gh1', { link: { html: A(RELEASE.repoUrl, t('about.gh1link')) } }) + '</li>' +
       '<li>' + tRich('about.gh2', { link: { html: A(RELEASE.issuesUrl, t('about.gh2link')) } }) + '</li>' +
       '<li>' + tRich('about.author', { name: { html: A(RELEASE.authorUrl, RELEASE.authorName) } }) + '</li></ul></div>';
