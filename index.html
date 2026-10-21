@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.11</title>
+<title>TreeLine V6.13</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -1396,7 +1396,7 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
 
 <div class="header">
   <div class="header-titles">
-    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V6.11</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
+    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V6.13</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
     <div class="about-pop" id="aboutPop" role="dialog" aria-label="About TreeLine" data-i18n-aria="about.aria" hidden></div>
   </div>
   <div class="header-focal" id="headerFocal"></div>
@@ -4877,7 +4877,7 @@ window.TLPops = (function(){
         else if (tag==='FAMS') indi.fams.push(value);
       } else if (level===2) {
         subCtx=tag;
-        if (ctx==='NAME'&&nameN===1) { if (tag==='GIVN') indi.givn=value; else if (tag==='SURN') indi.surn=value; }
+        if (ctx==='NAME'&&nameN===1) { if (tag==='GIVN') indi.givn=value; else if (tag==='SURN') indi.surn=value; else if (tag==='_MARNM'&&value&&!indi.marnm) indi.marnm=value.trim(); } // V6.12: _MARNM = name after marriage or name change
         else if (ctx==='BIRT'&&indi.birth) {
           if (tag==='DATE') { const d=parseDateStr(value); if (d) Object.assign(indi.birth,d); }
           else if (tag==='PLAC'&&value) indi.birth.place=value;
@@ -4893,6 +4893,26 @@ window.TLPops = (function(){
       }
     }
     indi.raw=rec.children; // V5.0: full record kept for the profile panel
+    { // V6.13: Geni export builds GIVN as (First + Birth Surname) minus the last word, so a multi-word birth surname leaks into GIVN:
+      // First "Liine" + Birth "Akilina Seeberg" -> GIVN "Liine Akilina". Remove the leaked words when GIVN ends with them.
+      const gw=(indi.givn||'').trim().split(/\s+/).filter(Boolean), sw=(indi.surn||'').trim().split(/\s+/).filter(Boolean);
+      if (sw.length>1&&gw.length>=sw.length) {
+        const lead=sw.slice(0,-1), tail=gw.slice(gw.length-lead.length);
+        if (lead.every((w,i)=>w===tail[i])) { indi.givn=gw.slice(0,gw.length-lead.length).join(' '); indi.name=[indi.givn,indi.surn.trim()].join(' '); }
+      }
+    }
+    indi.birthName=indi.name; indi.nameShort=indi.name;
+    if (indi.marnm) { // V6.12: show the later name first, the birth surname in brackets (Geni style): Jaan Seljamäe (Nikolai Seeberg)
+      const raw=String((rec.children.find(c=>c.level===1&&c.tag==='NAME')||{}).value||'');
+      const o=raw.search(/(^|\s)\/\S/), op=o<0?-1:raw.indexOf('/',o), cl=raw.lastIndexOf('/'); // same delimiter rule as cleanName: first opening, last closing slash
+      const giv=(indi.givn||(op>=0?raw.slice(0,op):raw.split(' ')[0])).replace(/\s+/g,' ').trim(); // GIVN/SURN tags win: names may hold extra slashes (Mare /Talviste/Tömp/)
+      const sur=(indi.surn||(op>=0&&cl>op?raw.slice(op+1,cl):'')).replace(/\s+/g,' ').trim();
+      const key=x=>x.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,''); // "Terk / Tärk" = "Terk (Tärk)" → no brackets
+      if (sur&&key(indi.marnm)!==key(sur)) {
+        indi.nameShort=[giv,indi.marnm].filter(Boolean).join(' ');
+        indi.name=indi.nameShort+' ('+sur+')';
+      }
+    }
     if (indi.birth&&indi.birth.year===null&&!indi.birth.isRange&&!indi.birth.place) indi.birth=null;
     indi.deceased=!!indi.death; // DEAT present even without date → not living
     if (indi.death&&indi.death.year===null&&!indi.death.place) indi.death=null;
@@ -5855,8 +5875,8 @@ window.TLPops = (function(){
     var aka = [];
     bl.forEach(function(b){
       if (b.tag !== 'NAME') return;
-      var n = cleanNm(b.value); if (n && n !== nameOf(p) && aka.indexOf(n) < 0) aka.push(n);
-      (b.all || []).forEach(function(kv){ if ((kv[0] === 'NICK' || kv[0] === '_MARNM') && kv[1] && aka.indexOf(kv[1]) < 0 && kv[1] !== nameOf(p)) aka.push(kv[1]); });
+      var n = cleanNm(b.value); if (n && n !== nameOf(p) && n !== p.nameShort && n !== p.birthName && aka.indexOf(n) < 0) aka.push(n);   // V6.12: the display name already holds the birth name and the later name
+      (b.all || []).forEach(function(kv){ if (kv[0] === '_MARNM' && kv[1] === p.marnm) return; if ((kv[0] === 'NICK' || kv[0] === '_MARNM') && kv[1] && aka.indexOf(kv[1]) < 0 && kv[1] !== nameOf(p)) aka.push(kv[1]); });
     });
     aliases(p).names.forEach(function(n){ if (n && n !== nameOf(p) && aka.indexOf(n) < 0) aka.push(n); });
     if (aka.length) h += '<div class="pp-aka"><span>' + esc(t('pp.aka')) + '</span> ' + aka.map(esc).join(', ') + '</div>';
@@ -6474,7 +6494,7 @@ window.TLPops = (function(){
     searchIndex = [];
     gedData.individuals.forEach(function(indi, id) {
       if (!indi.name) return;
-      var toks = norm(indi.name + ' ' + (indi.givn || '') + ' ' + (indi.surn || '')).split(' ').filter(Boolean);
+      var toks = norm(indi.name + ' ' + (indi.birthName || '') + ' ' + (indi.givn || '') + ' ' + (indi.surn || '')).split(' ').filter(Boolean);
       searchIndex.push({
         id: id, name: indi.name,
         birth: indi.birth ? indi.birth.year : null,
@@ -6851,12 +6871,13 @@ window.TLPops = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.11', date: [2026, 10, 21],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.13', date: [2026, 10, 21],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
   notes: [
     "This is a summary of the biggest changes since V5.45.",
+    "Names after marriage or a name change: the later name is shown first, the birth surname in brackets, e.g. Maria Kuuli (Seeberg), the same way as on Geni. Search finds both names.",
     "All people: after you open a file, a list shows everyone in it, grouped by family or sorted A–Z. Pick a person to open their timeline.",
     "List view: the header switches between List view and Timeline view. In the profile, one button shows the person in the list or on the timeline.",
     "Start page after loading: the number of people, the earliest and latest born person, the search, Open another file, and the help “Are people missing?” (why an export can hold fewer people).",
