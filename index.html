@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.13</title>
+<title>TreeLine V6.14</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -1006,7 +1006,8 @@ body.profile-collapsed .gaps-bar { display: none; }
 
 /* ═══ V5.20 — B1: frame (border only) around each partner's children, name set into the top border */
 .grp-frame { fill: none; fill-opacity: 1; stroke: var(--panel-border); stroke-width: 1.2; }
-.grp-label { font-size: 14px; font-weight: 700; fill: var(--header-title); paint-order: stroke; stroke: var(--band-bg); stroke-width: 12px; stroke-linejoin: round; cursor: pointer; }
+.grp-label { font-size: 14px; font-weight: 700; fill: var(--header-title); cursor: pointer; }
+.grp-label.grp-halo, .grp-label.grp-halo * { fill: none; stroke: var(--band-bg); stroke-width: 12px; stroke-linejoin: round; pointer-events: none; }   /* V6.14: halo in its own copy under the text — a per-tspan stroke painted over the end of the previous word */
 .grp-label:hover { text-decoration: underline; }
 .grp-unknown { font-weight: 400; fill: var(--header-sub); cursor: default; }
 .grp-unknown:hover { text-decoration: none; }
@@ -1396,7 +1397,7 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
 
 <div class="header">
   <div class="header-titles">
-    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V6.13</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
+    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V6.14</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
     <div class="about-pop" id="aboutPop" role="dialog" aria-label="About TreeLine" data-i18n-aria="about.aria" hidden></div>
   </div>
   <div class="header-focal" id="headerFocal"></div>
@@ -1679,7 +1680,7 @@ I18N.en = {
   'tl.today': 'Today',                                              // pill at the end of the year axis, very short
   'tl.with': 'with {name}',                                         // label on a partner group frame
   'tl.otherUnknown': 'other parent unknown',                        // label on a group frame
-  'tl.half': 'Half-siblings of {person} · {parent}’s children with {other}',   // label on a half-sibling frame
+  'tl.half': 'Half-siblings · {parent} + {other}',   // V6.14: short label (the person is the one in focus)
   'tl.unknownPartner': 'an unknown partner',                        // replaces {other} above
   'tl.married': 'Married {year}',                                   // tooltip on the marriage dot
   'tip.lived': { one: 'lived {n} year', other: 'lived {n} years' }, // bar tooltip (first letter is made upper case)
@@ -1946,7 +1947,7 @@ I18N.et = {
   'tl.today': 'Täna',
   'tl.with': 'Teine vanem: {name}',
   'tl.otherUnknown': 'teine vanem teadmata',
-  'tl.half': 'Poolõed-vennad: {person} · ühine vanem {parent}, teine vanem {other}',
+  'tl.half': 'Poolõed-vennad · {parent} + {other}',   // V6.14: short label (the person is the one in focus)
   'tl.unknownPartner': 'teadmata',
   'tl.married': 'Abiellus {year}',
   'tip.lived': { one: 'elas {n} aasta', other: 'elas {n} aastat' },
@@ -2144,7 +2145,7 @@ I18N.de = {
   'help.desktop': 'Desktop-Programme (Family Tree Maker, RootsMagic, MacFamilyTree, Gramps): suchen Sie File → Export → GEDCOM.',
   'tl.earliest': 'Früheste Bekannte', 'tl.childrenOf': 'Kinder von {name}', 'tl.grandchildrenOf': 'Enkel von {name}', 'tl.descendantsOf': 'Nachkommen von {name}',
   'tl.generation': '{n}. Generation', 'tl.today': 'Heute', 'tl.with': 'mit {name}', 'tl.otherUnknown': 'anderer Elternteil unbekannt',
-  'tl.half': 'Halbgeschwister von {person} · gemeinsamer Elternteil {parent}, anderer Elternteil {other}',
+  'tl.half': 'Halbgeschwister · {parent} + {other}',   // V6.14: short label (the person is the one in focus)
   'tl.unknownPartner': 'unbekannt', 'tl.married': 'Heirat {year}',
   'tip.lived': { one: 'lebte {n} Jahr', other: 'lebte {n} Jahre' }, 'tip.livedAbout': { one: 'lebte etwa {n} Jahr', other: 'lebte etwa {n} Jahre' },
   'tip.livedRange': 'lebte {a}–{b} Jahre', 'tip.livedUnder': 'lebte weniger als {n} Jahre',
@@ -2306,7 +2307,7 @@ I18N.fi = {
   'help.desktop': 'Tietokoneohjelmat (Family Tree Maker, RootsMagic, MacFamilyTree, Gramps): etsi File → Export → GEDCOM.',
   'tl.earliest': 'Varhaisimmat tunnetut', 'tl.childrenOf': 'Lapset: {name}', 'tl.grandchildrenOf': 'Lastenlapset: {name}', 'tl.descendantsOf': 'Jälkeläiset: {name}',
   'tl.generation': '{n}. sukupolvi', 'tl.today': 'Tänään', 'tl.with': 'Toinen vanhempi: {name}', 'tl.otherUnknown': 'toinen vanhempi tuntematon',
-  'tl.half': 'Sisarpuolet: {person} · yhteinen vanhempi {parent}, toinen vanhempi {other}',
+  'tl.half': 'Sisarpuolet · {parent} + {other}',   // V6.14: short label (the person is the one in focus)
   'tl.unknownPartner': 'tuntematon', 'tl.married': 'Avioitui {year}',
   'tip.lived': { one: 'eli {n} vuoden', other: 'eli {n} vuotta' }, 'tip.livedAbout': { one: 'eli noin {n} vuoden', other: 'eli noin {n} vuotta' },
   'tip.livedRange': 'eli {a}–{b} vuotta', 'tip.livedUnder': 'eli alle {n} vuotta',
@@ -2470,7 +2471,7 @@ I18N.sv = {
   'tl.earliest': 'Tidigast kända', 'tl.childrenOf': 'Barn till {name}', 'tl.grandchildrenOf': 'Barnbarn till {name}', 'tl.descendantsOf': 'Ättlingar till {name}',
   'tl.generation': { one: '{n}:a generationen', other: '{n}:e generationen' }, 'tl.today': 'I dag', 'tl.with': 'med {name}',
   'tl.otherUnknown': 'andra föräldern okänd',
-  'tl.half': 'Halvsyskon till {person} · gemensam förälder {parent}, andra föräldern {other}',
+  'tl.half': 'Halvsyskon · {parent} + {other}',   // V6.14: short label (the person is the one in focus)
   'tl.unknownPartner': 'okänd', 'tl.married': 'Gifte sig {year}',
   'tip.lived': 'levde {n} år', 'tip.livedAbout': 'levde omkring {n} år', 'tip.livedRange': 'levde {a}–{b} år', 'tip.livedUnder': 'levde under {n} år',
   'tip.livedAtLeast': 'levde minst {n} år', 'tip.age': 'ålder {n}', 'tip.ageAbout': 'ålder omkring {n}',
@@ -2693,7 +2694,7 @@ I18N.es = {
   'tl.today': "Hoy",
   'tl.with': "con {name}",
   'tl.otherUnknown': "otro progenitor desconocido",
-  'tl.half': "Medios hermanos de {person} · progenitor común {parent}, otro progenitor {other}",
+  'tl.half': 'Medios hermanos · {parent} + {other}',   // V6.14: short label (the person is the one in focus)
   'tl.unknownPartner': "desconocido",
   'tl.married': "Matrimonio: {year}",
   'tip.lived': {"one": "vivió {n} año", "other": "vivió {n} años"},
@@ -3005,7 +3006,7 @@ I18N.fr = {
   'tl.today': "Aujourd’hui",
   'tl.with': "Autre parent : {name}",
   'tl.otherUnknown': "autre parent inconnu",
-  'tl.half': "Demi-frères et sœurs : {person} · parent commun {parent}, autre parent {other}",
+  'tl.half': 'Demi-frères et sœurs · {parent} + {other}',   // V6.14: short label (the person is the one in focus)
   'tl.unknownPartner': "inconnu",
   'tl.married': "Mariage {year}",
   'tip.lived': {"one": "a vécu {n} an", "other": "a vécu {n} ans"},
@@ -3317,7 +3318,7 @@ I18N.nl = {
   'tl.today': "Vandaag",
   'tl.with': "met {name}",
   'tl.otherUnknown': "andere ouder onbekend",
-  'tl.half': "Halfbroers en -zussen van {person} · gemeenschappelijke ouder {parent}, andere ouder {other}",
+  'tl.half': 'Halfbroers en -zussen · {parent} + {other}',   // V6.14: short label (the person is the one in focus)
   'tl.unknownPartner': "onbekend",
   'tl.married': "Getrouwd {year}",
   'tip.lived': "werd {n} jaar",
@@ -3629,7 +3630,7 @@ I18N.lv = {
   'tl.today': "Šodien",
   'tl.with': "Otrs vecāks: {name}",
   'tl.otherUnknown': "otrs vecāks nav zināms",
-  'tl.half': "Pusbrāļi un pusmāsas: {person} · kopīgais vecāks {parent}, otrs vecāks {other}",
+  'tl.half': 'Pusbrāļi un pusmāsas · {parent} + {other}',   // V6.14: short label (the person is the one in focus)
   'tl.unknownPartner': "nav zināms",
   'tl.married': "Laulība: {year}",
   'tip.lived': {"zero": "nodzīvoja {n} gadu", "one": "nodzīvoja {n} gadu", "other": "nodzīvoja {n} gadus"},
@@ -3941,7 +3942,7 @@ I18N.lt = {
   'tl.today': "Šiandien",
   'tl.with': "Kitas iš tėvų: {name}",
   'tl.otherUnknown': "kitas iš tėvų nežinomas",
-  'tl.half': "Broliai ir seserys per vieną iš tėvų: {person} · bendras iš tėvų {parent}, kitas iš tėvų {other}",
+  'tl.half': 'Broliai ir seserys per vieną iš tėvų · {parent} + {other}',   // V6.14: short label (the person is the one in focus)
   'tl.unknownPartner': "nežinomas",
   'tl.married': "Santuoka: {year}",
   'tip.lived': {"one": "gyveno {n} metus", "few": "gyveno {n} metus", "many": "gyveno {n} metų", "other": "gyveno {n} metų"},
@@ -4253,7 +4254,7 @@ I18N.no = {
   'tl.today': "I dag",
   'tl.with': "med {name}",
   'tl.otherUnknown': "den andre forelderen ukjent",
-  'tl.half': "Halvsøsken av {person} · felles forelder {parent}, den andre forelderen {other}",
+  'tl.half': 'Halvsøsken · {parent} + {other}',   // V6.14: short label (the person is the one in focus)
   'tl.unknownPartner': "ukjent",
   'tl.married': "Giftet seg {year}",
   'tip.lived': "levde {n} år",
@@ -4565,7 +4566,7 @@ I18N.da = {
   'tl.today': "I dag",
   'tl.with': "med {name}",
   'tl.otherUnknown': "den anden forælder ukendt",
-  'tl.half': "Halvsøskende til {person} · fælles forælder {parent}, den anden forælder {other}",
+  'tl.half': 'Halvsøskende · {parent} + {other}',   // V6.14: short label (the person is the one in focus)
   'tl.unknownPartner': "ukendt",
   'tl.married': "Gift {year}",
   'tip.lived': "levede {n} år",
@@ -5319,7 +5320,7 @@ window.TLPops = (function(){
         var fx = Math.max(BAND_X + 10, (bandMin < 1e9 ? bandMin : TODAY_X - 400) - 20), fw = TODAY_X - 10 - fx;
         grps.forEach(function(g){
           hl.push('<rect class="grp-frame" x="' + f1(fx) + '" y="' + f1(g.top) + '" width="' + f1(fw) + '" height="' + f1(g.bot - g.top) + '" rx="10"/>');
-          layer3.push(g.lbl.replace('__X__', f1(fx + 18)).replace('__Y__', f1(g.top + 5)));   // V5.21: name at the left end of the top border — keeps connector lines unbroken
+          var gl = g.lbl.replace('__X__', f1(fx + 18)).replace('__Y__', f1(g.top + 5)); layer3.push(gl.replace('class="grp-label', 'aria-hidden="true" class="grp-label grp-halo').replace(/ data-act="[^"]*"/, ''), gl);   // V6.14: halo copy first, then the text   // V5.21: name at the left end of the top border — keeps connector lines unbroken
         });
       }
       band.rows.forEach(function(id){
@@ -6871,13 +6872,14 @@ window.TLPops = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.13', date: [2026, 10, 21],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.14', date: [2026, 10, 21],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
   notes: [
     "This is a summary of the biggest changes since V5.45.",
     "Names after marriage or a name change: the later name is shown first, the birth surname in brackets, e.g. Maria Kuuli (Seeberg), the same way as on Geni. Search finds both names.",
+    "Half-sibling groups have a shorter label: the shared parent + the other parent.",
     "All people: after you open a file, a list shows everyone in it, grouped by family or sorted A–Z. Pick a person to open their timeline.",
     "List view: the header switches between List view and Timeline view. In the profile, one button shows the person in the list or on the timeline.",
     "Start page after loading: the number of people, the earliest and latest born person, the search, Open another file, and the help “Are people missing?” (why an export can hold fewer people).",
