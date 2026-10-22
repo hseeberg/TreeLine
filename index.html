@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.21</title>
+<title>TreeLine V6.22</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -6812,7 +6812,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       (results.length > plim ? '<div class="person-option person-more" data-more="people">' + escHtml(t('search.showAll', { n: results.length })) + '</div>' : '') +
       renderNotes(notes, showAll.notes, !results.length);
     }
-    personDropdown.classList.add('open');
+    personDropdown.classList.add('open'); placeDropdown();
   }
   // V6.6: second group — people whose notes mention the search words (owner name + years, then a short piece of the note)
   function renderNotes(notes, all, first) {
@@ -6842,6 +6842,18 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     selectPerson(opt.dataset.id, opt.querySelector('.person-option-name').textContent, opt.dataset.nopin);
   }
 
+  // V6.22: on the start card the search sits inside a scrolling column (.hero-copy) that cut the result list off.
+  // There the list is drawn 'fixed' over everything, glued under the search field; in the header it stays as before.
+  function placeDropdown() {
+    var dd = personDropdown, st = dd.style;
+    if (!dd.classList.contains('open') || !dd.closest('.empty-state')) { st.position = st.zIndex = st.left = st.top = st.bottom = st.width = st.maxHeight = st.right = ''; return; }
+    var r = dd.parentNode.getBoundingClientRect(), below = window.innerHeight - r.bottom - 22, hb = document.querySelector('.header').getBoundingClientRect().bottom, above = r.top - Math.max(0, hb) - 18;   // upward list stops under the header
+    st.position = 'fixed'; st.zIndex = '120'; st.left = r.left + 'px'; st.width = r.width + 'px'; st.right = 'auto';
+    if (below >= 240 || below >= above) { st.top = (r.bottom + 6) + 'px'; st.bottom = 'auto'; st.maxHeight = Math.min(640, below) + 'px'; }
+    else { st.top = 'auto'; st.bottom = (window.innerHeight - r.top + 6) + 'px'; st.maxHeight = Math.min(640, above) + 'px'; }   // little room below → opens upward
+  }
+  window.addEventListener('scroll', function(){ if (personDropdown.classList.contains('open')) placeDropdown(); }, true);
+  window.addEventListener('resize', function(){ if (personDropdown.classList.contains('open')) placeDropdown(); });
   function closeDropdown() {
     personDropdown.classList.remove('open');
     kbdIdx = -1;
@@ -6870,7 +6882,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     if (!h) { closeDropdown(); return; }
     kbdIdx = -1;
     personDropdown.innerHTML = h;
-    personDropdown.classList.add('open');
+    personDropdown.classList.add('open'); placeDropdown();
   }
   var PIN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>';
   personInput.addEventListener('focus', function(){ if (!personInput.value.trim()) renderRecent(); });
@@ -7092,7 +7104,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.21', since: 'V5.45', date: [2026, 10, 22],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.22', since: 'V5.45', date: [2026, 10, 22],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
