@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.16</title>
+<title>TreeLine V6.20</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -1459,6 +1459,70 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
 .about-pop, .gaps-pop { max-height: calc(100vh - 120px); max-height: calc(100dvh - 120px); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 @media (max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) { .gaps-pop { max-height: calc(100vh - 150px); max-height: calc(100dvh - 150px); } }
 .ab-since { margin: 6px 0 0; font-size: 15px; color: var(--header-sub); }
+
+/* ═══ V6.17 ═══ */
+/* Profile + Find gaps controls: one height for every button (‹ › List Export × Pin List/Timeline Open on …) */
+.gb-btn, .gb-list, .gb-close, .gb-exp, .pp-actions .pp-pin, .pp-actions .pp-ext { height: 44px; min-height: 44px; box-sizing: border-box; }
+.gb-btn, .gb-close { min-width: 44px; }
+.pp-actions .pp-pin { width: 44px; }
+.pin-back:disabled { opacity: 0.4; cursor: default; }
+body.is-start .header .pin-back { display: none; }
+.about-btn { align-items: center; }
+.about-btn .about-lbl { font-size: 15px; }
+/* Narrow screens (≤900 px, landscape phone): width decides the header, not the pointer type → desktop Chrome and phone Chrome look the same.
+   Icon-only buttons always (no text ↔ icon flip = no jumping). Timeline view: row 1 = logo · About · List view · Menu; row 2 = Pin · Search · Find gaps.
+   Start page and loaded start page: one row = logo · About · Menu. */
+@media (max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
+  .header { column-gap: 8px; row-gap: 4px; }
+  .header .settings-btn > span[data-i18n] { display: none !important; }
+  .header .settings-btn, .header.hdr-compact .settings-btn:not(#openAnotherBtn) { width: 48px; min-width: 48px; height: 48px; min-height: 48px; padding: 0; justify-content: center; }
+  .header .header-titles { order: 1; margin-right: auto; }
+  .header .view-btn { order: 2; }
+  .header .settings-wrap { order: 3; margin-left: 0; }
+  body:not(.is-start) .header::after { content: ""; order: 4; flex: 0 0 100%; height: 0; }
+  .header .pin-back { order: 5; }
+  .header .person-selector-wrap { order: 6; flex: 1 1 0; min-width: 0; width: auto; }
+  .header .gaps-wrap { order: 7; }
+  .header .person-input { height: 48px; }
+}
+@media (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
+  body:not(.is-start) .header::after { display: none; }
+  .header .pin-back { order: 2; } .header .person-selector-wrap { order: 3; } .header .gaps-wrap { order: 4; } .header .view-btn { order: 5; } .header .settings-wrap { order: 6; }
+  .header .header-titles { margin-right: 0; }
+}
+/* Phone: timeline and List view run from the left screen edge to the right one; the scroll bar sits at the very right edge */
+@media (max-width: 700px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
+  body:not(.is-start), body.has-profile:not(.is-start), body.has-profile.profile-collapsed:not(.is-start) { padding-left: 0; padding-right: 0; }
+  body:not(.is-start) .header, body.has-profile:not(.is-start) .header, body.has-profile.profile-collapsed:not(.is-start) .header { width: 100%; margin-left: 0; margin-right: 0; }
+  body:not(.is-start) .timeline-outer { width: 100%; max-width: none; margin: 0; }
+  body:not(.is-start) .list-view { padding: 0; }
+  body:not(.is-start) .list-view .plist { max-width: none; margin: 0; border-radius: 0; border-left: 0; border-right: 0; }
+}
+
+/* ═══ V6.20 ═══ */
+/* Desktop header: logo + About left · List view, Pin, Search, Find gaps in the middle of the screen · Open another file + Menu right */
+.header-end { display: flex; align-items: center; gap: 12px; }
+@media (min-width: 901px) {
+  .header { gap: 12px; justify-content: center; }
+  .header-right { display: contents; }
+  .header .header-titles { order: 1; flex: 1 1 0; min-width: var(--side-w, max-content); }
+  .header .view-btn { order: 2; }
+  .header .pin-back { order: 3; }
+  .header .person-selector-wrap { order: 4; }
+  .header .gaps-wrap { order: 5; }
+  .header .header-end { order: 6; flex: 1 1 0; min-width: var(--side-w, max-content); justify-content: flex-end; }
+  .header.side-measure .header-titles, .header.side-measure .header-end { flex: 0 0 auto; min-width: 0; }
+}
+@media (max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
+  .header-end { display: contents; }
+}
+@media (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
+  .header .header-titles { flex: 0 1 auto; min-width: 0; }
+  .header .person-selector-wrap { flex: 1 1 200px; }
+}
+/* Are people missing?: each service section in a rounded box, same as the GEDCOM help list */
+.miss-sec { margin-top: 12px; padding: 11px 14px; border: 1px solid var(--panel-border); border-radius: 12px; border-top: 1px solid var(--panel-border); }
+.menu-help-body .miss-sec { padding: 9px 12px; }
 </style>
 </head>
 <body class="is-start">
@@ -1470,7 +1534,7 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
 
 <div class="header">
   <div class="header-titles">
-    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="version-tag">V6.16</span><span class="about-sep">·</span><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
+    <h1><a class="home-link" id="homeLink" href="./" title="Back to the start page" data-i18n-title="hdr.home.title"><svg class="logo-mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5" style="fill:var(--male-primary)"/><rect x="9" y="13" width="19" height="5" rx="2.5" style="fill:var(--female-primary)"/><rect x="5" y="20" width="14" height="5" rx="2.5" style="fill:var(--male-primary)" opacity="0.45"/></svg><span id="pageTitle">TreeLine</span></a><button class="about-btn" id="aboutBtn" aria-haspopup="dialog" aria-expanded="false"><span class="about-lbl" data-i18n="hdr.about">About</span></button><span class="sample-badge" id="sampleBadge" hidden data-i18n="hdr.sampleBadge">Sample data</span><button class="imp-badge" id="impBadge" type="button" hidden aria-haspopup="dialog" aria-expanded="false" title="Problems found in this file – show" aria-label="Problems found in this file – show" data-i18n-title="imp.badge" data-i18n-aria="imp.badge">⚠</button></h1>
     <div class="about-pop" id="aboutPop" role="dialog" aria-label="About TreeLine" data-i18n-aria="about.aria" hidden></div>
   </div>
   <div class="header-focal" id="headerFocal"></div>
@@ -1495,10 +1559,10 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
         <button class="load-ged-btn gp-show" id="gpShow" disabled>Select what is missing</button>
       </div>
     </div>
-    <button class="settings-btn open-another pre-render" id="openAnotherBtn" title="Close this tree and open a different GEDCOM file" data-i18n-title="hdr.openAnother.title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 17v-6"/><path d="M9 14l3-3 3 3"/></svg><span data-i18n="hdr.openAnother">Open another file</span></button>
+    <div class="header-end"><button class="settings-btn open-another pre-render" id="openAnotherBtn" title="Close this tree and open a different GEDCOM file" data-i18n-title="hdr.openAnother.title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 17v-6"/><path d="M9 14l3-3 3 3"/></svg><span data-i18n="hdr.openAnother">Open another file</span></button>
     <div class="settings-wrap">
       <button class="settings-btn menu-btn" id="settingsBtn" aria-haspopup="true" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
         <span data-i18n="menu.btn">Menu</span>
       </button>
       <div class="settings-menu" id="settingsMenu" role="menu">
@@ -1515,6 +1579,7 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
         <button class="theme-option" data-theme="dark"><span class="dot"></span><span data-i18n="menu.dark">Dark mode</span></button>
         <button class="theme-option active" data-theme="light"><span class="dot"></span><span data-i18n="menu.light">Light mode</span></button>
       </div>
+    </div>
     </div>
   </div>
 </div>
@@ -1597,6 +1662,7 @@ I18N.en = {
   'search.placeholderNotes': "Search names and notes…",   // search field once a file is loaded
   'search.inNotes': "Mentioned in notes",   // group heading: people whose notes contain the search words
   'search.showAll': "Show all ({n})",   // last row of that group; {n} = all hits
+  'tl.descendants': { one: '{n} descendant', other: '{n} descendants' },   // V6.19: grey count after the selected person's descendant headings (spouses not counted)
   'common.people': { one: '{n} person', other: '{n} people' },      // counts: search list, Find gaps
   'name.unknown': 'Unknown',                                        // person without a name in the file
   // ── Find gaps (popover) ──
@@ -1869,6 +1935,7 @@ I18N.et = {
   'search.placeholderNotes': "Otsi nimest või märkmetest…",
   'search.inNotes': "Mainitud märkmetes",
   'search.showAll': "Näita kõiki ({n})",
+  'tl.descendants': { one: '{n} järeltulija', other: '{n} järeltulijat' },
   'common.people': { one: '{n} inimene', other: '{n} inimest' },
   'name.unknown': 'Tundmatu',
   'gaps.btn': 'Leia lüngad',
@@ -2162,6 +2229,7 @@ I18N.de = {
   'miss.owner': "Bei Ancestry kann nur der Eigentümer eines Stammbaums ihn exportieren. Bitten Sie den Eigentümer um die Datei.",
   'miss.source': "Geni-Hilfe: How can I export my GEDCOM?",
   'about.project': "Das Projekt",
+  'tl.descendants': { one: '{n} Nachkomme', other: '{n} Nachkommen' },
   'common.people': { one: '{n} Person', other: '{n} Personen' }, 'name.unknown': 'Unbekannt',
   'gaps.btn': 'Lücken finden', 'gaps.title': 'Personen finden, bei denen fehlt…',
   'gaps.crit.bdate': 'Geburtsdatum', 'gaps.crit.ddate': 'Sterbedatum', 'gaps.crit.bplace': 'Geburtsort', 'gaps.crit.dplace': 'Sterbeort',
@@ -2325,6 +2393,7 @@ I18N.fi = {
   'miss.owner': "Ancestryssä vain puun omistaja voi viedä sen. Pyydä tiedosto omistajalta.",
   'miss.source': "Genin ohje: How can I export my GEDCOM?",
   'about.project': "Projekti",
+  'tl.descendants': { one: '{n} jälkeläinen', other: '{n} jälkeläistä' },
   'common.people': { one: '{n} henkilö', other: '{n} henkilöä' }, 'name.unknown': 'Tuntematon',
   'gaps.btn': 'Etsi puutteet', 'gaps.title': 'Etsi henkilöt, joilta puuttuu…',
   'gaps.crit.bdate': 'Syntymäaika', 'gaps.crit.ddate': 'Kuolinaika', 'gaps.crit.bplace': 'Syntymäpaikka', 'gaps.crit.dplace': 'Kuolinpaikka',
@@ -2488,6 +2557,7 @@ I18N.sv = {
   'miss.owner': "På Ancestry kan bara trädets ägare exportera det. Be ägaren om filen.",
   'miss.source': "Genis hjälp: How can I export my GEDCOM?",
   'about.project': "Projektet",
+  'tl.descendants': { one: '{n} ättling', other: '{n} ättlingar' },
   'common.people': { one: '{n} person', other: '{n} personer' }, 'name.unknown': 'Okänd',
   'gaps.btn': 'Hitta luckor', 'gaps.title': 'Hitta personer som saknar…',
   'gaps.crit.bdate': 'Födelsedatum', 'gaps.crit.ddate': 'Dödsdatum', 'gaps.crit.bplace': 'Födelseort', 'gaps.crit.dplace': 'Dödsort',
@@ -2655,6 +2725,7 @@ I18N.es = {
   'miss.owner': "En Ancestry, solo el propietario de un árbol puede exportarlo. Pida el archivo al propietario.",
   'miss.source': "Ayuda de Geni: How can I export my GEDCOM?",
   'about.project': "El proyecto",
+  'tl.descendants': { one: '{n} descendiente', other: '{n} descendientes' },
   'common.people': {"one": "{n} persona", "other": "{n} personas"},
   'name.unknown': "Desconocido",
   'gaps.btn': "Buscar lagunas",
@@ -2967,6 +3038,7 @@ I18N.fr = {
   'miss.owner': "Sur Ancestry, seul le propriétaire d’un arbre peut l’exporter. Demandez le fichier au propriétaire.",
   'miss.source': "Aide Geni : How can I export my GEDCOM?",
   'about.project': "Le projet",
+  'tl.descendants': { one: '{n} descendant', other: '{n} descendants' },
   'common.people': {"one": "{n} personne", "other": "{n} personnes"},
   'name.unknown': "Inconnu",
   'gaps.btn': "Trouver les lacunes",
@@ -3279,6 +3351,7 @@ I18N.nl = {
   'miss.owner': "Bij Ancestry kan alleen de eigenaar een stamboom exporteren. Vraag de eigenaar om het bestand.",
   'miss.source': "Geni-hulp: How can I export my GEDCOM?",
   'about.project': "Het project",
+  'tl.descendants': { one: '{n} afstammeling', other: '{n} afstammelingen' },
   'common.people': {"one": "{n} persoon", "other": "{n} personen"},
   'name.unknown': "Onbekend",
   'gaps.btn': "Hiaten zoeken",
@@ -3591,6 +3664,7 @@ I18N.lv = {
   'miss.owner': "Ancestry koku var eksportēt tikai tā īpašnieks. Palūdziet failu īpašniekam.",
   'miss.source': "Geni palīdzība: How can I export my GEDCOM?",
   'about.project': "Projekts",
+  'tl.descendants': { zero: '{n} pēcteču', one: '{n} pēctecis', other: '{n} pēcteči' },
   'common.people': {"zero": "{n} cilvēku", "one": "{n} cilvēks", "other": "{n} cilvēki"},
   'name.unknown': "Nezināms",
   'gaps.btn': "Atrast robus",
@@ -3903,6 +3977,7 @@ I18N.lt = {
   'miss.owner': "Ancestry medį gali eksportuoti tik jo savininkas. Paprašykite failo savininko.",
   'miss.source': "Geni pagalba: How can I export my GEDCOM?",
   'about.project': "Projektas",
+  'tl.descendants': { one: '{n} palikuonis', few: '{n} palikuonys', many: '{n} palikuonio', other: '{n} palikuonių' },
   'common.people': {"one": "{n} asmuo", "few": "{n} asmenys", "many": "{n} asmens", "other": "{n} asmenų"},
   'name.unknown': "Nežinomas",
   'gaps.btn': "Rasti spragas",
@@ -4215,6 +4290,7 @@ I18N.no = {
   'miss.owner': "På Ancestry kan bare eieren av et tre eksportere det. Be eieren om filen.",
   'miss.source': "Geni-hjelp: How can I export my GEDCOM?",
   'about.project': "Prosjektet",
+  'tl.descendants': { one: '{n} etterkommer', other: '{n} etterkommere' },
   'common.people': {"one": "{n} person", "other": "{n} personer"},
   'name.unknown': "Ukjent",
   'gaps.btn': "Finn hull",
@@ -4527,6 +4603,7 @@ I18N.da = {
   'miss.owner': "På Ancestry kan kun ejeren af et træ eksportere det. Bed ejeren om filen.",
   'miss.source': "Geni-hjælp: How can I export my GEDCOM?",
   'about.project': "Projektet",
+  'tl.descendants': { one: '{n} efterkommer', other: '{n} efterkommere' },
   'common.people': {"one": "{n} person", "other": "{n} personer"},
   'name.unknown': "Ukendt",
   'gaps.btn': "Find huller",
@@ -5336,6 +5413,12 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     bandTops = [];
     var nGen = 0;
     function ordinal(n) { return tOrd('tl.generation', n); }
+    // V6.19 (all devices): no "Nth generation" — the number in the circle already says it.
+    // Ancestor bands: heading only. The selected person's descendant bands: heading + how many people are in that band (children, grandchildren, …).
+    function genTail(band) {
+      if (band.kind !== 'desc') return '';
+      return tn('tl.descendants', band.rows.filter(function(r){ return typeof r !== 'object'; }).length);
+    }
 
     // Ancestor + focal bands, top → down
     for (var k = L.length - 1; k >= 0; k--) {
@@ -5358,7 +5441,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       })();
       lineChild[heirId] = k > 0 ? L[k - 1] : null;
       var sub = k === L.length - 1 ? t('tl.earliest') : t('tl.childrenOf', { name: nameOf(P(L[k + 1])) });
-      bands.push({ kind: 'anc', level: k, heir: heirId, rows: rows, sub: sub });
+      bands.push({ kind: 'anc', level: k, heir: heirId, rows: rows, sub: sub, earliest: k === L.length - 1 });
     }
     // Descendant bands (Q3: all generations)
     var level = [state.focal], seen = {}, seen2 = {}; seen[state.focal] = 1;
@@ -5426,7 +5509,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
           var barY = rowY + 4;
           var solidEnd = lvl > 0 ? (by(P(L[lvl - 1])) != null ? Math.max(by(P(L[lvl - 1])), lastChildBirth(id) || 0) : lastChildBirth(id)) : lastChildBirth(id);
           var bar = barSVG(p, id, barY, true, defs, solidEnd);
-          var lx = Math.max(bar.x - 16, MIN_LABEL_X), sex = sexKey(p);
+          var lx = bar.x - 16, sex = sexKey(p);
           layer3.push(bar.svg);
           layer3.push('<text class="anc-name-' + sex + (isFocal ? ' focal-name' : ' name-link') + '" x="' + f1(lx) + '" y="' + f1(barY + 12) + '" text-anchor="end" data-pid="' + esc(id) + '"' + (isFocal ? '' : ' data-act="focus-anc" data-level="' + lvl + '"') + '>' + labelHtml(p) + '</text>');
           spouses.forEach(function(sid, i){
@@ -5436,7 +5519,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
             FORCE_PRIMARY = onLine;
             var pbar = barSVG(sp, sid, py - 8, false, defs, onLine ? Math.max(by(P(L[lvl - 1])) || 0, lastChildBirth(sid) || 0) || null : lastChildBirth(sid));
             FORCE_PRIMARY = false;
-            var plx = Math.max(pbar.x - 8, MIN_LABEL_X);
+            var plx = pbar.x - 8;
             layer3.push(pbar.svg);
             // marriage marker on the partner bar
             var fam = null; (p.fams || []).forEach(function(fid){ var f = G.families.get(fid); if (f && (f.husb === sid || f.wife === sid)) fam = f; });
@@ -5451,7 +5534,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
           rowY += spouses.length ? 4 + 34 + (spouses.length - 1) * PARTNER_STEP + 22 : ANC_PITCH - SPOUSE_STEP;
         } else {
           var sbar = barSVG(p, id, rowY, false, defs, lastChildBirth(id));
-          var sx = Math.max(sbar.x - 6, MIN_LABEL_X);
+          var sx = sbar.x - 6;
           if (grpTop != null) grpMin = Math.min(grpMin, sx - (label(p).length + 2) * 7.4);
           var kids = childrenOf(id).length > 0 || spousesOf(id).length > 0;
           layer3.push(sbar.svg);
@@ -5467,7 +5550,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       layer1.push('<path class="band-bg" filter="url(#bandShadow)" d="M' + f1(bx + r) + ' ' + f1(bandY) + 'H' + f1(bx2) + 'V' + f1(by2) + 'H' + f1(bx + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + f1(bx) + ' ' + f1(by2 - r) + 'V' + f1(bandY + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + f1(bx + r) + ' ' + f1(bandY) + 'Z"/>');
       bandTops.push(bandY - 40);
       genHeads.push('<circle class="gen-num" cx="' + (BAND_X + 14) + '" cy="' + f1(bandY - 20) + '" r="14"/><text class="gen-num-text" x="' + (BAND_X + 14) + '" y="' + f1(bandY - 15.5) + '" text-anchor="middle">' + nGen + '</text>');
-      genHeads.push('<text class="gen-head" x="' + (BAND_X + 38) + '" y="' + f1(bandY - 14) + '"><tspan class="gen-head-strong">' + esc(band.sub) + '</tspan><tspan dx="10">' + ordinal(nGen) + '</tspan></text>');
+      genHeads.push('<text class="gen-head" x="' + (BAND_X + 38) + '" y="' + f1(bandY - 14) + '"><tspan class="gen-head-strong">' + esc(band.sub) + '</tspan>' + (function(tl){ return tl ? '<tspan dx="10">' + esc(tl) + '</tspan>' : ''; })(genTail(band)) + '</text>');
       y = bandY + h + GAP;
     });
 
@@ -5614,7 +5697,25 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   // clicking around the tree does not. Recent = people shown as focal, newest first.
   var pinId = null, recent = [];
   // V5.34 — focal generation in view (sample family opens on Arthur's generation, not on the oldest ancestors)
-  var bandTops = [], focalY = null, genFirst = false;
+  var bandTops = [], focalY = null, genFirst = false, centerNext = false;
+  // V6.20: a person picked from the list (start page / List view) or from search opens in the middle of the timeline's visible area
+  function centerOnFocal() {
+    var o = document.getElementById('timelineOuter'), svg = document.getElementById('mainSvg');
+    if (!state || !svg.viewBox.baseVal || !svg.viewBox.baseVal.height || !o.clientHeight) return;
+    var lbl = svg.querySelector('text.focal-name'); if (!lbl) return;
+    var k = svg.getBoundingClientRect().height / svg.viewBox.baseVal.height, bb = lbl.getBBox();
+    var ruler = document.getElementById('rulerWrap').getBoundingClientRect().height;
+    var oR = o.getBoundingClientRect(), sR = svg.getBoundingClientRect();
+    var svgTop = sR.top - oR.top + o.scrollTop, svgLeft = sR.left - oR.left + o.scrollLeft;
+    var cy = (bb.y + bb.height / 2) * k, visH = o.clientHeight - ruler;
+    var wantTop = Math.max(0, svgTop + cy - ruler - visH / 2), maxTop = o.scrollHeight - o.clientHeight;
+    if (wantTop > maxTop) svg.style.marginBottom = Math.ceil(wantTop - maxTop) + 'px';   // a person low in the tree can still reach the middle
+    o.scrollTop = wantTop;
+    var right = oR.right, pnl = document.getElementById('profilePanel');
+    if (!NARROW.matches && pnl && !pnl.hidden) right = Math.min(right, pnl.getBoundingClientRect().left);
+    var anchor = (bb.x + bb.width + 16) * k;   // birth point = where the name ends and the bar begins
+    o.scrollLeft = Math.max(0, svgLeft + anchor - (right - oR.left) / 2);
+  }
   function scrollToFocalGen() {
     var o = document.getElementById('timelineOuter'), svg = document.getElementById('mainSvg');
     if (focalY == null || !svg.viewBox.baseVal || !svg.viewBox.baseVal.height) return;
@@ -5638,7 +5739,9 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var b = document.getElementById('pinBackBtn'), hr = document.querySelector('.header-right'), psw = document.getElementById('personSelectorWrap');
     if (psw.parentNode === hr && b.nextSibling !== psw) hr.insertBefore(b, psw);
     var away = !!(G && state && pinId && P(pinId) && pinId !== state.focal);
-    b.hidden = !away;
+    var hn = window.matchMedia('(max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse)').matches;   // V6.17: phone row 2 always starts with Pin → no jumping
+    b.hidden = false; b.disabled = !away;   // V6.20: always in place on every width → the search never shifts
+    if (!away) { b.removeAttribute('title'); b.removeAttribute('aria-label'); }
     if (away) { var bt = t('pin.back', { name: nameOf(P(pinId)) }); b.title = bt; b.setAttribute('aria-label', bt); }
     var tg = pinTarget(), on = !!(tg && pinId === tg), nm = tg && P(tg) ? nameOf(P(tg)) : '';
     document.querySelectorAll('[data-pin]').forEach(function(x){
@@ -5653,6 +5756,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     pinId = pinId === tg ? null : tg;
     updatePinUI();
   });
+  window.matchMedia('(max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse)').addEventListener('change', updatePinUI);   // V6.17
   document.getElementById('pinBackBtn').addEventListener('click', function(){
     if (pinId && P(pinId)) go({ focal: pinId, ov: {} }, true);
   });
@@ -6184,7 +6288,9 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   }
   var BUSY_FROM = 3000;   // V6.0: smaller files draw in well under 300 ms, so they skip the extra frame
   function goDraw(st, push) {
+    document.getElementById('mainSvg').style.marginBottom = '';
     render();
+    if (centerNext) { centerNext = false; genFirst = false; requestAnimationFrame(centerOnFocal); }
     var h = '#f=' + encodeURIComponent(st.focal);
     if (push) history.pushState({ focal: st.focal, ov: st.ov }, '', h);
     else history.replaceState({ focal: st.focal, ov: st.ov }, '', h);
@@ -6471,7 +6577,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     row: function(id){ return P(id) ? PL.row(id) : ''; },
     mountStartList: function(host){ PL.mount(host, 'start'); },
     person: function(id){ var p = P(id); if (!p) return null; var r = rawDate(p, 'BIRT'); return { name: nameOf(p), born: r ? niceDate(r) : (by(p) != null ? String(by(p)) : '') }; },
-    show: function(id, pin){ if (pin) pinId = id; go({ focal: id, ov: {} }, true); },
+    show: function(id, pin){ if (pin) pinId = id; centerNext = true; genFirst = true; go({ focal: id, ov: {} }, true); },   // V6.20: list / search pick → person in the middle of the screen
     // V6.6: notes search
     notesOf: function(p){ return blocks(p).filter(function(b){ return b.tag === 'NOTE' && b.value && !/^@.+@$/.test(b.value); }).map(function(b){ return String(b.value).replace(/\{geni:[a-z_]+\}\s*/gi, ''); }); },
     hasPin: function(){ return !!pinId; },
@@ -6974,12 +7080,12 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.16', since: 'V5.45', date: [2026, 10, 21],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.20', since: 'V5.45', date: [2026, 10, 22],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
   notes: [
-    "Phone and tablet: the timeline now works on small screens. On a phone, tap a name to open the profile full screen; the arrow button brings you back to the timeline.",
+    "Phone and tablet: the timeline now works on small screens and uses the full screen width. On a phone, tap a name to open the profile full screen; the arrow button brings you back to the timeline.",
     "All people: after you open a file, a list shows everyone in it, grouped by family or sorted A–Z. Pick a person to open their timeline.",
     "Search also finds people mentioned in notes, with the search words highlighted in the note.",
     "Names after marriage or a name change: the later name first, the birth surname in brackets, e.g. Mary Brandt (Ashworth), the same way as on Geni. Search finds both names.",
@@ -7129,10 +7235,24 @@ window.ImpCheck = (function(){
       var cs = getComputedStyle(i); cv.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
       return cv.measureText(i.placeholder).width <= i.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) + 1;
     }
+    var HN = window.matchMedia('(max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse)');   // V6.17
     function fit() {
-      hd.classList.remove('hdr-compact');
-      var tight = hr.scrollWidth > hr.clientWidth + 1 || hd.scrollWidth > hd.clientWidth + 1 || !phFits();
+      if (!HN.matches) hd.classList.remove('hdr-compact');
+      var tight = HN.matches || hr.scrollWidth > hr.clientWidth + 1 || hd.scrollWidth > hd.clientWidth + 1 || !phFits();
       hd.classList.toggle('hdr-compact', tight);
+      // V6.20: desktop — left and right groups get the same width so the middle group (List view, Pin, Search, Find gaps) sits in the screen's centre
+      hd.style.removeProperty('--side-w');
+      if (!HN.matches) {
+        var ti = hd.querySelector('.header-titles'), en = hd.querySelector('.header-end');
+        hd.classList.add('side-measure');
+        var sw = Math.ceil(Math.max(ti.getBoundingClientRect().width, en.getBoundingClientRect().width));
+        hd.classList.remove('side-measure');
+        if (sw > 0) hd.style.setProperty('--side-w', sw + 'px');
+        if (!tight && (hd.scrollWidth > hd.clientWidth + 1 || !phFits())) { hd.classList.add('hdr-compact'); tight = true;   // equal sides squeezed the search → icon-only buttons, measure again
+          hd.style.removeProperty('--side-w'); hd.classList.add('side-measure');
+          sw = Math.ceil(Math.max(ti.getBoundingClientRect().width, en.getBoundingClientRect().width));
+          hd.classList.remove('side-measure'); if (sw > 0) hd.style.setProperty('--side-w', sw + 'px'); }
+      }
       btns.forEach(function(b){ var sp = b.querySelector('span[data-i18n]'); if (!sp) return;
         b.setAttribute('aria-label', sp.textContent);
         if (tight) b.title = sp.textContent; else if (b.id === 'viewBtn') b.title = t(b.getAttribute('data-i18n-title')); else b.removeAttribute('title'); });
