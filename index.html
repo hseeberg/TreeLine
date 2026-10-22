@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.20</title>
+<title>TreeLine V6.21</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -1556,7 +1556,7 @@ body.is-start .header .pin-back { display: none; }
           <label class="gp-radio"><input type="radio" name="gpScope" value="view" checked><span data-i18n="gaps.scopeView">This timeline</span><em id="gpScopeView"></em></label>
           <label class="gp-radio"><input type="radio" name="gpScope" value="all"><span data-i18n="gaps.scopeAll">Whole file</span><em id="gpScopeAll"></em></label>
         </div>
-        <button class="load-ged-btn gp-show" id="gpShow" disabled>Select what is missing</button>
+        <button class="load-ged-btn gp-show" id="gpShow" disabled data-i18n="gaps.selectWhat">Select what is missing</button>
       </div>
     </div>
     <div class="header-end"><button class="settings-btn open-another pre-render" id="openAnotherBtn" title="Close this tree and open a different GEDCOM file" data-i18n-title="hdr.openAnother.title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 17v-6"/><path d="M9 14l3-3 3 3"/></svg><span data-i18n="hdr.openAnother">Open another file</span></button>
@@ -1592,7 +1592,7 @@ body.is-start .header .pin-back { display: none; }
     <span data-i18n="start.lead">Every life in your family tree, side by side on one timeline. Open the GEDCOM file (.ged) you exported from your genealogy service.</span>
   </div>
   <div class="err" id="loadError" role="alert"></div>
-  <div class="search-slot" id="searchSlot"><span class="drop-hint" data-i18n="start.drop">Drop the file here, or</span><button class="load-ged-btn" id="loadGedBtn" data-i18n="start.choose">Choose GEDCOM file</button><div class="load-status" id="loadStatus" role="status" aria-live="polite" hidden><span class="ls-spin" aria-hidden="true"></span><span class="ls-text"><span class="ls-title" id="loadTitle">Reading file…</span><span class="ls-file" id="loadFile"></span></span><span class="ls-bar" id="loadBar" hidden><span class="ls-fill" id="loadFill"></span></span><span class="ls-pct" id="loadPct" hidden></span></div></div>
+  <div class="search-slot" id="searchSlot"><span class="drop-hint" data-i18n="start.drop">Drop the file here, or</span><button class="load-ged-btn" id="loadGedBtn" data-i18n="start.choose">Choose GEDCOM file</button><div class="load-status" id="loadStatus" role="status" aria-live="polite" hidden><span class="ls-spin" aria-hidden="true"></span><span class="ls-text"><span class="ls-title" id="loadTitle" data-i18n="start.reading">Reading file…</span><span class="ls-file" id="loadFile"></span></span><span class="ls-bar" id="loadBar" hidden><span class="ls-fill" id="loadFill"></span></span><span class="ls-pct" id="loadPct" hidden></span></div></div>
   <div class="loaded-extra" id="loadedExtra">
     <button class="start-another" id="startAnotherBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 18v-6"/><path d="M9 15l3-3 3 3"/></svg><span data-i18n="hdr.openAnother">Open another file</span></button>
     <details class="miss-help" id="missingHelp"><summary><span data-i18n="miss.title">Are people missing?</span><svg class="gh-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="gh-body miss-body" id="missingBody"></div></details>
@@ -1663,6 +1663,7 @@ I18N.en = {
   'search.inNotes': "Mentioned in notes",   // group heading: people whose notes contain the search words
   'search.showAll': "Show all ({n})",   // last row of that group; {n} = all hits
   'tl.descendants': { one: '{n} descendant', other: '{n} descendants' },   // V6.19: grey count after the selected person's descendant headings (spouses not counted)
+  'about.since': 'This is a summary of the biggest changes since {v}.',   // V6.21: About, line above What's new
   'common.people': { one: '{n} person', other: '{n} people' },      // counts: search list, Find gaps
   'name.unknown': 'Unknown',                                        // person without a name in the file
   // ── Find gaps (popover) ──
@@ -1936,6 +1937,7 @@ I18N.et = {
   'search.inNotes': "Mainitud märkmetes",
   'search.showAll': "Näita kõiki ({n})",
   'tl.descendants': { one: '{n} järeltulija', other: '{n} järeltulijat' },
+  'about.since': 'Siin on kokkuvõte suurimatest muudatustest alates versioonist {v}.',
   'common.people': { one: '{n} inimene', other: '{n} inimest' },
   'name.unknown': 'Tundmatu',
   'gaps.btn': 'Leia lüngad',
@@ -2230,6 +2232,7 @@ I18N.de = {
   'miss.source': "Geni-Hilfe: How can I export my GEDCOM?",
   'about.project': "Das Projekt",
   'tl.descendants': { one: '{n} Nachkomme', other: '{n} Nachkommen' },
+  'about.since': 'Hier eine Zusammenfassung der größten Änderungen seit {v}.',
   'common.people': { one: '{n} Person', other: '{n} Personen' }, 'name.unknown': 'Unbekannt',
   'gaps.btn': 'Lücken finden', 'gaps.title': 'Personen finden, bei denen fehlt…',
   'gaps.crit.bdate': 'Geburtsdatum', 'gaps.crit.ddate': 'Sterbedatum', 'gaps.crit.bplace': 'Geburtsort', 'gaps.crit.dplace': 'Sterbeort',
@@ -2394,6 +2397,7 @@ I18N.fi = {
   'miss.source': "Genin ohje: How can I export my GEDCOM?",
   'about.project': "Projekti",
   'tl.descendants': { one: '{n} jälkeläinen', other: '{n} jälkeläistä' },
+  'about.since': 'Tässä on yhteenveto suurimmista muutoksista version {v} jälkeen.',
   'common.people': { one: '{n} henkilö', other: '{n} henkilöä' }, 'name.unknown': 'Tuntematon',
   'gaps.btn': 'Etsi puutteet', 'gaps.title': 'Etsi henkilöt, joilta puuttuu…',
   'gaps.crit.bdate': 'Syntymäaika', 'gaps.crit.ddate': 'Kuolinaika', 'gaps.crit.bplace': 'Syntymäpaikka', 'gaps.crit.dplace': 'Kuolinpaikka',
@@ -2558,6 +2562,7 @@ I18N.sv = {
   'miss.source': "Genis hjälp: How can I export my GEDCOM?",
   'about.project': "Projektet",
   'tl.descendants': { one: '{n} ättling', other: '{n} ättlingar' },
+  'about.since': 'Det här är en sammanfattning av de största ändringarna sedan {v}.',
   'common.people': { one: '{n} person', other: '{n} personer' }, 'name.unknown': 'Okänd',
   'gaps.btn': 'Hitta luckor', 'gaps.title': 'Hitta personer som saknar…',
   'gaps.crit.bdate': 'Födelsedatum', 'gaps.crit.ddate': 'Dödsdatum', 'gaps.crit.bplace': 'Födelseort', 'gaps.crit.dplace': 'Dödsort',
@@ -2726,6 +2731,7 @@ I18N.es = {
   'miss.source': "Ayuda de Geni: How can I export my GEDCOM?",
   'about.project': "El proyecto",
   'tl.descendants': { one: '{n} descendiente', other: '{n} descendientes' },
+  'about.since': 'Este es un resumen de los cambios más importantes desde {v}.',
   'common.people': {"one": "{n} persona", "other": "{n} personas"},
   'name.unknown': "Desconocido",
   'gaps.btn': "Buscar lagunas",
@@ -3039,6 +3045,7 @@ I18N.fr = {
   'miss.source': "Aide Geni : How can I export my GEDCOM?",
   'about.project': "Le projet",
   'tl.descendants': { one: '{n} descendant', other: '{n} descendants' },
+  'about.since': 'Voici un résumé des principaux changements depuis {v}.',
   'common.people': {"one": "{n} personne", "other": "{n} personnes"},
   'name.unknown': "Inconnu",
   'gaps.btn': "Trouver les lacunes",
@@ -3352,6 +3359,7 @@ I18N.nl = {
   'miss.source': "Geni-hulp: How can I export my GEDCOM?",
   'about.project': "Het project",
   'tl.descendants': { one: '{n} afstammeling', other: '{n} afstammelingen' },
+  'about.since': 'Dit is een samenvatting van de grootste wijzigingen sinds {v}.',
   'common.people': {"one": "{n} persoon", "other": "{n} personen"},
   'name.unknown': "Onbekend",
   'gaps.btn': "Hiaten zoeken",
@@ -3665,6 +3673,7 @@ I18N.lv = {
   'miss.source': "Geni palīdzība: How can I export my GEDCOM?",
   'about.project': "Projekts",
   'tl.descendants': { zero: '{n} pēcteču', one: '{n} pēctecis', other: '{n} pēcteči' },
+  'about.since': 'Šis ir lielāko izmaiņu kopsavilkums kopš {v}.',
   'common.people': {"zero": "{n} cilvēku", "one": "{n} cilvēks", "other": "{n} cilvēki"},
   'name.unknown': "Nezināms",
   'gaps.btn': "Atrast robus",
@@ -3978,6 +3987,7 @@ I18N.lt = {
   'miss.source': "Geni pagalba: How can I export my GEDCOM?",
   'about.project': "Projektas",
   'tl.descendants': { one: '{n} palikuonis', few: '{n} palikuonys', many: '{n} palikuonio', other: '{n} palikuonių' },
+  'about.since': 'Tai didžiausių pakeitimų nuo {v} santrauka.',
   'common.people': {"one": "{n} asmuo", "few": "{n} asmenys", "many": "{n} asmens", "other": "{n} asmenų"},
   'name.unknown': "Nežinomas",
   'gaps.btn': "Rasti spragas",
@@ -4291,6 +4301,7 @@ I18N.no = {
   'miss.source': "Geni-hjelp: How can I export my GEDCOM?",
   'about.project': "Prosjektet",
   'tl.descendants': { one: '{n} etterkommer', other: '{n} etterkommere' },
+  'about.since': 'Dette er et sammendrag av de største endringene siden {v}.',
   'common.people': {"one": "{n} person", "other": "{n} personer"},
   'name.unknown': "Ukjent",
   'gaps.btn': "Finn hull",
@@ -4604,6 +4615,7 @@ I18N.da = {
   'miss.source': "Geni-hjælp: How can I export my GEDCOM?",
   'about.project': "Projektet",
   'tl.descendants': { one: '{n} efterkommer', other: '{n} efterkommere' },
+  'about.since': 'Dette er et resumé af de største ændringer siden {v}.',
   'common.people': {"one": "{n} person", "other": "{n} personer"},
   'name.unknown': "Ukendt",
   'gaps.btn': "Find huller",
@@ -7080,7 +7092,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.20', since: 'V5.45', date: [2026, 10, 22],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.21', since: 'V5.45', date: [2026, 10, 22],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
@@ -7101,7 +7113,7 @@ var RELEASE = {
   function build() {
     var d = RELEASE.date;
     pop.innerHTML = '<div class="ab-head"><div><div class="ab-title">TreeLine ' + e(RELEASE.version) + '</div><div class="ab-date">' + e(t('about.released', { date: tDate(d[0], d[1], d[2]) })) + '</div></div><button class="ab-close" aria-label="' + e(t('about.close')) + '">✕</button></div>' +
-      '<div class="ab-label">' + e(t('about.new')) + '</div><p class="ab-since">This is a summary of the biggest changes since ' + e(RELEASE.since) + '.</p><ul class="ab-notes">' + RELEASE.notes.map(function(n){ return '<li>' + e(n) + '</li>'; }).join('') + '</ul>' +
+      '<div class="ab-label">' + e(t('about.new')) + '</div><p class="ab-since">' + e(t('about.since', { v: RELEASE.since })) + '</p><ul class="ab-notes">' + RELEASE.notes.map(function(n){ return '<li>' + e(n) + '</li>'; }).join('') + '</ul>' +
       '<div class="ab-gh"><div class="ab-label ab-label-top">TreeLine</div><ul class="ab-notes ab-links"><li>' + tRich('about.gh1', { link: { html: A(RELEASE.repoUrl, t('about.gh1link')) } }) + '</li>' +
       '<li>' + tRich('about.gh2', { link: { html: A(RELEASE.issuesUrl, t('about.gh2link')) } }) + '</li>' +
       '<li>' + tRich('about.author', { name: { html: A(RELEASE.authorUrl, RELEASE.authorName) } }) + '</li></ul></div>';
