@@ -7,8 +7,6 @@ Every person is a lifespan bar on one shared time axis.
 
 ![TreeLine timeline view](docs/screenshot.png)
 
-
-
 You see:
 - who lived at the same time
 - how generations overlapped
@@ -20,7 +18,34 @@ You see:
 2. Load the sample family, or your own GEDCOM file. GEDCOM (.ged) is the standard export format of Geni, MyHeritage, Ancestry and similar tools. The sample family is fictional. It contains no real persons.
 3. Select a person. You see ancestors, siblings, partners and descendants.
 
+## Features
 
+### Search
+
+One search field finds:
+- **People** – by name, also by the name after marriage
+- **Places** – where people were born and where they lived
+- **Notes** – words in a person's notes. The note opens with the words highlighted.
+
+Results are grouped: `All · People · Places · Notes`.
+Search accepts typos, missing accents, a different word order and birth years.
+
+### Fact cards
+
+Statistics about one person's bloodline: descendants or ancestors.
+Open a profile and select **See fact cards**.
+
+You see:
+- people per generation, with their birth years
+- average lifespan per generation, men and women
+- age at death by birth period
+- who lived the longest and who had the most children
+- children per family, per generation
+- top 10 birthplaces, countries and given names
+
+Spouses are not counted.
+Each card tells you how many people have missing data.
+One click makes them a research list in **Find gaps**.
 
 ## Why I built TreeLine?
 
@@ -48,7 +73,7 @@ born across 50 years. TreeLine puts time first.
 
 - One HTML file
 - Tested in: Google Chrome
-- Current version: 5.31
+- Current version: 6.49
 
 ## License
 
