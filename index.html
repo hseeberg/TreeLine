@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.42</title>
+<title>TreeLine V6.46</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -1267,6 +1267,9 @@ body.is-listview .timeline-outer, body.is-listview .sticky-ruler-wrap { display:
   border-radius: 16px; overflow: hidden; color: var(--header-title); }
 .pl-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 14px 16px 12px; border-bottom: 1px solid var(--panel-border); }
 .pl-title { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.3; color: var(--header-title); display: flex; align-items: baseline; gap: 10px; }
+.pl-tw { flex: 1 1 260px; min-width: 0; }
+.pl-note { margin: 4px 0 0; max-width: 60ch; font-size: 14px; line-height: 1.4; color: var(--header-sub); }   /* V6.45: same size as fact-card notes (.fc-foot) */
+.pl-note[hidden] { display: none; }
 .pl-count { font-size: 15px; font-weight: 600; color: var(--header-sub); font-variant-numeric: tabular-nums; }
 .pl-seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--bg); border: 1px solid var(--panel-border); }
 .pl-seg button { min-height: 36px; padding: 0 14px; border: 0; border-radius: 7px; background: none; font: inherit; font-size: 15px; font-weight: 600; color: var(--header-sub); cursor: pointer; white-space: nowrap; }
@@ -1713,6 +1716,9 @@ html[data-tl-theme="dark"] { --fc-nb: #4C4549; --fc-nb-track: #2F2A2D; --ag0: #5
 .fc-top5 li.is-top .fc-who .fc-name { font-size: 20px; }
 .fc-top5 li.is-top .fc-big2 b { font-size: 44px; background: linear-gradient(180deg, var(--fc-tx-a), var(--fc-tx-b));   /* text stops darker than bar stops: ≥ 3:1 for large text */ -webkit-background-clip: text; background-clip: text; color: transparent; }
 @media (forced-colors: active) { .fc-top5 li.is-top .fc-big2 b { color: CanvasText; background: none; } }
+/* V6.45 (owner 2026-10-24): overview numbers in the same gradient as the Top-1 numbers (Lived the longest, Most children) */
+.fc-kpi dd:first-of-type { background: linear-gradient(180deg, var(--fc-tx-a), var(--fc-tx-b)); -webkit-background-clip: text; background-clip: text; color: transparent; align-self: flex-start; }
+@media (forced-colors: active) { .fc-kpi dd:first-of-type { color: CanvasText; background: none; } }
 .fc-top5 li.is-top .fc-rank { font-size: 20px; }
 /* KPIs bigger */
 .fc-kpi dd:first-of-type { font-size: 56px; }
@@ -1997,6 +2003,17 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
 .pp-switch[aria-checked="true"] .pp-switch-t { background: var(--header-accent); border-color: var(--header-accent); }
 .pp-switch[aria-checked="true"] .pp-switch-k { transform: translateX(18px); background: var(--panel-bg); }   /* panel colour: white in light mode, dark in dark mode → thumb always contrasts with the accent track */
 @media (prefers-reduced-motion: reduce) { .pp-switch-t, .pp-switch-k { transition: none; } }
+/* V6.43 (owner 2026-10-24): Starting person row = same Sunset brown as the buttons under it (text, pin icon, switch); separator line removed */
+.pp-switch, .pp-switch > svg { color: var(--header-accent); }
+.pp-switch-t { border-color: color-mix(in srgb, var(--header-accent) 55%, transparent); }
+.pp-switch-k { background: var(--header-accent); }
+/* V6.43 bug fix, phone: the header is a flex item of body (column, 100dvh). List view kept a fixed height (100vh − 72 px), so the browser
+   shrank the header to one row; row 2 (Pin, Search, Find gaps) spilled over the list, white on white, and caught taps meant for the list
+   (tap on "A–Z" hit Find gaps). Rule: the header never shrinks; List view and Fact cards take the space that is left. */
+@media (max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
+  body:not(.is-start) > .header { flex-shrink: 0; }
+  body:not(.is-start) .list-view, body:not(.is-start) .facts-view { height: auto; flex: 1 1 0; min-height: 0; }
+}
 /* place: one text flow — a long place name wraps under the pin icon (owner choice B, 2026-10-23) */
 .pp-row dd .pp-place { display: block; }
 .pp-row dd .pp-place svg { display: inline-block; vertical-align: -2px; margin: 0 6px 0 0; }
@@ -2249,7 +2266,7 @@ I18N.en = {
   'start.readPct': '{n} %',                                         // progress next to the bar
   'list.title': 'All people',                                       // list heading, short
   'list.tree': 'Families',                                          // switch: grouped tree, short
-  'list.az': 'A–Z',                                                 // switch: alphabetical, short
+  'list.az': 'Names', 'list.sur': 'Last names', 'list.noSur': 'No last name', 'list.surNote': "Some people are listed under more than one last name, for example their birth name and their married name.",                                                 // switch: alphabetical, short
   'list.switch': 'How to sort the list',                            // screen reader label of the switch
   'list.family': '{name} family',                                   // group heading; et puts the name after a colon
   'list.notLinked': 'Not linked to anyone',                         // group of people with no parents, partner or children
@@ -2520,7 +2537,7 @@ I18N.et = {
   'start.readPct': '{n} %',
   'list.title': 'Kõik inimesed',
   'list.tree': 'Pered',
-  'list.az': 'A–Z',
+  'list.az': 'Nimed', 'list.sur': 'Perekonnanimed', 'list.noSur': 'Perekonnanimeta', 'list.surNote': "Mõni inimene on mitme perekonnanime all, näiteks sünninime ja abielujärgse nime all.",
   'list.switch': 'Kuidas nimekirja järjestada',
   'list.family': 'Pere: {name}',
   'list.notLinked': 'Pole kellegagi seotud',
@@ -2680,7 +2697,7 @@ I18N.de = {
   'start.readPct': "{n} %",
   'list.title': "Alle Personen",
   'list.tree': "Familien",
-  'list.az': "A–Z",
+  'list.az': "Namen", 'list.sur': "Nachnamen", 'list.noSur': "Ohne Nachnamen", 'list.surNote': "Manche Personen stehen unter mehr als einem Nachnamen, zum Beispiel unter dem Geburtsnamen und dem Ehenamen.",
   'list.switch': "Sortierung der Liste",
   'list.family': "Familie: {name}",
   'list.notLinked': "Mit niemandem verbunden",
@@ -2846,7 +2863,7 @@ I18N.fi = {
   'start.readPct': "{n} %",
   'list.title': "Kaikki henkilöt",
   'list.tree': "Perheet",
-  'list.az': "A–Ö",
+  'list.az': "Nimet", 'list.sur': "Sukunimet", 'list.noSur': "Ei sukunimeä", 'list.surNote': "Osa henkilöistä on useamman sukunimen alla, esimerkiksi syntymänimen ja avionimen alla.",
   'list.switch': "Luettelon järjestys",
   'list.family': "Perhe: {name}",
   'list.notLinked': "Ei yhteyttä keneenkään",
@@ -3012,7 +3029,7 @@ I18N.sv = {
   'start.readPct': "{n} %",
   'list.title': "Alla personer",
   'list.tree': "Familjer",
-  'list.az': "A–Ö",
+  'list.az': "Namn", 'list.sur': "Efternamn", 'list.noSur': "Utan efternamn", 'list.surNote': "Vissa personer finns under mer än ett efternamn, till exempel födelsenamnet och namnet efter giftermålet.",
   'list.switch': "Hur listan sorteras",
   'list.family': "Familj: {name}",
   'list.notLinked': "Inte kopplad till någon",
@@ -3182,7 +3199,7 @@ I18N.es = {
   'start.readPct': "{n} %",
   'list.title': "Todas las personas",
   'list.tree': "Familias",
-  'list.az': "A–Z",
+  'list.az': "Nombres", 'list.sur': "Apellidos", 'list.noSur': "Sin apellido", 'list.surNote': "Algunas personas aparecen con más de un apellido, por ejemplo el apellido de nacimiento y el apellido tras el matrimonio.",
   'list.switch': "Cómo ordenar la lista",
   'list.family': "Familia: {name}",
   'list.notLinked': "Sin vínculos con nadie",
@@ -3497,7 +3514,7 @@ I18N.fr = {
   'start.readPct': "{n} %",
   'list.title': "Toutes les personnes",
   'list.tree': "Familles",
-  'list.az': "A–Z",
+  'list.az': "Prénoms", 'list.sur': "Noms de famille", 'list.noSur': "Sans nom de famille", 'list.surNote': "Certaines personnes figurent sous plusieurs noms de famille, par exemple leur nom de naissance et leur nom après le mariage.",
   'list.switch': "Ordre de la liste",
   'list.family': "Famille : {name}",
   'list.notLinked': "Liée à personne",
@@ -3812,7 +3829,7 @@ I18N.nl = {
   'start.readPct': "{n} %",
   'list.title': "Alle personen",
   'list.tree': "Families",
-  'list.az': "A–Z",
+  'list.az': "Namen", 'list.sur': "Achternamen", 'list.noSur': "Zonder achternaam", 'list.surNote': "Sommige personen staan onder meer dan één achternaam, bijvoorbeeld hun geboortenaam en hun naam na het huwelijk.",
   'list.switch': "Sortering van de lijst",
   'list.family': "Familie: {name}",
   'list.notLinked': "Met niemand verbonden",
@@ -4127,7 +4144,7 @@ I18N.lv = {
   'start.readPct': "{n} %",
   'list.title': "Visi cilvēki",
   'list.tree': "Ģimenes",
-  'list.az': "A–Z",
+  'list.az': "Vārdi", 'list.sur': "Uzvārdi", 'list.noSur': "Bez uzvārda", 'list.surNote': "Dažas personas ir zem vairāk nekā viena uzvārda, piemēram, ar dzimšanas uzvārdu un uzvārdu pēc laulībām.",
   'list.switch': "Saraksta kārtošana",
   'list.family': "Ģimene: {name}",
   'list.notLinked': "Nav saistīts ne ar vienu",
@@ -4442,7 +4459,7 @@ I18N.lt = {
   'start.readPct': "{n} %",
   'list.title': "Visi asmenys",
   'list.tree': "Šeimos",
-  'list.az': "A–Ž",
+  'list.az': "Vardai", 'list.sur': "Pavardės", 'list.noSur': "Be pavardės", 'list.surNote': "Kai kurie asmenys yra po daugiau nei viena pavarde, pavyzdžiui, gimimo pavarde ir pavarde po santuokos.",
   'list.switch': "Sąrašo rikiavimas",
   'list.family': "Šeima: {name}",
   'list.notLinked': "Su niekuo nesusietas",
@@ -4757,7 +4774,7 @@ I18N.no = {
   'start.readPct': "{n} %",
   'list.title': "Alle personer",
   'list.tree': "Familier",
-  'list.az': "A–Å",
+  'list.az': "Navn", 'list.sur': "Etternavn", 'list.noSur': "Uten etternavn", 'list.surNote': "Noen personer står under mer enn ett etternavn, for eksempel fødenavnet og navnet etter ekteskapet.",
   'list.switch': "Hvordan listen sorteres",
   'list.family': "Familie: {name}",
   'list.notLinked': "Ikke koblet til noen",
@@ -5072,7 +5089,7 @@ I18N.da = {
   'start.readPct': "{n} %",
   'list.title': "Alle personer",
   'list.tree': "Familier",
-  'list.az': "A–Å",
+  'list.az': "Navne", 'list.sur': "Efternavne", 'list.noSur': "Uden efternavn", 'list.surNote': "Nogle personer står under mere end ét efternavn, for eksempel fødenavnet og navnet efter ægteskabet.",
   'list.switch': "Hvordan listen sorteres",
   'list.family': "Familie: {name}",
   'list.notLinked': "Ikke knyttet til nogen",
@@ -6974,6 +6991,10 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
         if (lead.every((w,i)=>w===tail[i])) { indi.givn=gw.slice(0,gw.length-lead.length).join(' '); indi.name=[indi.givn,indi.surn.trim()].join(' '); }
       }
     }
+    if (indi.marnm&&indi.givn) { // V6.44: some exports write the full married name in _MARNM ("Dorothy Brandt") → keep only the last name
+      const g=indi.givn.replace(/\s+/g,' ').trim(), m=indi.marnm.replace(/\s+/g,' ').trim();
+      if (m.length>g.length&&m.toLowerCase().indexOf(g.toLowerCase()+' ')===0) indi.marnm=m.slice(g.length+1).trim();
+    }
     indi.birthName=indi.name; indi.nameShort=indi.name;
     if (indi.marnm) { // V6.12: show the later name first, the birth surname in brackets (Geni style): Mary Brandt (Ashworth)
       const raw=String((rec.children.find(c=>c.level===1&&c.tag==='NAME')||{}).value||'');
@@ -8061,7 +8082,6 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     // 2) Show in the list / on the timeline (secondary); 3) See fact cards (primary — the only filled button); 4) Open on … (secondary; the only place to edit the data)
     h += '<section class="pp-sec pp-orig"><div class="pp-actions pp-stack">' +
       '<button class="pp-switch" type="button" role="switch" aria-checked="false" data-pin>' + PIN_SVG + '<span class="pp-switch-l">' + esc(t('pin.label')) + '</span><span class="pp-switch-t" aria-hidden="true"><span class="pp-switch-k"></span></span></button>' +
-      '<div class="pp-stack-sep" role="presentation"></div>' +
       viewSwitchBtn(id) + factsBtnHtml(id) +
       links.map(function(l){ return '<a class="pp-act" href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span>' + esc(t('pp.openOn', { name: l.name })) + '</span></a>'; }).join('') +
       '</div></section>';
@@ -8306,7 +8326,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   //   4. anyone still not placed → their highest unplaced ancestor starts a new group; people with no links → "Not linked".
   //   Check: every person in the file is in some group (otherwise a warning line shows).
   var PL = (function(){
-    var root = null, scroller = null, segBtns = null, warnEl = null, mode = 'tree', data = null, rows = [], shown = 0, open = {}, sel = null, ctx = 'start', BATCH = 400;
+    var root = null, scroller = null, segBtns = null, warnEl = null, mode = 'sur', data = null, rows = [], shown = 0, open = {}, sel = null, ctx = 'start', BATCH = 400;
     var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
     function hasParent(id) { var pr = parents(id); return !!(pr && (pr.father || pr.mother)); }
     function linked(id) { return hasParent(id) || spousesOf(id).length > 0 || childrenOf(id).length > 0; }
@@ -8366,6 +8386,35 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       return { groups: groups, unplaced: n - placed, early: early, late: late, az: null };
     }
     function ensure() { if (!data && G) { data = build(); open = {}; } return data; }
+    // V6.44 — Last names (owner decisions 2026-10-24): one group per last name, all groups closed.
+    //   A person is in every group their last names give: birth surname (SURN, else the /…/ part of NAME) and the name after
+    //   marriage (_MARNM). A name with variants is in the group as written AND in one group per part:
+    //   "Seeberg / Seep" → "Seeberg / Seep", "Seeberg", "Seep"; "Seeberg-Jura" → "Seeberg-Jura", "Seeberg", "Jura".
+    //   So group sizes do not add up to the file total (by design). No last name → "No last name" group, last.
+    function surnamesOf(p) {
+      var base = [], out = [], seen = {};
+      var s1 = p.surn;
+      if (!s1) { var raw = String(((p.raw || []).find(function(c){ return c.level === 1 && c.tag === 'NAME'; }) || {}).value || ''), a = raw.indexOf('/'), b = raw.lastIndexOf('/'); if (a >= 0 && b > a) s1 = raw.slice(a + 1, b); }
+      [s1, p.marnm].forEach(function(x){ if (x) base.push(x); });
+      function add(x) { x = String(x).replace(/\s+/g, ' ').trim(); var k = x.toLocaleLowerCase(); if (x && !seen[k]) { seen[k] = 1; out.push(x); } }
+      base.forEach(function(x){ add(x); String(x).split(/\s*[\/\-\u2010-\u2013]\s*/).forEach(add); });
+      return out;
+    }
+    function surData() {
+      if (data.sur) return data.sur;
+      var coll = new Intl.Collator(tLang() === 'xx' ? 'en' : tLang(), { sensitivity: 'base' }), map = {}, keys = [], none = [];
+      G.individuals.forEach(function(p, id){
+        var ss = surnamesOf(p); if (!ss.length) { none.push(id); return; }
+        ss.forEach(function(x){ var k = x.toLocaleLowerCase(); if (!map[k]) { map[k] = { sur: x, list: [] }; keys.push(k); } map[k].list.push(id); });
+      });
+      function byName(a, b) { var na = P(a).name, nb = P(b).name; if (!na !== !nb) return na ? -1 : 1; return coll.compare(na || '', nb || '') || (by(P(a)) || 0) - (by(P(b)) || 0); }
+      var gs = keys.map(function(k){ return map[k]; }).sort(function(a, b){ return coll.compare(a.sur, b.sur); });
+      if (none.length) gs.push({ none: true, list: none });
+      gs.forEach(function(g){ g.list.sort(byName); g.n = g.list.length; g.rows = g.list.map(function(id){ return { k: 'p', id: id, gen: 0, d: 0 }; }); g.ids = {}; g.list.forEach(function(id){ g.ids[id] = 1; }); });
+      return (data.sur = gs);
+    }
+    function grps() { return mode === 'sur' ? surData() : data.groups; }
+    function gKey(gi) { return mode + gi; }
     function gName(g) { return g.lone ? t('list.notLinked') : t('list.family', { name: nameOf(P(g.top)) }); }
     function azRows() {
       if (data.az) return data.az;
@@ -8385,11 +8434,11 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     function flat() {
       if (mode === 'az') return azRows();
       var out = [];
-      data.groups.forEach(function(g, gi){ out.push({ k: 'g', gi: gi }); if (open[gi]) Array.prototype.push.apply(out, g.rows); });
+      grps().forEach(function(g, gi){ out.push({ k: 'g', gi: gi }); if (open[gKey(gi)]) Array.prototype.push.apply(out, g.rows); });
       return out;
     }
     function rowHtml(r) {
-      if (r.k === 'g') { var g = data.groups[r.gi]; return '<button class="pl-grp" type="button" data-gi="' + r.gi + '" aria-expanded="' + (open[r.gi] ? 'true' : 'false') + '">' + CHEV + '<span class="pl-gname">' + esc(gName(g)) + '</span><span class="pl-gn">' + esc(tn('common.people', g.n)) + '</span></button>'; }
+      if (r.k === 'g') { var g = grps()[r.gi]; return '<button class="pl-grp" type="button" data-gi="' + r.gi + '" aria-expanded="' + (open[gKey(r.gi)] ? 'true' : 'false') + '">' + CHEV + '<span class="pl-gname">' + esc(mode === 'sur' ? (g.none ? t('list.noSur') : g.sur) : gName(g)) + '</span><span class="pl-gn">' + esc(tn('common.people', g.n)) + '</span></button>'; }
       if (r.k === 'L') return '<div class="pl-letter">' + esc(r.ch) + '</div>';
       var p = P(r.id), pl = p.birth && p.birth.place, sp = r.k === 's', gtag = mode === 'tree' && r.gen ? ' pl-gen-' + (r.gen % 2 ? 'odd' : 'even') : '';
       return '<button class="pl-row' + gtag + (sp ? ' pl-sp' : '') + (r.id === sel ? ' is-sel' : '') + '" type="button" data-id="' + esc(r.id) + '" style="--d:' + (r.d || 0) + '">' +
@@ -8411,15 +8460,18 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     }
     function head() {
       root.querySelector('.pl-title').innerHTML = esc(t('list.title')) + ' <span class="pl-count">' + esc(num(G.individuals.size)) + '</span>';
-      segBtns[0].textContent = t('list.tree'); segBtns[1].textContent = t('list.az');
-      segBtns[0].setAttribute('aria-pressed', String(mode === 'tree')); segBtns[1].setAttribute('aria-pressed', String(mode === 'az'));
+      segBtns.forEach(function(b){ var m = b.getAttribute('data-mode'); b.textContent = t('list.' + m); b.setAttribute('aria-pressed', String(mode === m)); });   // V6.44: Last names · Names · Families
       root.querySelector('.pl-seg').setAttribute('aria-label', t('list.switch'));
       warnEl.hidden = !data.unplaced; if (data.unplaced) warnEl.textContent = t('list.unplaced', { n: data.unplaced });
+      // V6.45 (owner 2026-10-24): Last names — only when a person sits in more than one group, say so next to the total, small (fact-card note size). Copy V6.46.
+      var nt = root.querySelector('.pl-note'), sum = 0;
+      if (mode === 'sur') surData().forEach(function(g){ sum += g.n; });
+      nt.hidden = !(mode === 'sur' && sum > G.individuals.size); if (!nt.hidden) nt.textContent = t('list.surNote');
     }
     function num(n) { try { return n.toLocaleString(tLang() === 'xx' ? 'en' : tLang() === 'no' ? 'nb' : tLang()); } catch (_) { return String(n); } }
     function create() {
       root = document.createElement('section'); root.className = 'plist';
-      root.innerHTML = '<div class="pl-head"><h2 class="pl-title"></h2><div class="pl-seg" role="group"><button type="button" data-mode="tree"></button><button type="button" data-mode="az"></button></div></div>' +
+      root.innerHTML = '<div class="pl-head"><div class="pl-tw"><h2 class="pl-title"></h2><p class="pl-note" hidden></p></div><div class="pl-seg" role="group"><button type="button" data-mode="sur"></button><button type="button" data-mode="az"></button><button type="button" data-mode="tree"></button></div></div>' +
         '<p class="pl-warn" hidden></p><div class="pl-scroll"></div>';
       scroller = root.querySelector('.pl-scroll'); warnEl = root.querySelector('.pl-warn'); segBtns = root.querySelectorAll('.pl-seg button');
       root.querySelector('.pl-seg').addEventListener('click', function(e){
@@ -8429,7 +8481,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       scroller.addEventListener('scroll', function(){ if (shown < rows.length && scroller.scrollTop + scroller.clientHeight > scroller.scrollHeight - 900) more(); }, { passive: true });
       scroller.addEventListener('click', function(e){
         var g = e.target.closest('.pl-grp');
-        if (g) { var gi = +g.getAttribute('data-gi'); open[gi] = !open[gi]; var at = rows.indexOf(rows.filter(function(r){ return r.k === 'g' && r.gi === gi; })[0]); paint(Math.max(shown, at + BATCH), true); return; }
+        if (g) { var gi = +g.getAttribute('data-gi'); open[gKey(gi)] = !open[gKey(gi)]; var at = rows.indexOf(rows.filter(function(r){ return r.k === 'g' && r.gi === gi; })[0]); paint(Math.max(shown, at + BATCH), true); return; }
         var r = e.target.closest('.pl-row'); if (!r) return;
         var id = r.getAttribute('data-id'); if (!P(id)) return;
         if (ctx === 'start') window.TreeLine.show(id, true);   // start page: straight to the timeline, pin set (decision 2026-10-21)
@@ -8446,10 +8498,18 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
         var gi = -1, best = null;
         data.groups.forEach(function(g, i){ if (best === 'p' || !g.ids[id]) return; g.rows.forEach(function(r){ if (r.id !== id) return; if (r.k === 'p' && !r.stub) { if (best !== 'p') { best = 'p'; gi = i; } } else if (best == null) { best = 'o'; gi = i; } }); });
         if (gi < 0) return;
-        if (!open[gi]) { open[gi] = true; rows = flat(); shown = 0; scroller.innerHTML = ''; }
+        if (!open[gKey(gi)]) { open[gKey(gi)] = true; rows = flat(); shown = 0; scroller.innerHTML = ''; }
         rows = flat();
         for (var j = 0; j < rows.length; j++) { var r = rows[j]; if (r.id === id && (r.k === 'p' && !r.stub)) { idx = j; break; } }
         if (idx < 0) for (j = 0; j < rows.length; j++) if (rows[j].id === id) { idx = j; break; }
+      } else if (mode === 'sur') {
+        var sg = -1, sp0 = P(id) ? surnamesOf(P(id))[0] : null;   // the person's own (birth) last name first
+        surData().forEach(function(g, i){ if (sg < 0 && g.ids[id] && (g.none || !sp0 || g.sur === sp0)) sg = i; });
+        if (sg < 0) surData().forEach(function(g, i){ if (sg < 0 && g.ids[id]) sg = i; });
+        if (sg < 0) return;
+        if (!open[gKey(sg)]) { open[gKey(sg)] = true; shown = 0; scroller.innerHTML = ''; }
+        rows = flat();
+        var hq = -1; for (var q = 0; q < rows.length; q++) { if (rows[q].k === 'g' && rows[q].gi === sg) hq = q; else if (hq >= 0 && rows[q].id === id) { idx = q; break; } }
       } else {
         rows = flat();
         for (var k = 0; k < rows.length; k++) if (rows[k].id === id) { idx = k; break; }
@@ -8461,7 +8521,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       if (target) scroller.scrollTop = Math.max(0, target.offsetTop - scroller.clientHeight / 2 + target.offsetHeight);
     }
     return {
-      reset: function(){ data = null; sel = null; mode = 'tree'; if (scroller) scroller.innerHTML = ''; rows = []; shown = 0; },
+      reset: function(){ data = null; sel = null; mode = 'sur'; if (scroller) scroller.innerHTML = ''; rows = []; shown = 0; },
       range: function(){ return ensure() ? { early: data.early, late: data.late } : {}; },
       row: function(id){ var m = mode; mode = 'az'; var h = rowHtml({ k: 'p', id: id, gen: 0, d: 0 }); mode = m; return h.replace(' is-sel', ''); },   // V6.1: same look for Earliest / Latest born
       mount: function(host, c){
@@ -8476,7 +8536,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       sel: function(){ return sel; },
       reveal: function(id){ sel = id; reveal(id); },
       scrollTop: function(v){ if (!scroller) return 0; if (v != null) scroller.scrollTop = v; return scroller.scrollTop; },
-      relabel: function(){ if (!root || !data) return; data.az = null; head(); var tp = scroller.scrollTop, n = shown; rows = flat(); shown = 0; scroller.innerHTML = ''; more(n); scroller.scrollTop = tp; }
+      relabel: function(){ if (!root || !data) return; data.az = null; data.sur = null; head(); var tp = scroller.scrollTop, n = shown; rows = flat(); shown = 0; scroller.innerHTML = ''; more(n); scroller.scrollTop = tp; }
     };
   })();
 
@@ -9696,7 +9756,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.42', since: 'V5.45', date: [2026, 10, 23],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.46', since: 'V5.45', date: [2026, 10, 24],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
@@ -9705,7 +9765,7 @@ var RELEASE = {
     "Missing data becomes a research list: every fact card shows who lacks a date, place or name. Open the list right on the card, or go through the people one by one with Find gaps.",
     "Search shows People, Places and Notes. It also finds birthplaces and places where people lived.",
     "Phone and tablet: the timeline now works on small screens and uses the full screen width. On a phone, tap a name to open the profile full screen; the arrow button brings you back to the timeline.",
-    "All people: after you open a file, a list shows everyone in it, grouped by family or sorted A–Z. Pick a person to open their timeline."
+    "All people: after you open a file, a list shows everyone in it — by last name, by name or by family. Pick a person to open their timeline."
   ],
   repoUrl: 'https://github.com/hseeberg/TreeLine', issuesUrl: 'https://github.com/hseeberg/TreeLine/issues',
   authorName: 'Hannes Seeberg', authorUrl: 'https://www.linkedin.com/in/seeberg/'
