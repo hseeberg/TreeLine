@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.49</title>
+<title>TreeLine V6.51</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -2048,7 +2048,7 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
   <div class="header-right">
     <button class="settings-btn pin-back" id="pinBackBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg><span data-i18n="pin.label">Starting person</span></button>
     <div class="person-selector-wrap pre-render" id="personSelectorWrap">
-      <input type="text" id="personInput" class="person-input"
+      <input type="text" id="personInput" class="person-input" dir="auto"
              placeholder="Load a GEDCOM to search…" data-i18n-ph="search.placeholderEmpty" autocomplete="off" spellcheck="false" disabled>
       <div class="person-dropdown" id="personDropdown"></div>
     </div>
@@ -7112,7 +7112,13 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function f1(n) { return (Math.round(n * 10) / 10).toFixed(1); }
   function P(id) { return G.individuals.get(id); }
-  function nameOf(p) { return (p && p.name) || t('name.unknown'); }
+  // V6.51: right-to-left names (Hebrew, Arabic) are wrapped in Unicode isolates (FSI … PDI) when shown, so the years and brackets next to them stay on the correct side. Left-to-right names are not changed.
+  var RTL_RE = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+  function bidi(s) { s = s == null ? '' : String(s); return RTL_RE.test(s) ? '\u2068' + s + '\u2069' : s; }
+  // V6.51: one text fold for search and note highlights. Keeps letters of every script (Latin, Cyrillic, Hebrew …); removes accents and Hebrew vowel points; ł ø đ ß æ œ ı → l o d ss ae oe i; Hebrew final letters → normal letters.
+  var FOLD = { 'ł': 'l', 'ø': 'o', 'đ': 'd', 'ß': 'ss', 'æ': 'ae', 'œ': 'oe', 'ı': 'i', 'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ' };
+  function normTxt(x) { return String(x == null ? '' : x).normalize('NFD').replace(/[\u0300-\u036f\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]/g, '').toLowerCase().replace(/[łøđßæœıךםןףץ]/g, function(c){ return FOLD[c]; }).replace(/[^\p{L}\p{N}]+/gu, ' ').trim(); }
+  function nameOf(p) { return bidi((p && p.name) || t('name.unknown')); }
   function given(p) { return (p && (p.givn || (p.name || '').split(' ')[0])) || '?'; }
 
   // ── Relations ──
@@ -7964,7 +7970,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   function exportRows() {
     return gaps.ids.map(function(id){
       var q = P(id), B = evBlock(q, 'BIRT'), D = evBlock(q, 'DEAT'), L = providerLinks(q);
-      return { name: nameOf(q),
+      return { name: (q.name || t('name.unknown')),   // V6.51: raw name in exports (no bidi marks)
         bd: B && B.sub.DATE ? niceDate(B.sub.DATE) : '', bp: B ? placeOf(B) : '',
         dd: D && D.sub.DATE ? niceDate(D.sub.DATE) : (isLiving(q) ? t('exp.living') : ''), dp: D ? placeOf(D) : '',
         miss: missingOf(id).map(CS).join(', '), link: L.length ? L[0].url : '' };
@@ -8020,11 +8026,11 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var aka = [];
     bl.forEach(function(b){
       if (b.tag !== 'NAME') return;
-      var n = cleanNm(b.value); if (n && n !== nameOf(p) && n !== p.nameShort && n !== p.birthName && aka.indexOf(n) < 0) aka.push(n);   // V6.12: the display name already holds the birth name and the later name
-      (b.all || []).forEach(function(kv){ if (kv[0] === '_MARNM' && kv[1] === p.marnm) return; if ((kv[0] === 'NICK' || kv[0] === '_MARNM') && kv[1] && aka.indexOf(kv[1]) < 0 && kv[1] !== nameOf(p)) aka.push(kv[1]); });
+      var n = cleanNm(b.value); if (n && n !== p.name && n !== p.nameShort && n !== p.birthName && aka.indexOf(n) < 0) aka.push(n);   // V6.12: the display name already holds the birth name and the later name
+      (b.all || []).forEach(function(kv){ if (kv[0] === '_MARNM' && kv[1] === p.marnm) return; if ((kv[0] === 'NICK' || kv[0] === '_MARNM') && kv[1] && aka.indexOf(kv[1]) < 0 && kv[1] !== p.name) aka.push(kv[1]); });
     });
-    aliases(p).names.forEach(function(n){ if (n && n !== nameOf(p) && aka.indexOf(n) < 0) aka.push(n); });
-    if (aka.length) h += '<div class="pp-aka"><span>' + esc(t('pp.aka')) + '</span> ' + aka.map(esc).join(', ') + '</div>';
+    aliases(p).names.forEach(function(n){ if (n && n !== p.name && aka.indexOf(n) < 0) aka.push(n); });
+    if (aka.length) h += '<div class="pp-aka"><span>' + esc(t('pp.aka')) + '</span> ' + aka.map(function(n){ return esc(bidi(n)); }).join(', ') + '</div>';
     h += '@@ADDEDBY@@</div></header>';
     // 2. Life events — Geni-style: label | date, place on the line below; gap between events
     var ev = '', evRows = [];
@@ -8118,7 +8124,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   }
   // V6.6: highlight the search words inside the profile's notes and bring the first one into view
   function markNoteHits(body, toks) {
-    function nrm(x) { return String(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+    var nrm = normTxt;   // V6.51: same fold as search (every script)
     toks = toks.filter(function(q){ return q.length >= 2; }); if (!toks.length) return;
     function hit(w) { return nrm(w).split(' ').some(function(x){ return x && toks.some(function(q){ return x.indexOf(q) === 0; }); }); }
     var first = null;
@@ -8402,7 +8408,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     // V6.44 — Last names (owner decisions 2026-10-24): one group per last name, all groups closed.
     //   A person is in every group their last names give: birth surname (SURN, else the /…/ part of NAME) and the name after
     //   marriage (_MARNM). A name with variants is in the group as written AND in one group per part:
-    //   "Seeberg / Seep" → "Seeberg / Seep", "Seeberg", "Seep"; "Seeberg-Jura" → "Seeberg-Jura", "Seeberg", "Jura".
+    //   "Brandt / Brant" → "Brandt / Brant", "Brandt", "Brant"; "Brandt-Moore" → "Brandt-Moore", "Brandt", "Moore".   (V6.51: §22 — sample-family names only)
     //   So group sizes do not add up to the file total (by design). No last name → "No last name" group, last.
     function surnamesOf(p) {
       var base = [], out = [], seen = {};
@@ -9210,6 +9216,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     return '<button type="button" class="pp-facts-btn pp-primary" data-facts' + (none ? ' disabled' : '') + '>' + FACT_ICON + '<span class="pp-facts-t"><span class="pp-facts-1">' + esc(t('fact.cta')) + '</span><span class="pp-facts-2">' + esc(sub) + '</span></span>' + (none ? '' : '<svg class="pp-facts-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>') + '</button>';   // V6.33: CTA wording + arrow
   }
   window.TreeLine = {
+    norm: normTxt, bidi: bidi,   // V6.51: shared with the search module
     setData: function(g, fname){ if (factsOn) exitFacts(); factsFile = fname || null; factsOpened = new Date(); G = g; PL.reset(); pinId = null; recent = []; if (listOn) exitList(); listTop = 0; renderRuler(); },
     range: function(){ return PL.range(); },
     row: function(id){ return P(id) ? PL.row(id) : ''; },
@@ -9319,10 +9326,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   }
 
   // ── Search (V3.10): normalised, token-based, typo-tolerant, no result cap ──
-  function norm(t) {
-    return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-      .replace(/[^a-z0-9]+/g, ' ').trim();
-  }
+  function norm(t) { return TreeLine.norm(t); }   // V6.51: was a–z / 0–9 only → Cyrillic and Hebrew names were not found
   function lev(a, b, max) {
     if (Math.abs(a.length - b.length) > max) return max + 1;
     var prev = [], cur, i, j;
@@ -9467,8 +9471,8 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
         return '<button type="button" class="ps-cat' + (c === searchCat ? ' is-on' : '') + '" role="tab" aria-selected="' + (c === searchCat) + '" data-cat="' + c + '"' + (cnt[c] ? '' : ' disabled') + '>' + SI[CAT_ICON[c]] + '<span>' + escHtml(t('search.cat.' + c)) + '</span><span class="ps-n">' + cnt[c] + '</span></button>'; }).join('') + '</div>';
       var all = searchCat === 'all', ic = function(k){ return '<span class="ps-ic" title="' + escHtml(t('search.tag.' + k)) + '">' + SI[k] + '<span class="ps-sr">' + escHtml(t('search.tag.' + k)) + '</span></span>'; }, tag = function(k){ return all ? '<span class="ps-tag" title="' + escHtml(t('search.tag.' + k)) + '">' + SI[k] + '<span class="ps-sr">' + escHtml(t('search.tag.' + k)) + '</span></span>' : ''; };   // V6.32: icon only, name for screen readers
       // V6.33: icon always FIRST in a fixed column (Pipedrive pattern), then name + years, snippet underneath
-      var pRow = function(p){ var y = p.birth ? (p.birth + (p.death ? '–' + p.death : '')) : ''; return '<div class="person-option ps-row" data-id="' + escHtml(p.id) + '">' + ic('person') + '<span class="ps-main"><span class="ps-head"><span class="person-option-name">' + escHtml(p.name) + '</span>' + (y ? '<span class="person-option-years">' + y + '</span>' : '') + '</span></span></div>'; };
-      var sRow = function(r, k){ var p = r.p, y = p.birth ? (p.birth + (p.death ? '–' + p.death : '')) : ''; return '<div class="person-option ps-row" data-id="' + escHtml(p.id) + '"' + (k === 'note' ? ' data-note="1"' : '') + '>' + ic(k) + '<span class="ps-main"><span class="ps-head"><span class="person-option-name">' + escHtml(p.name) + '</span>' + (y ? '<span class="person-option-years">' + y + '</span>' : '') + '</span><span class="po-snippet">' + r.snip + '</span></span></div>'; };
+      var pRow = function(p){ var y = p.birth ? (p.birth + (p.death ? '–' + p.death : '')) : ''; return '<div class="person-option ps-row" data-id="' + escHtml(p.id) + '">' + ic('person') + '<span class="ps-main"><span class="ps-head"><span class="person-option-name">' + escHtml(TreeLine.bidi(p.name)) + '</span>' + (y ? '<span class="person-option-years">' + y + '</span>' : '') + '</span></span></div>'; };
+      var sRow = function(r, k){ var p = r.p, y = p.birth ? (p.birth + (p.death ? '–' + p.death : '')) : ''; return '<div class="person-option ps-row" data-id="' + escHtml(p.id) + '"' + (k === 'note' ? ' data-note="1"' : '') + '>' + ic(k) + '<span class="ps-main"><span class="ps-head"><span class="person-option-name">' + escHtml(TreeLine.bidi(p.name)) + '</span>' + (y ? '<span class="person-option-years">' + y + '</span>' : '') + '</span><span class="po-snippet">' + r.snip + '</span></span></div>'; };
       var more = function(c, n){ return '<div class="person-option person-more" data-more="' + c + '">' + escHtml(t('search.showAll', { n: n })) + '</div>'; };
       var CAP = 300, list = '';
       if (all) {
@@ -9490,7 +9494,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       personDropdown.innerHTML = (results.length ? '<div class="person-count">' + escHtml(tn('common.people', results.length)) + '</div>' : '') + results.slice(0, plim).map(function(p) {
         var y = p.birth ? (p.birth + (p.death ? '–' + p.death : '')) : '';
         return '<div class="person-option" data-id="' + escHtml(p.id) + '">' +
-          '<span class="person-option-name">' + escHtml(p.name) + '</span>' +
+          '<span class="person-option-name">' + escHtml(TreeLine.bidi(p.name)) + '</span>' +
           (y ? '<span class="person-option-years">' + y + '</span>' : '') +
           '</div>';
       }).join('') +
@@ -9508,7 +9512,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       notes.slice(0, lim).map(function(r){
         var p = r.p, y = p.birth ? (p.birth + (p.death ? '–' + p.death : '')) : '';
         return '<div class="person-option po-note" data-id="' + escHtml(p.id) + '"' + (moreKey ? '' : ' data-note="1"') + '><div class="po-note-head">' +
-          '<span class="person-option-name">' + escHtml(p.name) + '</span>' + (y ? '<span class="person-option-years">' + y + '</span>' : '') +
+          '<span class="person-option-name">' + escHtml(TreeLine.bidi(p.name)) + '</span>' + (y ? '<span class="person-option-years">' + y + '</span>' : '') +
           '</div><div class="po-snippet">' + r.snip + '</div></div>';
       }).join('') +
       (notes.length > lim ? '<div class="person-option person-more" data-more="' + (moreKey || 'notes') + '">' + escHtml(t('search.showAll', { n: notes.length })) + '</div>' : '');
@@ -9569,7 +9573,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       var p = gedData.individuals.get(id); if (!p) return '';
       var y = p.birth ? (p.birth.year + (p.death && p.death.year ? '–' + p.death.year : '')) : '';
       return '<div class="person-option" data-id="' + escHtml(id) + '" data-nopin="1">' +
-        '<span class="person-option-name">' + (isPin ? '<span class="po-pin">' + PIN_ICON + '</span>' : '') + escHtml(p.name || t('name.unknown')) + '</span>' +
+        '<span class="person-option-name">' + (isPin ? '<span class="po-pin">' + PIN_ICON + '</span>' : '') + escHtml(TreeLine.bidi(p.name || t('name.unknown'))) + '</span>' +
         (y ? '<span class="person-option-years">' + y + '</span>' : '') + '</div>';
     }
     if (r.pin) h += '<div class="person-group">' + escHtml(t('search.pinned')) + '</div>' + row(r.pin, true);
@@ -9793,14 +9797,14 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.49', since: 'V5.45', date: [2026, 10, 24],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.51', since: 'V5.45', date: [2026, 10, 25],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
   notes: [
     "Fact cards: open them from a person’s profile to see their bloodline in numbers — when each generation was born, how long men and women lived, how the age at death changed over time, family sizes, places and given names.",
     "Missing data becomes a research list: every fact card shows who lacks a date, place or name. Open the list right on the card, or go through the people one by one with Find gaps.",
-    "Search shows People, Places and Notes. It also finds birthplaces and places where people lived.",
+    "Search shows People, Places and Notes. It also finds birthplaces and places where people lived. Names in Cyrillic and Hebrew are found too.",
     "Phone and tablet: the timeline now works on small screens and uses the full screen width. On a phone, tap a name to open the profile full screen; the arrow button brings you back to the timeline.",
     "All people: after you open a file, a list shows everyone in it — by last name, by name or by family. Pick a person to open their timeline."
   ],
