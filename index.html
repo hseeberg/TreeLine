@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.52</title>
+<title>TreeLine V6.54</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -5569,6 +5569,19 @@ Object.assign(I18N.en, {
   'fact.hint.names': 'Add given names and sex to the people in your family tree. Then this card fills in.'
 });
 /* V6.39 — unknown sex (flow card) + dashed small-n key, 12 languages */
+/* V6.53 — fact-card insight from small groups only (spec §23.8, §26.7) */
+Object.assign(I18N.en, { 'fact.ins.few': 'Groups are small (fewer than 30 people), so no firm conclusions can be drawn.' });
+Object.assign(I18N.et, { 'fact.ins.few': 'Grupid on väikesed (alla 30 inimese), seega kindlaid järeldusi teha ei saa.' });
+Object.assign(I18N.de, { 'fact.ins.few': 'Die Gruppen sind klein (weniger als 30 Personen), daher lassen sich keine sicheren Schlüsse ziehen.' });
+Object.assign(I18N.fi, { 'fact.ins.few': 'Ryhmät ovat pieniä (alle 30 henkilöä), joten varmoja johtopäätöksiä ei voi tehdä.' });
+Object.assign(I18N.sv, { 'fact.ins.few': 'Grupperna är små (färre än 30 personer), så inga säkra slutsatser kan dras.' });
+Object.assign(I18N.es, { 'fact.ins.few': 'Los grupos son pequeños (menos de 30 personas), así que no se pueden sacar conclusiones firmes.' });
+Object.assign(I18N.fr, { 'fact.ins.few': 'Les groupes sont petits (moins de 30 personnes) : impossible d’en tirer des conclusions sûres.' });
+Object.assign(I18N.nl, { 'fact.ins.few': 'De groepen zijn klein (minder dan 30 personen), dus harde conclusies zijn niet mogelijk.' });
+Object.assign(I18N.lv, { 'fact.ins.few': 'Grupas ir mazas (mazāk nekā 30 cilvēku), tāpēc drošus secinājumus izdarīt nevar.' });
+Object.assign(I18N.lt, { 'fact.ins.few': 'Grupės mažos (mažiau nei 30 žmonių), todėl tvirtų išvadų daryti negalima.' });
+Object.assign(I18N.no, { 'fact.ins.few': 'Gruppene er små (færre enn 30 personer), så det kan ikke trekkes sikre konklusjoner.' });
+Object.assign(I18N.da, { 'fact.ins.few': 'Grupperne er små (færre end 30 personer), så der kan ikke drages sikre konklusioner.' });
 Object.assign(I18N.en, { 'pp.missSex': 'Sex', 'gaps.short.sex': 'sex', 'fact.drawer.gaps.sex': 'Sex unknown', 'fact.sex.u': 'Sex unknown', 'fact.flow.unkHint': { one: 'Sex unknown: {n} person. Click to see them in a Find gaps list.', other: 'Sex unknown: {n} people. Click to see them in a Find gaps list.' }, 'fact.flow.unkRule': 'Grey = sex unknown in the file. Click the grey block or Find gaps to see these people.', 'fact.ag.smallKey': 'Dashed outline = fewer than 30 people. Too few to draw conclusions.' });
 Object.assign(I18N.et, { 'pp.missSex': 'Sugu', 'gaps.short.sex': 'sugu', 'fact.drawer.gaps.sex': 'Sugu teadmata', 'fact.sex.u': 'Sugu teadmata', 'fact.flow.unkHint': { one: 'Sugu teadmata: {n} inimene. Klõpsa, et näha teda Leia lüngad nimekirjas.', other: 'Sugu teadmata: {n} inimest. Klõpsa, et näha neid Leia lüngad nimekirjas.' }, 'fact.flow.unkRule': 'Hall = sugu failis teadmata. Klõpsa hallil plokil või Leia lüngad nupul, et neid inimesi näha.', 'fact.ag.smallKey': 'Katkendjoon = alla 30 inimese. Järelduste tegemiseks liiga vähe.' });
 Object.assign(I18N.de, { 'pp.missSex': 'Geschlecht', 'gaps.short.sex': 'Geschlecht', 'fact.drawer.gaps.sex': 'Geschlecht unbekannt', 'fact.sex.u': 'Geschlecht unbekannt', 'fact.flow.unkHint': { one: 'Geschlecht unbekannt: {n} Person. Klicken, um sie in einer Lücken-Liste zu sehen.', other: 'Geschlecht unbekannt: {n} Personen. Klicken, um sie in einer Lücken-Liste zu sehen.' }, 'fact.flow.unkRule': 'Grau = Geschlecht in der Datei unbekannt. Klicke auf den grauen Block oder auf Lücken finden, um diese Personen zu sehen.', 'fact.ag.smallKey': 'Gestrichelt umrandet = weniger als 30 Personen. Zu wenige für Schlüsse.' });
@@ -8867,8 +8880,11 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   function cols(keys, vals, labelOf, showLabel, aria, ns, subs) {   // ns (V6.24): `n=` line, n < 30 hatched · subs (V6.29): birth-year span line
     var max = Math.max.apply(null, vals.concat([1])), h = '<div class="fc-cols-scroll"><div class="fc-cols' + (subs ? ' has-sub' : '') + '" role="img" aria-label="' + esc(aria) + '">';
     var dec = vals.some(function(v){ return v % 1 !== 0; }), fmtV = function(v){ if (!dec) return fNum(v); try { return v.toLocaleString(tLang() === 'xx' ? 'en' : tLang() === 'no' ? 'nb' : tLang(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }); } catch (_) { return v.toFixed(1); } };   // V6.31: averages keep one decimal (4,0 not 4)
+    // V6.53 (owner 2026-10-25): with n given, the highlight goes only to a group with n ≥ 30; no such group → the largest of all (insight adds `fact.ins.few`)
+    var hlVals = ns ? vals.filter(function(v, i){ return ns[i] >= 30; }) : vals, hlMax = hlVals.length ? Math.max.apply(null, hlVals) : max, hlDone = false;
     keys.forEach(function(k, i){
-      var v = vals[i], top = v === max, small = ns && ns[i] < 30;
+      var v = vals[i], top = !hlDone && v === hlMax && (!ns || !hlVals.length || ns[i] >= 30), small = ns && ns[i] < 30;
+      if (top) hlDone = true;
       h += '<div class="fc-col' + (top ? ' is-max' : '') + (small ? ' is-small' : '') + '"><span class="fc-plot"><span class="fc-val">' + fmtV(v) + '</span><span class="fc-bar" style="height:' + Math.max(2, Math.round(v / max * 150)) + 'px"></span></span><span class="fc-lab">' + (showLabel(k, i) ? esc(labelOf(k)) : '') + '</span>' + (subs ? '<span class="fc-sub">' + esc(subs[i] || '') + '</span>' : '') + (ns ? '<span class="fc-n">' + esc(t('fact.nShort', { n: fNum(ns[i]) })) + '</span>' : '') + '</div>';
     });
     return h + '</div></div>';
@@ -9077,11 +9093,12 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     fk = gk.filter(function(k){ return R.fam[k]; });   // V6.40: generation keys, same order as People per generation
     var fOk = fk.filter(function(k){ return R.fam[k].length >= MIN_N; });
     var favg = function(k){ var a = R.fam[k], sm = 0; a.forEach(function(v){ sm += v; }); return Math.round(sm / a.length * 10) / 10; };
-    var fBest = fOk.reduce(function(m, k){ return m == null || favg(k) > favg(m) ? k : m; }, null), fSmall = fOk.some(function(k){ return R.fam[k].length < 30; });
+    var fRel = fOk.filter(function(k){ return R.fam[k].length >= 30; }), fFew = !fRel.length;   // V6.53: insight only from n ≥ 30
+    var fBest = (fFew ? fOk : fRel).reduce(function(m, k){ return m == null || favg(k) > favg(m) ? k : m; }, null), fSmall = fOk.some(function(k){ return R.fam[k].length < 30; });
     var famN = fk.reduce(function(m, k){ return m + R.fam[k].length; }, 0);
     time += card2({ title: t('fact.c.fam'), cls: 'fc-full',
       after: smallLegend(fSmall), body: fOk.length ? cols(fOk, fOk.map(favg), gLab, function(){ return true; }, fOk.map(function(k){ return gAria(k) + ' (' + t('fact.bornSpan', { s: genSpan(R, k) || '?' }) + '): ' + favg(k) + ' (n=' + R.fam[k].length + ')'; }).join(', '), fOk.map(function(k){ return R.fam[k].length; }), fOk.map(function(k){ return genSpan(R, k); })) : ghost('cols', t('fact.why.fam', { min: MIN_N }), t('fact.hint.fam')),
-      insight: fBest != null ? esc(t('fact.ins.fam', { p: t('fact.genShort', { g: gLab(fBest) }) + (genSpan(R, fBest) ? ' (' + t('fact.bornSpan', { s: genSpan(R, fBest) }) + ')' : ''), a: fNum(favg(fBest)) })) : '',
+      insight: fBest != null ? esc(t('fact.ins.fam', { p: t('fact.genShort', { g: gLab(fBest) }) + (genSpan(R, fBest) ? ' (' + t('fact.bornSpan', { s: genSpan(R, fBest) }) + ')' : ''), a: fNum(favg(fBest)) }) + (fFew ? ' ' + t('fact.ins.few') : '')) : '',
       rules: [esc(t('fact.fam.rule', { n: fNum(famN) })), esc(t('fact.fam.childless')), esc(t('fact.fam.recent')), esc(t('fact.note.adopt'))] });
     var lifeGaps = gapBtn('life', R.gapIds.life);
     // V6.33: men vs women side by side per generation (same rules per sex: n ≥ 10, ≤ 20 % alive; n < 30 hatched)
@@ -9109,7 +9126,9 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       return { sx: sx, ok: ok, html: '<div class="fc-agpart"><p class="fc-agsex"><i class="' + sx.toLowerCase() + '"></i>' + esc(t(sx === 'M' ? 'fact.sex.m' : 'fact.sex.f')) + '</p>' + (ok.length ? ageArea(ok, perS[sx], AG, aw, sx) : ghost('area', whyLife(perS[sx], R.perPopS[sx]), t('fact.hint.life'), aw, sx)) + hiddenLine(hid) + '</div>', small: small };
     });
     var anyAg = agParts.some(function(x){ return x.ok.length; }), pSmall = agParts.some(function(x){ return x.small; });
-    var insAg = agParts.filter(function(x){ return x.ok.length >= 2; }).map(function(x){ var o = x.ok, a = perS[x.sx]; return t('fact.ins.agSex', { who: t(x.sx === 'M' ? 'fact.sex.m' : 'fact.sex.f'), a: med(a[o[0]]), p1: o[0] + '–' + (o[0] + 49), b: med(a[o[o.length - 1]]), p2: o[o.length - 1] + '–' + (o[o.length - 1] + 49) }); }).join(' ');
+    var agFew = false;   // V6.53: compare the first and last periods with n ≥ 30; fewer than 2 such periods → all periods + `fact.ins.few`
+    var insAg = agParts.filter(function(x){ return x.ok.length >= 2; }).map(function(x){ var a = perS[x.sx], rel = x.ok.filter(function(k){ return a[k].length >= 30; }), o = rel.length >= 2 ? rel : x.ok; if (o === x.ok) agFew = true; return t('fact.ins.agSex', { who: t(x.sx === 'M' ? 'fact.sex.m' : 'fact.sex.f'), a: med(a[o[0]]), p1: o[0] + '–' + (o[0] + 49), b: med(a[o[o.length - 1]]), p2: o[o.length - 1] + '–' + (o[o.length - 1] + 49) }); }).join(' ');
+    if (insAg && agFew) insAg += ' ' + t('fact.ins.few');
     time += card2({ title: t('fact.c.ageGroups'), cls: 'fc-full', insight: esc(insAg),
       body: anyAg ? '<div class="fc-agsplit' + (two ? ' two' : '') + '">' + agParts.map(function(x){ return x.html; }).join('') + '</div>' : ghost('area', whyLife(per, R.perPop), t('fact.hint.life'), avail, null),
       after: anyAg && pSmall ? '<p class="fc-small-key"><i class="dash" aria-hidden="true"></i>' + esc(t('fact.ag.smallKey')) + '</p>' : '',
@@ -9842,7 +9861,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.52', since: 'V5.45', date: [2026, 10, 25],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.54', since: 'V5.45', date: [2026, 10, 25],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
