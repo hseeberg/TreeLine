@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.51</title>
+<title>TreeLine V6.52</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -315,6 +315,8 @@ svg text { font-family: var(--font); }
 /* Links in the chart */
 .name-link, .sib-link, .spouse-link { cursor: pointer; }
 .name-link:hover, .sib-link:hover, .spouse-link:hover { text-decoration: underline; text-decoration-thickness: 1.5px; fill: var(--header-title); }
+.focal-name[data-act] { cursor: pointer; }   /* V6.52: tap / click opens the profile again */
+@media (hover: hover) { .focal-name[data-act]:hover { text-decoration: underline; text-decoration-thickness: 1.5px; } }
 .unknown-parent { font-style: italic; opacity: 0.8; }
 
 /* ── Person search ── */
@@ -7471,7 +7473,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
           var bar = barSVG(p, id, barY, true, defs, solidEnd);
           var lx = bar.x - 16, sex = sexKey(p);
           layer3.push(bar.svg);
-          layer3.push('<text class="anc-name-' + sex + (isFocal ? ' focal-name' : ' name-link') + '" x="' + f1(lx) + '" y="' + f1(barY + 12) + '" text-anchor="end" data-pid="' + esc(id) + '"' + (isFocal ? '' : ' data-act="focus-anc" data-level="' + lvl + '"') + '>' + labelHtml(p) + '</text>');
+          layer3.push('<text class="anc-name-' + sex + (isFocal ? ' focal-name' : ' name-link') + '" x="' + f1(lx) + '" y="' + f1(barY + 12) + '" text-anchor="end" data-pid="' + esc(id) + '"' + (isFocal ? ' data-act="profile"' : ' data-act="focus-anc" data-level="' + lvl + '"') + '>' + labelHtml(p) + '</text>');
           spouses.forEach(function(sid, i){
             var sp = P(sid), link = spouseHasData(sid), ssex = sexKey(sp), py = barY + 34 + i * PARTNER_STEP;
             var onLine = lvl > 0;   // V5.16: both parents/ancestors in primary colour
@@ -8152,9 +8154,18 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   }
   document.addEventListener('click', function(e){
     if (!e.target.closest('[data-viewswitch]') || !G || !ppShown || !P(ppShown)) return;
+    if (NARROW.matches) phoneCloseProfile();          // V6.52: phone — the profile closes, the chosen view is shown (spec §21.3)
     if (listOn) window.TreeLine.show(ppShown, true);   // rule 2: open on the timeline, pin is set (same as search)
     else enterList(ppShown);                         // rule 4: list, person highlighted
   });
+  // V6.52: close the full-screen profile WITHOUT history.back(). Back would fire popstate, and popstate closes the List view
+  // and redraws the timeline — that is why `Show in the list` looked like it did nothing (V6.51 bug).
+  // The profile's history entry is turned into a plain timeline entry, so system Back from the list returns to the timeline.
+  function phoneCloseProfile() {
+    ppPush = false; wantProfile = false;
+    if (ppPushed) { ppPushed = false; if (state) history.replaceState({ focal: state.focal, ov: state.ov }, '', location.hash); }
+    ppCollapsed = true; document.body.classList.add('profile-collapsed');
+  }
   function cleanNm(s) { return GEDCOMParser.cleanName(s); } // V5.45: one rule for every name (parser §3.1)
   function sec(title, inner) { return '<section class="pp-sec"><h3>' + esc(title) + '</h3>' + inner + '</section>'; }
   (function(){
@@ -8170,6 +8181,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   })();
   // V6.16 phone: close = back to the timeline (button, Esc, system Back); tap on a name or a list row opens the profile
   function closeProfileNarrow() {
+    ppPush = false;   // V6.52: a profile opened from the List view never pushed its entry → the pending push must not leak into the next timeline draw
     if (ppPushed) { ppPushed = false; history.back(); return; }
     ppCollapsed = true; document.body.classList.add('profile-collapsed');
   }
@@ -8181,7 +8193,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   document.getElementById('listView').addEventListener('click', function(e){ if (e.target.closest('.pl-row')) wantProfile = true; }, true);
   window.addEventListener('popstate', function(){
     if (!NARROW.matches) return;
-    ppPushed = false;
+    ppPushed = false; ppPush = false;   // V6.52
     if (document.body.classList.contains('has-profile') && !document.body.classList.contains('profile-collapsed')) { ppCollapsed = true; document.body.classList.add('profile-collapsed'); }
   });
   document.addEventListener('keydown', function(e){
@@ -8286,6 +8298,14 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     else history.replaceState({ focal: st.focal, ov: st.ov }, '', h);
     if (ppPush) { ppPush = false; if (!ppPushed) { history.pushState({ focal: st.focal, ov: st.ov, pp: 1 }, '', h); ppPushed = true; } }
   }
+  // V6.52: the profile was closed (phone) or folded to the rail (desktop) → the selected person's name opens it again
+  function openFocalProfile() {
+    if (!state) return;
+    if (NARROW.matches) {
+      wantProfile = true; renderProfile(state.focal);
+      if (ppPush) { ppPush = false; if (!ppPushed) { history.pushState({ focal: state.focal, ov: state.ov, pp: 1 }, '', location.hash); ppPushed = true; } }
+    } else if (ppCollapsed || document.body.classList.contains('profile-collapsed')) document.getElementById('ppToggle').click();
+  }
   window.addEventListener('popstate', function(e){
     if (G && e.state && e.state.focal && P(e.state.focal)) { if (listOn) exitList(); state = { focal: e.state.focal, ov: e.state.ov || {} }; render(); }
   });
@@ -8296,6 +8316,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var L = lineage(state), ov = {}, j;
     navMode = act === 'swap' ? 'up' : 'down'; navPid = pid;
     if (act === 'select') { navMode = 'full'; go({ focal: pid, ov: {} }, true); return; }
+    if (act === 'profile') { openFocalProfile(); return; }   // V6.52: tap on the selected person's name = open the profile again (no redraw)
     if (act === 'swap') {
       if (lvl === 0) { go({ focal: pid, ov: {} }, true); return; }
       for (j = 1; j < lvl; j++) ov[j] = L[j];
@@ -9542,17 +9563,41 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var left = Math.max(12, Math.min(r.left + r.width / 2 - W / 2, vw - 12 - W));
     st.width = W + 'px'; st.right = 'auto'; st.left = (fixed ? left : left - r.left) + 'px';
   }
+  // V6.52: visible bottom edge = top of the phone keyboard. Android Chrome and iOS Safari shrink only the visual viewport
+  // when the keyboard opens (window.innerHeight stays the full height) → the list was placed behind the keyboard.
+  function visBottom() { var v = window.visualViewport; return v ? v.offsetTop + v.height : window.innerHeight; }
   function placeDropdown() {
     var dd = personDropdown, st = dd.style;
-    if (dd.classList.contains('open') && !dd.closest('.empty-state')) { st.position = st.zIndex = st.top = st.bottom = st.maxHeight = ''; centreDropdown(dd.parentNode.getBoundingClientRect(), false); return; }
+    if (dd.classList.contains('open') && !dd.closest('.empty-state')) {
+      st.position = st.zIndex = st.top = st.bottom = st.maxHeight = ''; centreDropdown(dd.parentNode.getBoundingClientRect(), false);
+      var room = visBottom() - dd.getBoundingClientRect().top - 12;   // V6.52: header search — the list ends at the keyboard
+      if (room < dd.getBoundingClientRect().height) st.maxHeight = Math.max(160, room) + 'px';
+      return;
+    }
     if (!dd.classList.contains('open') || !dd.closest('.empty-state')) { st.position = st.zIndex = st.left = st.top = st.bottom = st.width = st.maxHeight = st.right = ''; return; }
-    var r = dd.parentNode.getBoundingClientRect(), below = window.innerHeight - r.bottom - 22, hb = document.querySelector('.header').getBoundingClientRect().bottom, above = r.top - Math.max(0, hb) - 18;   // upward list stops under the header
+    var r = dd.parentNode.getBoundingClientRect(), below = visBottom() - r.bottom - 22, hb = document.querySelector('.header').getBoundingClientRect().bottom, above = r.top - Math.max(0, hb) - 18;   // upward list stops under the header
     st.position = 'fixed'; st.zIndex = '120'; centreDropdown(r, true);
     if (below >= 240 || below >= above) { st.top = (r.bottom + 6) + 'px'; st.bottom = 'auto'; st.maxHeight = Math.min(640, below) + 'px'; }
     else { st.top = 'auto'; st.bottom = (window.innerHeight - r.top + 6) + 'px'; st.maxHeight = Math.min(640, above) + 'px'; }   // little room below → opens upward
   }
   window.addEventListener('scroll', function(){ if (personDropdown.classList.contains('open')) placeDropdown(); }, true);
   window.addEventListener('resize', function(){ if (personDropdown.classList.contains('open')) placeDropdown(); });
+  if (window.visualViewport) ['resize', 'scroll'].forEach(function(ev){ window.visualViewport.addEventListener(ev, function(){ if (personDropdown.classList.contains('open')) placeDropdown(); }); });   // V6.52: keyboard opens / closes
+  // V6.52: phone, start page — tapping the search moves the field up under the header (smooth), so the results get the
+  // space between the field and the keyboard. Only on narrow screens (same query as the phone layout, spec §21.3).
+  var LIFT = window.matchMedia('(max-width: 700px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse)');
+  function liftSearch() {
+    if (!LIFT.matches || !personInput.closest('.empty-state')) return;
+    var sc = personInput.parentNode; while (sc && sc !== document.body) { var oy = getComputedStyle(sc).overflowY; if ((oy === 'auto' || oy === 'scroll') && sc.scrollHeight > sc.clientHeight) break; sc = sc.parentNode; }
+    if (!sc || sc === document.body) sc = document.scrollingElement;
+    var top = sc === document.scrollingElement ? 0 : sc.getBoundingClientRect().top;
+    var hd = document.querySelector('.header'), pos = getComputedStyle(hd).position, hb = (pos === 'fixed' || pos === 'sticky' || sc !== document.scrollingElement) ? Math.max(0, hd.getBoundingClientRect().bottom) : 0, y = Math.max(top, hb) + 12;   // a header that scrolls away with the page takes no room
+    var d = personInput.getBoundingClientRect().top - y; if (Math.abs(d) < 4) return;
+    var rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    sc.scrollBy({ top: d, behavior: rm ? 'auto' : 'smooth' });
+  }
+  personInput.addEventListener('focus', liftSearch);
+  personInput.addEventListener('click', liftSearch);   // the field can already have focus (start page focuses it after loading)
   function closeDropdown() {
     personDropdown.classList.remove('open');
     kbdIdx = -1;
@@ -9797,7 +9842,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.51', since: 'V5.45', date: [2026, 10, 25],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.52', since: 'V5.45', date: [2026, 10, 25],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
