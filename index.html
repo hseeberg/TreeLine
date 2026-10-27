@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.55</title>
+<title>TreeLine V6.57</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -2071,9 +2071,22 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
   .empty-state { margin-top: 7vh; min-height: clamp(600px, calc(100vh - 72px - 14vh), 860px); }
   .hero-visual { padding-top: 110px; }
 }
+/* ═══ V6.56–V6.57 a11y — visible only with keyboard focus ═══ */
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+.skip-link { position: fixed; top: 14px; left: 14px; z-index: 10000; transform: translateY(calc(-100% - 80px)); padding: 12px 18px; border-radius: 12px; background: #FFFFFF; color: #1E1A26; font-family: inherit; font-weight: 600; font-size: 15px; line-height: 1.2; text-decoration: none; box-shadow: none; }
+.skip-link:focus { transform: none; box-shadow: 0 8px 24px rgba(36,32,44,0.25); outline: 2px solid var(--header-accent); outline-offset: 3px; }
+@media (prefers-reduced-motion: no-preference) { .skip-link { transition: transform 0.15s ease-out; } }
+#mainSvg text[role="button"]:focus { outline: none; }
+.kb-ring { fill: color-mix(in srgb, var(--header-accent) 12%, transparent); stroke: var(--header-accent); stroke-width: 2px; pointer-events: none; }
+@media (forced-colors: active) { .kb-ring { fill: none; stroke: Highlight; } }
+/* V6.57 — focus in the menu and pop-ups: the header's white focus ring was invisible on the white menu (WCAG 2.4.7) */
+#settingsMenu :focus-visible, #gapsPop :focus-visible, #aboutPop :focus-visible { outline-color: var(--header-accent); }
+#settingsMenu :is(.menu-item, .theme-option, .menu-help summary):focus-visible { background: var(--accent-tint); outline: 2px solid var(--header-accent); outline-offset: -2px; }
+#settingsMenu .lang-sel:focus-visible { outline: 2px solid var(--header-accent); outline-offset: 2px; border-color: var(--header-accent); }
 </style>
 </head>
 <body class="is-start">
+<a class="skip-link" id="skipLink" href="#emptyState">Skip to content</a>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
   <linearGradient id="tlSunset" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6E4260"/><stop offset="0.45" stop-color="#8E5468"/><stop offset="1" stop-color="#A85D46"/></linearGradient>
   <linearGradient id="tlSunsetH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7A4864"/><stop offset="0.5" stop-color="#985A66"/><stop offset="1" stop-color="#A85D46"/></linearGradient>
@@ -2162,18 +2175,20 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
   </div>
 </div>
 
+<div class="timeline-outer" id="timelineOuter">
+  <div class="sticky-ruler-wrap" id="rulerWrap">
+    <svg viewBox="0 0 1680 34" xmlns="http://www.w3.org/2000/svg" class="ruler-svg" id="rulerSvg"></svg>
+  </div>
+  <svg class="main-svg" id="mainSvg" viewBox="0 0 1680 100" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div id="a11yHidden" class="sr-only"><h1 id="tlTitle">Timeline</h1><p id="tlHelp"></p></div>
+</div>
 <aside class="profile-panel" id="profilePanel" aria-label="Profile" data-i18n-aria="pp.aria" hidden>
   <button class="pp-toggle" id="ppToggle" aria-expanded="true" title="Hide profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span class="pp-rail-label" data-i18n="pp.rail">Profile</span></button>
   <button class="pp-pin pp-rail-pin" type="button" data-pin aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg></button>
   <div class="gaps-bar" id="gapsBar" hidden></div>
   <div class="pp-scroll" id="ppBody"></div>
 </aside>
-<div class="timeline-outer" id="timelineOuter">
-  <div class="sticky-ruler-wrap" id="rulerWrap">
-    <svg viewBox="0 0 1680 34" xmlns="http://www.w3.org/2000/svg" class="ruler-svg" id="rulerSvg"></svg>
-  </div>
-  <svg class="main-svg" id="mainSvg" viewBox="0 0 1680 100" xmlns="http://www.w3.org/2000/svg"></svg>
-</div>
+<div id="a11yLive" class="sr-only" aria-live="polite"></div>
 
 <main class="list-view" id="listView" aria-label="All people" data-i18n-aria="list.title" hidden></main>
 <main class="facts-view" id="factsView" aria-label="Fact card" data-i18n-aria="fact.btn" hidden></main>
@@ -5522,6 +5537,33 @@ window.TLPops = (function(){
 })();
 </script>
 
+<script>
+/* V6.57 a11y texts (spec §28) — 12 languages. Screen reader only, except a11y.skip. Not native-reviewed (et with owner). */
+Object.assign(I18N.en, {"a11y.rel.father": "father", "a11y.rel.mother": "mother", "a11y.rel.parent": "parent", "a11y.rel.gf": "grandfather", "a11y.rel.gm": "grandmother", "a11y.rel.gp": "grandparent", "a11y.rel.ggf": "great-grandfather", "a11y.rel.ggm": "great-grandmother", "a11y.rel.ggp": "great-grandparent", "a11y.rel.ancN": "ancestor {n} generations back", "a11y.rel.son": "son", "a11y.rel.daughter": "daughter", "a11y.rel.child": "child", "a11y.rel.grandson": "grandson", "a11y.rel.granddaughter": "granddaughter", "a11y.rel.grandchild": "grandchild", "a11y.rel.ggc": "great-grandchild", "a11y.rel.descN": "descendant {n} generations down", "a11y.rel.brother": "brother", "a11y.rel.sister": "sister", "a11y.rel.sibling": "sibling", "a11y.rel.hbrother": "half-brother", "a11y.rel.hsister": "half-sister", "a11y.rel.hsibling": "half-sibling", "a11y.rel.uncle": "uncle", "a11y.rel.aunt": "aunt", "a11y.rel.psib": "parent’s sibling", "a11y.rel.guncle": "great-uncle", "a11y.rel.gaunt": "great-aunt", "a11y.rel.gpsib": "grandparent’s sibling", "a11y.rel.ancSibN": "sibling of an ancestor {n} generations back", "a11y.rel.husband": "husband", "a11y.rel.wife": "wife", "a11y.rel.spouse": "spouse", "a11y.rel.partner": "partner", "a11y.rel.sonInLaw": "son-in-law", "a11y.rel.daughterInLaw": "daughter-in-law", "a11y.rel.childInLaw": "child’s partner", "a11y.rel.partnerDesc": "partner of a descendant", "a11y.rel.partnerAnc": "partner of an ancestor", "a11y.rel.relative": "relative", "a11y.born": "Born {y}", "a11y.bornUnknown": "Birth year unknown.", "a11y.died": "Died {y}", "a11y.diedUnknown": "Death year unknown.", "a11y.living": "Living.", "a11y.yAbout": "about {y}", "a11y.yBefore": "before {y}", "a11y.yAfter": "after {y}", "a11y.yOr": "{a} or {b}", "a11y.yBetween": "between {a} and {b}", "a11y.parBoth": "Born when the father was {f} and the mother {m}.", "a11y.parF": "Born when the father was {n}.", "a11y.parM": "Born when the mother was {n}.", "a11y.atBirth": "Was {n} when the selected person was born.", "a11y.noOverlap": "Did not live at the same time as the selected person.", "a11y.actProfile": "Enter opens the profile.", "a11y.actSelect": "Enter makes this the selected person.", "a11y.actPromote": "Enter makes this the selected person and shows their descendants.", "a11y.actSwap": "Enter shows this person’s family line.", "a11y.short": "Short descriptions: name and relation.", "a11y.full": "Full descriptions.", "a11y.ppOpen": "Profile open. Press Tab to read it.", "a11y.help": "Use the up and down arrow keys to move between people. Left arrow: short descriptions. Right arrow: full descriptions. Enter selects the person and opens the profile. Tab moves to the profile.", "a11y.fcTop": "First: {v}.", "a11y.fcMost": "Most common: {v}.", "a11y.diedBefore": {"one": "Died {n} year before the selected person was born.", "other": "Died {n} years before the selected person was born."}, "a11y.overlap": {"one": "Lived at the same time as the selected person for {n} year.", "other": "Lived at the same time as the selected person for {n} years."}});
+Object.assign(I18N.et, {"a11y.rel.father": "isa", "a11y.rel.mother": "ema", "a11y.rel.parent": "vanem", "a11y.rel.gf": "vanaisa", "a11y.rel.gm": "vanaema", "a11y.rel.gp": "vanavanem", "a11y.rel.ggf": "vanavanaisa", "a11y.rel.ggm": "vanavanaema", "a11y.rel.ggp": "vanavanavanem", "a11y.rel.ancN": "esivanem {n} põlvkonda tagasi", "a11y.rel.son": "poeg", "a11y.rel.daughter": "tütar", "a11y.rel.child": "laps", "a11y.rel.grandson": "lapselaps", "a11y.rel.granddaughter": "lapselaps", "a11y.rel.grandchild": "lapselaps", "a11y.rel.ggc": "lapselapselaps", "a11y.rel.descN": "järeltulija {n} põlvkonda edasi", "a11y.rel.brother": "vend", "a11y.rel.sister": "õde", "a11y.rel.sibling": "õde või vend", "a11y.rel.hbrother": "poolvend", "a11y.rel.hsister": "poolõde", "a11y.rel.hsibling": "poolõde või -vend", "a11y.rel.uncle": "onu", "a11y.rel.aunt": "tädi", "a11y.rel.psib": "vanema õde või vend", "a11y.rel.guncle": "vanaonu", "a11y.rel.gaunt": "vanatädi", "a11y.rel.gpsib": "vanavanema õde või vend", "a11y.rel.ancSibN": "esivanema õde või vend, {n} põlvkonda tagasi", "a11y.rel.husband": "abikaasa", "a11y.rel.wife": "abikaasa", "a11y.rel.spouse": "abikaasa", "a11y.rel.partner": "elukaaslane", "a11y.rel.sonInLaw": "väimees", "a11y.rel.daughterInLaw": "minia", "a11y.rel.childInLaw": "lapse elukaaslane", "a11y.rel.partnerDesc": "järeltulija elukaaslane", "a11y.rel.partnerAnc": "esivanema elukaaslane", "a11y.rel.relative": "sugulane", "a11y.born": "Sündis {y}", "a11y.bornUnknown": "Sünniaasta teadmata.", "a11y.died": "Suri {y}", "a11y.diedUnknown": "Surmaaasta teadmata.", "a11y.living": "Elus.", "a11y.yAbout": "umbes {y}", "a11y.yBefore": "enne {y}", "a11y.yAfter": "pärast {y}", "a11y.yOr": "{a} või {b}", "a11y.yBetween": "{a} ja {b} vahel", "a11y.parBoth": "Sündis, kui isa oli {f} ja ema {m}.", "a11y.parF": "Sündis, kui isa oli {n}.", "a11y.parM": "Sündis, kui ema oli {n}.", "a11y.atBirth": "Oli {n}, kui valitud isik sündis.", "a11y.noOverlap": "Ei elanud valitud isikuga samal ajal.", "a11y.actProfile": "Enter avab profiili.", "a11y.actSelect": "Enter teeb selle valitud isikuks.", "a11y.actPromote": "Enter teeb selle valitud isikuks ja näitab tema järeltulijaid.", "a11y.actSwap": "Enter näitab tema suguvõsa.", "a11y.short": "Lühikesed kirjeldused: nimi ja suhe.", "a11y.full": "Täielikud kirjeldused.", "a11y.ppOpen": "Profiil on avatud. Lugemiseks vajuta Tab.", "a11y.help": "Liigu inimeste vahel nooleklahvidega üles ja alla. Vasak nool: lühikesed kirjeldused. Parem nool: täielikud kirjeldused. Enter valib inimese ja avab profiili. Tab viib profiilile.", "a11y.fcTop": "Esimene: {v}.", "a11y.fcMost": "Kõige sagedasem: {v}.", "a11y.diedBefore": {"one": "Suri {n} aasta enne valitud isiku sündi.", "other": "Suri {n} aastat enne valitud isiku sündi."}, "a11y.overlap": {"one": "Elas valitud isikuga samal ajal {n} aasta.", "other": "Elas valitud isikuga samal ajal {n} aastat."}});
+Object.assign(I18N.de, {"a11y.rel.father": "Vater", "a11y.rel.mother": "Mutter", "a11y.rel.parent": "Elternteil", "a11y.rel.gf": "Großvater", "a11y.rel.gm": "Großmutter", "a11y.rel.gp": "Großelternteil", "a11y.rel.ggf": "Urgroßvater", "a11y.rel.ggm": "Urgroßmutter", "a11y.rel.ggp": "Urgroßelternteil", "a11y.rel.ancN": "Vorfahr, {n} Generationen zurück", "a11y.rel.son": "Sohn", "a11y.rel.daughter": "Tochter", "a11y.rel.child": "Kind", "a11y.rel.grandson": "Enkel", "a11y.rel.granddaughter": "Enkelin", "a11y.rel.grandchild": "Enkelkind", "a11y.rel.ggc": "Urenkelkind", "a11y.rel.descN": "Nachkomme, {n} Generationen weiter", "a11y.rel.brother": "Bruder", "a11y.rel.sister": "Schwester", "a11y.rel.sibling": "Geschwister", "a11y.rel.hbrother": "Halbbruder", "a11y.rel.hsister": "Halbschwester", "a11y.rel.hsibling": "Halbgeschwister", "a11y.rel.uncle": "Onkel", "a11y.rel.aunt": "Tante", "a11y.rel.psib": "Geschwister eines Elternteils", "a11y.rel.guncle": "Großonkel", "a11y.rel.gaunt": "Großtante", "a11y.rel.gpsib": "Geschwister eines Großelternteils", "a11y.rel.ancSibN": "Geschwister eines Vorfahren, {n} Generationen zurück", "a11y.rel.husband": "Ehemann", "a11y.rel.wife": "Ehefrau", "a11y.rel.spouse": "Ehepartner", "a11y.rel.partner": "Partner", "a11y.rel.sonInLaw": "Schwiegersohn", "a11y.rel.daughterInLaw": "Schwiegertochter", "a11y.rel.childInLaw": "Partner eines Kindes", "a11y.rel.partnerDesc": "Partner eines Nachkommen", "a11y.rel.partnerAnc": "Partner eines Vorfahren", "a11y.rel.relative": "Verwandter", "a11y.born": "Geboren {y}", "a11y.bornUnknown": "Geburtsjahr unbekannt.", "a11y.died": "Gestorben {y}", "a11y.diedUnknown": "Sterbejahr unbekannt.", "a11y.living": "Lebt.", "a11y.yAbout": "um {y}", "a11y.yBefore": "vor {y}", "a11y.yAfter": "nach {y}", "a11y.yOr": "{a} oder {b}", "a11y.yBetween": "zwischen {a} und {b}", "a11y.parBoth": "Bei der Geburt war der Vater {f} und die Mutter {m}.", "a11y.parF": "Bei der Geburt war der Vater {n}.", "a11y.parM": "Bei der Geburt war die Mutter {n}.", "a11y.atBirth": "War {n}, als die ausgewählte Person geboren wurde.", "a11y.noOverlap": "Lebte nicht zur selben Zeit wie die ausgewählte Person.", "a11y.actProfile": "Enter öffnet das Profil.", "a11y.actSelect": "Enter macht diese Person zur ausgewählten Person.", "a11y.actPromote": "Enter macht diese Person zur ausgewählten Person und zeigt ihre Nachkommen.", "a11y.actSwap": "Enter zeigt die Familienlinie dieser Person.", "a11y.short": "Kurze Beschreibungen: Name und Beziehung.", "a11y.full": "Vollständige Beschreibungen.", "a11y.ppOpen": "Profil geöffnet. Mit Tab lesen.", "a11y.help": "Mit den Pfeiltasten nach oben und unten zwischen Personen wechseln. Pfeil links: kurze Beschreibungen. Pfeil rechts: vollständige Beschreibungen. Enter wählt die Person und öffnet das Profil. Tab wechselt zum Profil.", "a11y.fcTop": "Erster Platz: {v}.", "a11y.fcMost": "Am häufigsten: {v}.", "a11y.diedBefore": {"one": "Starb {n} Jahr vor der Geburt der ausgewählten Person.", "other": "Starb {n} Jahre vor der Geburt der ausgewählten Person."}, "a11y.overlap": {"one": "Lebte {n} Jahr gleichzeitig mit der ausgewählten Person.", "other": "Lebte {n} Jahre gleichzeitig mit der ausgewählten Person."}});
+Object.assign(I18N.fi, {"a11y.rel.father": "isä", "a11y.rel.mother": "äiti", "a11y.rel.parent": "vanhempi", "a11y.rel.gf": "isoisä", "a11y.rel.gm": "isoäiti", "a11y.rel.gp": "isovanhempi", "a11y.rel.ggf": "isoisoisä", "a11y.rel.ggm": "isoisoäiti", "a11y.rel.ggp": "isoisovanhempi", "a11y.rel.ancN": "esivanhempi {n} sukupolvea taaksepäin", "a11y.rel.son": "poika", "a11y.rel.daughter": "tytär", "a11y.rel.child": "lapsi", "a11y.rel.grandson": "lapsenlapsi", "a11y.rel.granddaughter": "lapsenlapsi", "a11y.rel.grandchild": "lapsenlapsi", "a11y.rel.ggc": "lapsenlapsenlapsi", "a11y.rel.descN": "jälkeläinen {n} sukupolvea eteenpäin", "a11y.rel.brother": "veli", "a11y.rel.sister": "sisko", "a11y.rel.sibling": "sisarus", "a11y.rel.hbrother": "velipuoli", "a11y.rel.hsister": "sisarpuoli", "a11y.rel.hsibling": "sisaruspuoli", "a11y.rel.uncle": "setä tai eno", "a11y.rel.aunt": "täti", "a11y.rel.psib": "vanhemman sisarus", "a11y.rel.guncle": "isosetä", "a11y.rel.gaunt": "isotäti", "a11y.rel.gpsib": "isovanhemman sisarus", "a11y.rel.ancSibN": "esivanhemman sisarus, {n} sukupolvea taaksepäin", "a11y.rel.husband": "aviomies", "a11y.rel.wife": "vaimo", "a11y.rel.spouse": "puoliso", "a11y.rel.partner": "kumppani", "a11y.rel.sonInLaw": "vävy", "a11y.rel.daughterInLaw": "miniä", "a11y.rel.childInLaw": "lapsen puoliso", "a11y.rel.partnerDesc": "jälkeläisen puoliso", "a11y.rel.partnerAnc": "esivanhemman puoliso", "a11y.rel.relative": "sukulainen", "a11y.born": "Syntyi {y}", "a11y.bornUnknown": "Syntymävuosi tuntematon.", "a11y.died": "Kuoli {y}", "a11y.diedUnknown": "Kuolinvuosi tuntematon.", "a11y.living": "Elossa.", "a11y.yAbout": "noin {y}", "a11y.yBefore": "ennen {y}", "a11y.yAfter": "{y} jälkeen", "a11y.yOr": "{a} tai {b}", "a11y.yBetween": "{a}–{b} välillä", "a11y.parBoth": "Syntyessä isä oli {f} ja äiti {m}.", "a11y.parF": "Syntyessä isä oli {n}.", "a11y.parM": "Syntyessä äiti oli {n}.", "a11y.atBirth": "Oli {n}, kun valittu henkilö syntyi.", "a11y.noOverlap": "Ei elänyt samaan aikaan valitun henkilön kanssa.", "a11y.actProfile": "Enter avaa profiilin.", "a11y.actSelect": "Enter tekee tästä valitun henkilön.", "a11y.actPromote": "Enter tekee tästä valitun henkilön ja näyttää jälkeläiset.", "a11y.actSwap": "Enter näyttää tämän henkilön suvun.", "a11y.short": "Lyhyet kuvaukset: nimi ja suhde.", "a11y.full": "Täydet kuvaukset.", "a11y.ppOpen": "Profiili on auki. Lue se Tab-näppäimellä.", "a11y.help": "Siirry henkilöiden välillä ylä- ja alanuolinäppäimillä. Vasen nuoli: lyhyet kuvaukset. Oikea nuoli: täydet kuvaukset. Enter valitsee henkilön ja avaa profiilin. Tab siirtyy profiiliin.", "a11y.fcTop": "Ensimmäinen: {v}.", "a11y.fcMost": "Yleisin: {v}.", "a11y.diedBefore": {"one": "Kuoli {n} vuosi ennen valitun henkilön syntymää.", "other": "Kuoli {n} vuotta ennen valitun henkilön syntymää."}, "a11y.overlap": {"one": "Eli samaan aikaan valitun henkilön kanssa {n} vuoden.", "other": "Eli samaan aikaan valitun henkilön kanssa {n} vuotta."}});
+Object.assign(I18N.sv, {"a11y.rel.father": "far", "a11y.rel.mother": "mor", "a11y.rel.parent": "förälder", "a11y.rel.gf": "farfar eller morfar", "a11y.rel.gm": "farmor eller mormor", "a11y.rel.gp": "mor- eller farförälder", "a11y.rel.ggf": "gammelfarfar", "a11y.rel.ggm": "gammelfarmor", "a11y.rel.ggp": "gammelförälder", "a11y.rel.ancN": "förfader {n} generationer bakåt", "a11y.rel.son": "son", "a11y.rel.daughter": "dotter", "a11y.rel.child": "barn", "a11y.rel.grandson": "barnbarn", "a11y.rel.granddaughter": "barnbarn", "a11y.rel.grandchild": "barnbarn", "a11y.rel.ggc": "barnbarnsbarn", "a11y.rel.descN": "ättling {n} generationer framåt", "a11y.rel.brother": "bror", "a11y.rel.sister": "syster", "a11y.rel.sibling": "syskon", "a11y.rel.hbrother": "halvbror", "a11y.rel.hsister": "halvsyster", "a11y.rel.hsibling": "halvsyskon", "a11y.rel.uncle": "farbror eller morbror", "a11y.rel.aunt": "faster eller moster", "a11y.rel.psib": "förälders syskon", "a11y.rel.guncle": "gammelfarbror", "a11y.rel.gaunt": "gammelfaster", "a11y.rel.gpsib": "mor- eller farförälders syskon", "a11y.rel.ancSibN": "syskon till en förfader {n} generationer bakåt", "a11y.rel.husband": "make", "a11y.rel.wife": "hustru", "a11y.rel.spouse": "make eller maka", "a11y.rel.partner": "partner", "a11y.rel.sonInLaw": "svärson", "a11y.rel.daughterInLaw": "svärdotter", "a11y.rel.childInLaw": "barnets partner", "a11y.rel.partnerDesc": "ättlings partner", "a11y.rel.partnerAnc": "förfaders partner", "a11y.rel.relative": "släkting", "a11y.born": "Född {y}", "a11y.bornUnknown": "Födelseår okänt.", "a11y.died": "Död {y}", "a11y.diedUnknown": "Dödsår okänt.", "a11y.living": "Lever.", "a11y.yAbout": "omkring {y}", "a11y.yBefore": "före {y}", "a11y.yAfter": "efter {y}", "a11y.yOr": "{a} eller {b}", "a11y.yBetween": "mellan {a} och {b}", "a11y.parBoth": "Vid födseln var fadern {f} och modern {m}.", "a11y.parF": "Vid födseln var fadern {n}.", "a11y.parM": "Vid födseln var modern {n}.", "a11y.atBirth": "Var {n} när den valda personen föddes.", "a11y.noOverlap": "Levde inte samtidigt med den valda personen.", "a11y.actProfile": "Enter öppnar profilen.", "a11y.actSelect": "Enter gör detta till den valda personen.", "a11y.actPromote": "Enter gör detta till den valda personen och visar ättlingarna.", "a11y.actSwap": "Enter visar personens släktlinje.", "a11y.short": "Korta beskrivningar: namn och relation.", "a11y.full": "Fullständiga beskrivningar.", "a11y.ppOpen": "Profilen är öppen. Tryck Tab för att läsa den.", "a11y.help": "Flytta mellan personer med pil upp och pil ned. Vänsterpil: korta beskrivningar. Högerpil: fullständiga beskrivningar. Enter väljer personen och öppnar profilen. Tab flyttar till profilen.", "a11y.fcTop": "Första plats: {v}.", "a11y.fcMost": "Vanligast: {v}.", "a11y.diedBefore": {"other": "Dog {n} år före den valda personens födelse."}, "a11y.overlap": {"other": "Levde samtidigt med den valda personen i {n} år."}});
+Object.assign(I18N.es, {"a11y.rel.father": "padre", "a11y.rel.mother": "madre", "a11y.rel.parent": "progenitor", "a11y.rel.gf": "abuelo", "a11y.rel.gm": "abuela", "a11y.rel.gp": "abuelo o abuela", "a11y.rel.ggf": "bisabuelo", "a11y.rel.ggm": "bisabuela", "a11y.rel.ggp": "bisabuelo o bisabuela", "a11y.rel.ancN": "antepasado de hace {n} generaciones", "a11y.rel.son": "hijo", "a11y.rel.daughter": "hija", "a11y.rel.child": "hijo o hija", "a11y.rel.grandson": "nieto", "a11y.rel.granddaughter": "nieta", "a11y.rel.grandchild": "nieto o nieta", "a11y.rel.ggc": "bisnieto o bisnieta", "a11y.rel.descN": "descendiente {n} generaciones después", "a11y.rel.brother": "hermano", "a11y.rel.sister": "hermana", "a11y.rel.sibling": "hermano o hermana", "a11y.rel.hbrother": "medio hermano", "a11y.rel.hsister": "media hermana", "a11y.rel.hsibling": "medio hermano o media hermana", "a11y.rel.uncle": "tío", "a11y.rel.aunt": "tía", "a11y.rel.psib": "tío o tía", "a11y.rel.guncle": "tío abuelo", "a11y.rel.gaunt": "tía abuela", "a11y.rel.gpsib": "tío abuelo o tía abuela", "a11y.rel.ancSibN": "hermano o hermana de un antepasado de hace {n} generaciones", "a11y.rel.husband": "esposo", "a11y.rel.wife": "esposa", "a11y.rel.spouse": "cónyuge", "a11y.rel.partner": "pareja", "a11y.rel.sonInLaw": "yerno", "a11y.rel.daughterInLaw": "nuera", "a11y.rel.childInLaw": "pareja de un hijo", "a11y.rel.partnerDesc": "pareja de un descendiente", "a11y.rel.partnerAnc": "pareja de un antepasado", "a11y.rel.relative": "pariente", "a11y.born": "Nacimiento: {y}", "a11y.bornUnknown": "Año de nacimiento desconocido.", "a11y.died": "Defunción: {y}", "a11y.diedUnknown": "Año de defunción desconocido.", "a11y.living": "Vive.", "a11y.yAbout": "hacia {y}", "a11y.yBefore": "antes de {y}", "a11y.yAfter": "después de {y}", "a11y.yOr": "{a} o {b}", "a11y.yBetween": "entre {a} y {b}", "a11y.parBoth": "Al nacer, el padre tenía {f} y la madre {m}.", "a11y.parF": "Al nacer, el padre tenía {n}.", "a11y.parM": "Al nacer, la madre tenía {n}.", "a11y.atBirth": "Tenía {n} cuando nació la persona seleccionada.", "a11y.noOverlap": "No vivió al mismo tiempo que la persona seleccionada.", "a11y.actProfile": "Intro abre el perfil.", "a11y.actSelect": "Intro convierte a esta persona en la seleccionada.", "a11y.actPromote": "Intro convierte a esta persona en la seleccionada y muestra sus descendientes.", "a11y.actSwap": "Intro muestra la línea familiar de esta persona.", "a11y.short": "Descripciones cortas: nombre y parentesco.", "a11y.full": "Descripciones completas.", "a11y.ppOpen": "Perfil abierto. Pulsa Tab para leerlo.", "a11y.help": "Usa las flechas arriba y abajo para moverte entre personas. Flecha izquierda: descripciones cortas. Flecha derecha: descripciones completas. Intro selecciona a la persona y abre el perfil. Tab pasa al perfil.", "a11y.fcTop": "Primer puesto: {v}.", "a11y.fcMost": "Más frecuente: {v}.", "a11y.diedBefore": {"one": "Murió {n} año antes de nacer la persona seleccionada.", "other": "Murió {n} años antes de nacer la persona seleccionada."}, "a11y.overlap": {"one": "Vivió al mismo tiempo que la persona seleccionada durante {n} año.", "other": "Vivió al mismo tiempo que la persona seleccionada durante {n} años."}});
+Object.assign(I18N.fr, {"a11y.rel.father": "père", "a11y.rel.mother": "mère", "a11y.rel.parent": "parent", "a11y.rel.gf": "grand-père", "a11y.rel.gm": "grand-mère", "a11y.rel.gp": "grand-parent", "a11y.rel.ggf": "arrière-grand-père", "a11y.rel.ggm": "arrière-grand-mère", "a11y.rel.ggp": "arrière-grand-parent", "a11y.rel.ancN": "ancêtre, {n} générations en arrière", "a11y.rel.son": "fils", "a11y.rel.daughter": "fille", "a11y.rel.child": "enfant", "a11y.rel.grandson": "petit-fils", "a11y.rel.granddaughter": "petite-fille", "a11y.rel.grandchild": "petit-enfant", "a11y.rel.ggc": "arrière-petit-enfant", "a11y.rel.descN": "descendant, {n} générations plus tard", "a11y.rel.brother": "frère", "a11y.rel.sister": "sœur", "a11y.rel.sibling": "frère ou sœur", "a11y.rel.hbrother": "demi-frère", "a11y.rel.hsister": "demi-sœur", "a11y.rel.hsibling": "demi-frère ou demi-sœur", "a11y.rel.uncle": "oncle", "a11y.rel.aunt": "tante", "a11y.rel.psib": "oncle ou tante", "a11y.rel.guncle": "grand-oncle", "a11y.rel.gaunt": "grand-tante", "a11y.rel.gpsib": "grand-oncle ou grand-tante", "a11y.rel.ancSibN": "frère ou sœur d’un ancêtre, {n} générations en arrière", "a11y.rel.husband": "mari", "a11y.rel.wife": "épouse", "a11y.rel.spouse": "conjoint", "a11y.rel.partner": "partenaire", "a11y.rel.sonInLaw": "gendre", "a11y.rel.daughterInLaw": "belle-fille", "a11y.rel.childInLaw": "partenaire d’un enfant", "a11y.rel.partnerDesc": "partenaire d’un descendant", "a11y.rel.partnerAnc": "partenaire d’un ancêtre", "a11y.rel.relative": "membre de la famille", "a11y.born": "Naissance : {y}", "a11y.bornUnknown": "Année de naissance inconnue.", "a11y.died": "Décès : {y}", "a11y.diedUnknown": "Année de décès inconnue.", "a11y.living": "En vie.", "a11y.yAbout": "vers {y}", "a11y.yBefore": "avant {y}", "a11y.yAfter": "après {y}", "a11y.yOr": "{a} ou {b}", "a11y.yBetween": "entre {a} et {b}", "a11y.parBoth": "À la naissance, le père avait {f} ans et la mère {m} ans.", "a11y.parF": "À la naissance, le père avait {n} ans.", "a11y.parM": "À la naissance, la mère avait {n} ans.", "a11y.atBirth": "Avait {n} ans à la naissance de la personne sélectionnée.", "a11y.noOverlap": "N’a pas vécu en même temps que la personne sélectionnée.", "a11y.actProfile": "Entrée ouvre le profil.", "a11y.actSelect": "Entrée sélectionne cette personne.", "a11y.actPromote": "Entrée sélectionne cette personne et affiche ses descendants.", "a11y.actSwap": "Entrée affiche la lignée de cette personne.", "a11y.short": "Descriptions courtes : nom et lien de parenté.", "a11y.full": "Descriptions complètes.", "a11y.ppOpen": "Profil ouvert. Appuyez sur Tab pour le lire.", "a11y.help": "Utilisez les flèches haut et bas pour passer d’une personne à l’autre. Flèche gauche : descriptions courtes. Flèche droite : descriptions complètes. Entrée sélectionne la personne et ouvre le profil. Tab passe au profil.", "a11y.fcTop": "Premier : {v}.", "a11y.fcMost": "Le plus fréquent : {v}.", "a11y.diedBefore": {"one": "Décès {n} an avant la naissance de la personne sélectionnée.", "other": "Décès {n} ans avant la naissance de la personne sélectionnée."}, "a11y.overlap": {"one": "A vécu en même temps que la personne sélectionnée pendant {n} an.", "other": "A vécu en même temps que la personne sélectionnée pendant {n} ans."}});
+Object.assign(I18N.nl, {"a11y.rel.father": "vader", "a11y.rel.mother": "moeder", "a11y.rel.parent": "ouder", "a11y.rel.gf": "grootvader", "a11y.rel.gm": "grootmoeder", "a11y.rel.gp": "grootouder", "a11y.rel.ggf": "overgrootvader", "a11y.rel.ggm": "overgrootmoeder", "a11y.rel.ggp": "overgrootouder", "a11y.rel.ancN": "voorouder, {n} generaties terug", "a11y.rel.son": "zoon", "a11y.rel.daughter": "dochter", "a11y.rel.child": "kind", "a11y.rel.grandson": "kleinzoon", "a11y.rel.granddaughter": "kleindochter", "a11y.rel.grandchild": "kleinkind", "a11y.rel.ggc": "achterkleinkind", "a11y.rel.descN": "nakomeling, {n} generaties verder", "a11y.rel.brother": "broer", "a11y.rel.sister": "zus", "a11y.rel.sibling": "broer of zus", "a11y.rel.hbrother": "halfbroer", "a11y.rel.hsister": "halfzus", "a11y.rel.hsibling": "halfbroer of halfzus", "a11y.rel.uncle": "oom", "a11y.rel.aunt": "tante", "a11y.rel.psib": "oom of tante", "a11y.rel.guncle": "oudoom", "a11y.rel.gaunt": "oudtante", "a11y.rel.gpsib": "oudoom of oudtante", "a11y.rel.ancSibN": "broer of zus van een voorouder, {n} generaties terug", "a11y.rel.husband": "echtgenoot", "a11y.rel.wife": "echtgenote", "a11y.rel.spouse": "echtgenoot", "a11y.rel.partner": "partner", "a11y.rel.sonInLaw": "schoonzoon", "a11y.rel.daughterInLaw": "schoondochter", "a11y.rel.childInLaw": "partner van een kind", "a11y.rel.partnerDesc": "partner van een nakomeling", "a11y.rel.partnerAnc": "partner van een voorouder", "a11y.rel.relative": "familielid", "a11y.born": "Geboren {y}", "a11y.bornUnknown": "Geboortejaar onbekend.", "a11y.died": "Overleden {y}", "a11y.diedUnknown": "Sterfjaar onbekend.", "a11y.living": "Leeft.", "a11y.yAbout": "rond {y}", "a11y.yBefore": "vóór {y}", "a11y.yAfter": "na {y}", "a11y.yOr": "{a} of {b}", "a11y.yBetween": "tussen {a} en {b}", "a11y.parBoth": "Bij de geboorte was de vader {f} en de moeder {m}.", "a11y.parF": "Bij de geboorte was de vader {n}.", "a11y.parM": "Bij de geboorte was de moeder {n}.", "a11y.atBirth": "Was {n} toen de geselecteerde persoon werd geboren.", "a11y.noOverlap": "Leefde niet tegelijk met de geselecteerde persoon.", "a11y.actProfile": "Enter opent het profiel.", "a11y.actSelect": "Enter maakt dit de geselecteerde persoon.", "a11y.actPromote": "Enter maakt dit de geselecteerde persoon en toont de nakomelingen.", "a11y.actSwap": "Enter toont de familielijn van deze persoon.", "a11y.short": "Korte beschrijvingen: naam en relatie.", "a11y.full": "Volledige beschrijvingen.", "a11y.ppOpen": "Profiel geopend. Druk op Tab om het te lezen.", "a11y.help": "Gebruik de pijltjestoetsen omhoog en omlaag om tussen personen te gaan. Pijl links: korte beschrijvingen. Pijl rechts: volledige beschrijvingen. Enter selecteert de persoon en opent het profiel. Tab gaat naar het profiel.", "a11y.fcTop": "Eerste plaats: {v}.", "a11y.fcMost": "Meest voorkomend: {v}.", "a11y.diedBefore": {"other": "Overleed {n} jaar vóór de geboorte van de geselecteerde persoon."}, "a11y.overlap": {"other": "Leefde {n} jaar tegelijk met de geselecteerde persoon."}});
+Object.assign(I18N.lv, {"a11y.rel.father": "tēvs", "a11y.rel.mother": "māte", "a11y.rel.parent": "vecāks", "a11y.rel.gf": "vectēvs", "a11y.rel.gm": "vecmāte", "a11y.rel.gp": "vecvecāks", "a11y.rel.ggf": "vecvectēvs", "a11y.rel.ggm": "vecvecmāte", "a11y.rel.ggp": "vecvecvecāks", "a11y.rel.ancN": "sencis, {n} paaudzes atpakaļ", "a11y.rel.son": "dēls", "a11y.rel.daughter": "meita", "a11y.rel.child": "bērns", "a11y.rel.grandson": "mazdēls", "a11y.rel.granddaughter": "mazmeita", "a11y.rel.grandchild": "mazbērns", "a11y.rel.ggc": "mazmazbērns", "a11y.rel.descN": "pēcnācējs, {n} paaudzes uz priekšu", "a11y.rel.brother": "brālis", "a11y.rel.sister": "māsa", "a11y.rel.sibling": "brālis vai māsa", "a11y.rel.hbrother": "pusbrālis", "a11y.rel.hsister": "pusmāsa", "a11y.rel.hsibling": "pusbrālis vai pusmāsa", "a11y.rel.uncle": "tēvocis", "a11y.rel.aunt": "tante", "a11y.rel.psib": "vecāka brālis vai māsa", "a11y.rel.guncle": "vectēvocis", "a11y.rel.gaunt": "vectante", "a11y.rel.gpsib": "vecvecāka brālis vai māsa", "a11y.rel.ancSibN": "senča brālis vai māsa, {n} paaudzes atpakaļ", "a11y.rel.husband": "vīrs", "a11y.rel.wife": "sieva", "a11y.rel.spouse": "laulātais", "a11y.rel.partner": "partneris", "a11y.rel.sonInLaw": "znots", "a11y.rel.daughterInLaw": "vedekla", "a11y.rel.childInLaw": "bērna partneris", "a11y.rel.partnerDesc": "pēcnācēja partneris", "a11y.rel.partnerAnc": "senča partneris", "a11y.rel.relative": "radinieks", "a11y.born": "Dzimis {y}", "a11y.bornUnknown": "Dzimšanas gads nav zināms.", "a11y.died": "Miris {y}", "a11y.diedUnknown": "Miršanas gads nav zināms.", "a11y.living": "Dzīvs.", "a11y.yAbout": "ap {y}", "a11y.yBefore": "pirms {y}", "a11y.yAfter": "pēc {y}", "a11y.yOr": "{a} vai {b}", "a11y.yBetween": "starp {a} un {b}", "a11y.parBoth": "Dzimšanas brīdī tēvam bija {f}, mātei {m}.", "a11y.parF": "Dzimšanas brīdī tēvam bija {n}.", "a11y.parM": "Dzimšanas brīdī mātei bija {n}.", "a11y.atBirth": "Bija {n}, kad dzima izvēlētā persona.", "a11y.noOverlap": "Nedzīvoja vienlaikus ar izvēlēto personu.", "a11y.actProfile": "Enter atver profilu.", "a11y.actSelect": "Enter padara šo par izvēlēto personu.", "a11y.actPromote": "Enter padara šo par izvēlēto personu un parāda pēcnācējus.", "a11y.actSwap": "Enter parāda šīs personas dzimtas līniju.", "a11y.short": "Īsi apraksti: vārds un radniecība.", "a11y.full": "Pilni apraksti.", "a11y.ppOpen": "Profils atvērts. Nospiediet Tab, lai to lasītu.", "a11y.help": "Pārvietojieties starp personām ar bultiņām uz augšu un uz leju. Bultiņa pa kreisi: īsi apraksti. Bultiņa pa labi: pilni apraksti. Enter izvēlas personu un atver profilu. Tab pāriet uz profilu.", "a11y.fcTop": "Pirmā vieta: {v}.", "a11y.fcMost": "Visbiežāk: {v}.", "a11y.diedBefore": {"zero": "Miris {n} gadus pirms izvēlētās personas dzimšanas.", "one": "Miris {n} gadu pirms izvēlētās personas dzimšanas.", "other": "Miris {n} gadus pirms izvēlētās personas dzimšanas."}, "a11y.overlap": {"zero": "Dzīvoja vienlaikus ar izvēlēto personu {n} gadus.", "one": "Dzīvoja vienlaikus ar izvēlēto personu {n} gadu.", "other": "Dzīvoja vienlaikus ar izvēlēto personu {n} gadus."}});
+Object.assign(I18N.lt, {"a11y.rel.father": "tėvas", "a11y.rel.mother": "motina", "a11y.rel.parent": "tėvas arba motina", "a11y.rel.gf": "senelis", "a11y.rel.gm": "senelė", "a11y.rel.gp": "senelis arba senelė", "a11y.rel.ggf": "prosenelis", "a11y.rel.ggm": "prosenelė", "a11y.rel.ggp": "prosenelis arba prosenelė", "a11y.rel.ancN": "protėvis, prieš {n} kartas", "a11y.rel.son": "sūnus", "a11y.rel.daughter": "dukra", "a11y.rel.child": "vaikas", "a11y.rel.grandson": "anūkas", "a11y.rel.granddaughter": "anūkė", "a11y.rel.grandchild": "anūkas arba anūkė", "a11y.rel.ggc": "proanūkis", "a11y.rel.descN": "palikuonis, po {n} kartų", "a11y.rel.brother": "brolis", "a11y.rel.sister": "sesuo", "a11y.rel.sibling": "brolis arba sesuo", "a11y.rel.hbrother": "brolis (bendras vienas iš tėvų)", "a11y.rel.hsister": "sesuo (bendras vienas iš tėvų)", "a11y.rel.hsibling": "brolis arba sesuo (bendras vienas iš tėvų)", "a11y.rel.uncle": "dėdė", "a11y.rel.aunt": "teta", "a11y.rel.psib": "dėdė arba teta", "a11y.rel.guncle": "senelio arba senelės brolis", "a11y.rel.gaunt": "senelio arba senelės sesuo", "a11y.rel.gpsib": "senelio arba senelės brolis ar sesuo", "a11y.rel.ancSibN": "protėvio brolis arba sesuo, prieš {n} kartas", "a11y.rel.husband": "vyras", "a11y.rel.wife": "žmona", "a11y.rel.spouse": "sutuoktinis", "a11y.rel.partner": "partneris", "a11y.rel.sonInLaw": "žentas", "a11y.rel.daughterInLaw": "marti", "a11y.rel.childInLaw": "vaiko partneris", "a11y.rel.partnerDesc": "palikuonio partneris", "a11y.rel.partnerAnc": "protėvio partneris", "a11y.rel.relative": "giminaitis", "a11y.born": "Gimė {y}", "a11y.bornUnknown": "Gimimo metai nežinomi.", "a11y.died": "Mirė {y}", "a11y.diedUnknown": "Mirties metai nežinomi.", "a11y.living": "Gyvas.", "a11y.yAbout": "apie {y}", "a11y.yBefore": "prieš {y}", "a11y.yAfter": "po {y}", "a11y.yOr": "{a} arba {b}", "a11y.yBetween": "tarp {a} ir {b}", "a11y.parBoth": "Gimimo metu tėvui buvo {f}, motinai {m}.", "a11y.parF": "Gimimo metu tėvui buvo {n}.", "a11y.parM": "Gimimo metu motinai buvo {n}.", "a11y.atBirth": "Buvo {n}, kai gimė pasirinktas asmuo.", "a11y.noOverlap": "Negyveno tuo pačiu metu kaip pasirinktas asmuo.", "a11y.actProfile": "Enter atveria profilį.", "a11y.actSelect": "Enter pasirenka šį asmenį.", "a11y.actPromote": "Enter pasirenka šį asmenį ir parodo palikuonis.", "a11y.actSwap": "Enter parodo šio asmens giminės liniją.", "a11y.short": "Trumpi aprašymai: vardas ir giminystė.", "a11y.full": "Išsamūs aprašymai.", "a11y.ppOpen": "Profilis atvertas. Paspauskite Tab, kad jį perskaitytumėte.", "a11y.help": "Tarp asmenų judėkite rodyklėmis aukštyn ir žemyn. Rodyklė kairėn: trumpi aprašymai. Rodyklė dešinėn: išsamūs aprašymai. Enter pasirenka asmenį ir atveria profilį. Tab pereina į profilį.", "a11y.fcTop": "Pirma vieta: {v}.", "a11y.fcMost": "Dažniausiai: {v}.", "a11y.diedBefore": {"one": "Mirė likus {n} metams iki pasirinkto asmens gimimo.", "few": "Mirė likus {n} metams iki pasirinkto asmens gimimo.", "many": "Mirė likus {n} metų iki pasirinkto asmens gimimo.", "other": "Mirė likus {n} metų iki pasirinkto asmens gimimo."}, "a11y.overlap": {"one": "Gyveno tuo pačiu metu kaip pasirinktas asmuo {n} metus.", "few": "Gyveno tuo pačiu metu kaip pasirinktas asmuo {n} metus.", "many": "Gyveno tuo pačiu metu kaip pasirinktas asmuo {n} metų.", "other": "Gyveno tuo pačiu metu kaip pasirinktas asmuo {n} metų."}});
+Object.assign(I18N.no, {"a11y.rel.father": "far", "a11y.rel.mother": "mor", "a11y.rel.parent": "forelder", "a11y.rel.gf": "bestefar", "a11y.rel.gm": "bestemor", "a11y.rel.gp": "besteforelder", "a11y.rel.ggf": "oldefar", "a11y.rel.ggm": "oldemor", "a11y.rel.ggp": "oldeforelder", "a11y.rel.ancN": "forfar {n} generasjoner tilbake", "a11y.rel.son": "sønn", "a11y.rel.daughter": "datter", "a11y.rel.child": "barn", "a11y.rel.grandson": "barnebarn", "a11y.rel.granddaughter": "barnebarn", "a11y.rel.grandchild": "barnebarn", "a11y.rel.ggc": "oldebarn", "a11y.rel.descN": "etterkommer {n} generasjoner fram", "a11y.rel.brother": "bror", "a11y.rel.sister": "søster", "a11y.rel.sibling": "søsken", "a11y.rel.hbrother": "halvbror", "a11y.rel.hsister": "halvsøster", "a11y.rel.hsibling": "halvsøsken", "a11y.rel.uncle": "onkel", "a11y.rel.aunt": "tante", "a11y.rel.psib": "forelders søsken", "a11y.rel.guncle": "grandonkel", "a11y.rel.gaunt": "grandtante", "a11y.rel.gpsib": "besteforelders søsken", "a11y.rel.ancSibN": "søsken av en forfar {n} generasjoner tilbake", "a11y.rel.husband": "ektemann", "a11y.rel.wife": "kone", "a11y.rel.spouse": "ektefelle", "a11y.rel.partner": "partner", "a11y.rel.sonInLaw": "svigersønn", "a11y.rel.daughterInLaw": "svigerdatter", "a11y.rel.childInLaw": "barnets partner", "a11y.rel.partnerDesc": "etterkommers partner", "a11y.rel.partnerAnc": "forfars partner", "a11y.rel.relative": "slektning", "a11y.born": "Født {y}", "a11y.bornUnknown": "Fødselsår ukjent.", "a11y.died": "Død {y}", "a11y.diedUnknown": "Dødsår ukjent.", "a11y.living": "Lever.", "a11y.yAbout": "omkring {y}", "a11y.yBefore": "før {y}", "a11y.yAfter": "etter {y}", "a11y.yOr": "{a} eller {b}", "a11y.yBetween": "mellom {a} og {b}", "a11y.parBoth": "Ved fødselen var faren {f} og moren {m}.", "a11y.parF": "Ved fødselen var faren {n}.", "a11y.parM": "Ved fødselen var moren {n}.", "a11y.atBirth": "Var {n} da den valgte personen ble født.", "a11y.noOverlap": "Levde ikke samtidig med den valgte personen.", "a11y.actProfile": "Enter åpner profilen.", "a11y.actSelect": "Enter gjør dette til den valgte personen.", "a11y.actPromote": "Enter gjør dette til den valgte personen og viser etterkommerne.", "a11y.actSwap": "Enter viser personens slektslinje.", "a11y.short": "Korte beskrivelser: navn og relasjon.", "a11y.full": "Fullstendige beskrivelser.", "a11y.ppOpen": "Profilen er åpen. Trykk Tab for å lese den.", "a11y.help": "Bruk pil opp og pil ned for å gå mellom personer. Venstre pil: korte beskrivelser. Høyre pil: fullstendige beskrivelser. Enter velger personen og åpner profilen. Tab går til profilen.", "a11y.fcTop": "Førsteplass: {v}.", "a11y.fcMost": "Vanligst: {v}.", "a11y.diedBefore": {"other": "Døde {n} år før den valgte personen ble født."}, "a11y.overlap": {"other": "Levde samtidig med den valgte personen i {n} år."}});
+Object.assign(I18N.da, {"a11y.rel.father": "far", "a11y.rel.mother": "mor", "a11y.rel.parent": "forælder", "a11y.rel.gf": "bedstefar", "a11y.rel.gm": "bedstemor", "a11y.rel.gp": "bedsteforælder", "a11y.rel.ggf": "oldefar", "a11y.rel.ggm": "oldemor", "a11y.rel.ggp": "oldeforælder", "a11y.rel.ancN": "forfader {n} generationer tilbage", "a11y.rel.son": "søn", "a11y.rel.daughter": "datter", "a11y.rel.child": "barn", "a11y.rel.grandson": "barnebarn", "a11y.rel.granddaughter": "barnebarn", "a11y.rel.grandchild": "barnebarn", "a11y.rel.ggc": "oldebarn", "a11y.rel.descN": "efterkommer {n} generationer frem", "a11y.rel.brother": "bror", "a11y.rel.sister": "søster", "a11y.rel.sibling": "søskende", "a11y.rel.hbrother": "halvbror", "a11y.rel.hsister": "halvsøster", "a11y.rel.hsibling": "halvsøskende", "a11y.rel.uncle": "onkel", "a11y.rel.aunt": "tante", "a11y.rel.psib": "forælders søskende", "a11y.rel.guncle": "grandonkel", "a11y.rel.gaunt": "grandtante", "a11y.rel.gpsib": "bedsteforælders søskende", "a11y.rel.ancSibN": "søskende til en forfader {n} generationer tilbage", "a11y.rel.husband": "ægtemand", "a11y.rel.wife": "hustru", "a11y.rel.spouse": "ægtefælle", "a11y.rel.partner": "partner", "a11y.rel.sonInLaw": "svigersøn", "a11y.rel.daughterInLaw": "svigerdatter", "a11y.rel.childInLaw": "barnets partner", "a11y.rel.partnerDesc": "efterkommers partner", "a11y.rel.partnerAnc": "forfaders partner", "a11y.rel.relative": "slægtning", "a11y.born": "Født {y}", "a11y.bornUnknown": "Fødselsår ukendt.", "a11y.died": "Død {y}", "a11y.diedUnknown": "Dødsår ukendt.", "a11y.living": "Lever.", "a11y.yAbout": "omkring {y}", "a11y.yBefore": "før {y}", "a11y.yAfter": "efter {y}", "a11y.yOr": "{a} eller {b}", "a11y.yBetween": "mellem {a} og {b}", "a11y.parBoth": "Ved fødslen var faderen {f} og moderen {m}.", "a11y.parF": "Ved fødslen var faderen {n}.", "a11y.parM": "Ved fødslen var moderen {n}.", "a11y.atBirth": "Var {n}, da den valgte person blev født.", "a11y.noOverlap": "Levede ikke samtidig med den valgte person.", "a11y.actProfile": "Enter åbner profilen.", "a11y.actSelect": "Enter gør dette til den valgte person.", "a11y.actPromote": "Enter gør dette til den valgte person og viser efterkommerne.", "a11y.actSwap": "Enter viser personens slægtslinje.", "a11y.short": "Korte beskrivelser: navn og relation.", "a11y.full": "Fuldstændige beskrivelser.", "a11y.ppOpen": "Profilen er åben. Tryk Tab for at læse den.", "a11y.help": "Brug pil op og pil ned for at gå mellem personer. Venstre pil: korte beskrivelser. Højre pil: fuldstændige beskrivelser. Enter vælger personen og åbner profilen. Tab går til profilen.", "a11y.fcTop": "Førsteplads: {v}.", "a11y.fcMost": "Mest almindelig: {v}.", "a11y.diedBefore": {"other": "Døde {n} år før den valgte person blev født."}, "a11y.overlap": {"other": "Levede samtidig med den valgte person i {n} år."}});
+Object.assign(I18N.en, { 'a11y.skip': 'Skip to content', 'a11y.tl': 'Timeline: {name}', 'a11y.sel': 'selected person' });
+Object.assign(I18N.et, { 'a11y.skip': 'Liigu sisu juurde', 'a11y.tl': 'Ajajoon: {name}', 'a11y.sel': 'valitud isik' });
+Object.assign(I18N.de, { 'a11y.skip': 'Zum Inhalt springen', 'a11y.tl': 'Zeitleiste: {name}', 'a11y.sel': 'ausgewählte Person' });
+Object.assign(I18N.fi, { 'a11y.skip': 'Siirry sisältöön', 'a11y.tl': 'Aikajana: {name}', 'a11y.sel': 'valittu henkilö' });
+Object.assign(I18N.sv, { 'a11y.skip': 'Hoppa till innehållet', 'a11y.tl': 'Tidslinje: {name}', 'a11y.sel': 'vald person' });
+Object.assign(I18N.es, { 'a11y.skip': 'Saltar al contenido', 'a11y.tl': 'Línea de tiempo: {name}', 'a11y.sel': 'persona seleccionada' });
+Object.assign(I18N.fr, { 'a11y.skip': 'Aller au contenu', 'a11y.tl': 'Frise chronologique : {name}', 'a11y.sel': 'personne sélectionnée' });
+Object.assign(I18N.nl, { 'a11y.skip': 'Naar de inhoud', 'a11y.tl': 'Tijdlijn: {name}', 'a11y.sel': 'geselecteerde persoon' });
+Object.assign(I18N.lv, { 'a11y.skip': 'Pāriet uz saturu', 'a11y.tl': 'Laika josla: {name}', 'a11y.sel': 'izvēlētā persona' });
+Object.assign(I18N.lt, { 'a11y.skip': 'Pereiti prie turinio', 'a11y.tl': 'Laiko juosta: {name}', 'a11y.sel': 'pasirinktas asmuo' });
+Object.assign(I18N.no, { 'a11y.skip': 'Hopp til innholdet', 'a11y.tl': 'Tidslinje: {name}', 'a11y.sel': 'valgt person' });
+Object.assign(I18N.da, { 'a11y.skip': 'Spring til indhold', 'a11y.tl': 'Tidslinje: {name}', 'a11y.sel': 'valgt person' });
+</script>
 <script>
 /* V6.23 — Fact card texts (spec §23). V6.34: all 12 languages. */
 Object.assign(I18N.en, {
@@ -9294,8 +9336,89 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var sub = none ? t('fact.btnNone') : tn('fact.nDesc', c.d) + ' · ' + tn('fact.nAnc', c.a);
     return '<button type="button" class="pp-facts-btn pp-primary" data-facts' + (none ? ' disabled' : '') + '>' + FACT_ICON + '<span class="pp-facts-t"><span class="pp-facts-1">' + esc(t('fact.cta')) + '</span><span class="pp-facts-2">' + esc(sub) + '</span></span>' + (none ? '' : '<svg class="pp-facts-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>') + '</button>';   // V6.33: CTA wording + arrow
   }
+  // ═══ V6.57 a11y — one spoken sentence per person on the timeline (spec §28.3). Built from the same data as the bars; never shown. ═══
+  var A11Y_REL = { f: null, up: null, down: null };
+  function a11yMaps() {
+    var F = state && state.focal; if (A11Y_REL.f === F) return A11Y_REL;
+    var up = {}, down = {}, q = [[F, 0]], c;
+    while (q.length) { c = q.shift(); if (c[1] >= 40) continue; var pr = parents(c[0]); if (!pr) continue; [pr.father, pr.mother].forEach(function(x){ if (x && up[x] == null) { up[x] = c[1] + 1; q.push([x, c[1] + 1]); } }); }
+    q = [[F, 0]];
+    while (q.length) { c = q.shift(); if (c[1] >= 40) continue; childrenOf(c[0]).forEach(function(x){ if (down[x] == null && x !== F) { down[x] = c[1] + 1; q.push([x, c[1] + 1]); } }); }
+    A11Y_REL = { f: F, up: up, down: down }; return A11Y_REL;
+  }
+  function a11yShare(a, b) { if (!a || !b) return 0; var k = 0; if (a.father && a.father === b.father) k++; if (a.mother && a.mother === b.mother) k++; return k; }
+  function a11yRel(id) {
+    var F = state && state.focal, p = P(id); if (!F || !p) return '';
+    if (id === F) return t('a11y.sel');
+    var M = a11yMaps(), sx = p.sex, n;
+    function S(m, f, x) { return t('a11y.rel.' + (sx === 'M' ? m : sx === 'F' ? f : x)); }
+    if (M.up[id] != null) { n = M.up[id]; return n === 1 ? S('father', 'mother', 'parent') : n === 2 ? S('gf', 'gm', 'gp') : n === 3 ? S('ggf', 'ggm', 'ggp') : t('a11y.rel.ancN', { n: n }); }
+    if (M.down[id] != null) { n = M.down[id]; return n === 1 ? S('son', 'daughter', 'child') : n === 2 ? S('grandson', 'granddaughter', 'grandchild') : n === 3 ? t('a11y.rel.ggc') : t('a11y.rel.descN', { n: n }); }
+    var mine = parents(F), his = parents(id), s = a11yShare(mine, his);
+    if (s) return (s === 2 || !mine.father || !mine.mother || !his.father || !his.mother) ? S('brother', 'sister', 'sibling') : S('hbrother', 'hsister', 'hsibling');
+    if (his) { var best = null; for (var a in M.up) if (a11yShare(parents(a), his) && (best == null || M.up[a] < best)) best = M.up[a];
+      if (best != null) return best === 1 ? S('uncle', 'aunt', 'psib') : best === 2 ? S('guncle', 'gaunt', 'gpsib') : t('a11y.rel.ancSibN', { n: best }); }
+    var sp = spousesOf(id), i;
+    if (sp.indexOf(F) >= 0) { var fam = null; p.fams.forEach(function(fid){ var f = G.families.get(fid); if (f && (f.husb === F || f.wife === F)) fam = f; });
+      return fam && fam.marr ? S('husband', 'wife', 'spouse') : t('a11y.rel.partner'); }
+    for (i = 0; i < sp.length; i++) if (M.down[sp[i]] === 1) return S('sonInLaw', 'daughterInLaw', 'childInLaw');
+    for (i = 0; i < sp.length; i++) if (M.down[sp[i]] != null) return t('a11y.rel.partnerDesc');
+    for (i = 0; i < sp.length; i++) if (M.up[sp[i]] != null) return t('a11y.rel.partnerAnc');
+    return t('a11y.rel.relative');
+  }
+  function a11yYear(p, tag) {
+    if (tag === 'BIRT') { var b = by(p); if (b == null) return null; if (p.birth.isRange) return t('a11y.yOr', { a: p.birth.yearLo, b: p.birth.yearHi }); }
+    var y = tag === 'BIRT' ? by(p) : dy(p); if (y == null) return null;
+    var qq = qual(p, tag);
+    return qq.q === 'ABT' ? t('a11y.yAbout', { y: y }) : qq.q === 'BEF' ? t('a11y.yBefore', { y: qq.y }) : qq.q === 'AFT' ? t('a11y.yAfter', { y: qq.y }) : qq.q === 'BET' ? t('a11y.yBetween', { a: qq.y, b: qq.y2 }) : String(y);
+  }
+  function a11yLife(p, id) {   // same rules as the hover tooltip (ageTip), as words
+    var b = by(p); if (b == null) return '';
+    var bq = qual(p, 'BIRT'), dq = qual(p, 'DEAT'), d = dy(p), ab = !!bq.q, last = lastEventYear(id), minA = last != null && last > b ? last - b : null;
+    if (d != null) {
+      if (!dq.q) return tn(ab ? 'tip.livedAbout' : 'tip.lived', d - b);
+      if (dq.q === 'ABT') return tn('tip.livedAbout', d - b);
+      if (dq.q === 'BEF') return minA != null && minA < dq.y - b ? t('tip.livedRange', { a: minA, b: dq.y - b }) : t('tip.livedUnder', { n: dq.y - b });
+      if (dq.q === 'AFT') return tn('tip.livedAtLeast', dq.y - b);
+      if (dq.q === 'BET') return t('tip.livedRange', { a: dq.y - b, b: dq.y2 - b });
+    } else if (isLiving(p)) return t(ab ? 'tip.ageAbout' : 'tip.age', { n: new Date().getFullYear() - b });
+    else if (minA != null) return tn('tip.livedAtLeast', minA);
+    return '';
+  }
+  function a11yCap(s) { s = String(s || '').trim(); return s ? s.charAt(0).toUpperCase() + s.slice(1) + (/[.!?]$/.test(s) ? '' : '.') : ''; }
+  function a11yExact(p) { return p && by(p) != null && !p.birth.isRange && !qual(p, 'BIRT').q ? by(p) : null; }
+  function a11yDescribe(id, act) {
+    var p = P(id); if (!p) return null;
+    var F = state && state.focal, rel = a11yRel(id), short = nameOf(p) + (rel ? ', ' + rel : ''), out = [short + '.'];
+    var bs = a11yYear(p, 'BIRT'), bpl = shortPlace(p);
+    out.push(bs ? t('a11y.born', { y: bs }) + (bpl ? ', ' + bpl : '') + '.' : t('a11y.bornUnknown'));
+    var ds = a11yYear(p, 'DEAT'), dpl = p.death && p.death.place ? String(p.death.place).split(',')[0].trim() : '';
+    if (ds) out.push(t('a11y.died', { y: ds }) + (dpl ? ', ' + dpl : '') + '.');
+    else if (isLiving(p)) out.push(t('a11y.living'));
+    else out.push(t('a11y.diedUnknown'));
+    var life = a11yLife(p, id); if (life) out.push(a11yCap(life));
+    if (id !== F) {
+      var pr = parents(id), b = a11yExact(p), fa = b != null && pr && pr.father ? a11yExact(P(pr.father)) : null, mo = b != null && pr && pr.mother ? a11yExact(P(pr.mother)) : null;
+      fa = fa != null && b - fa > 0 ? b - fa : null; mo = mo != null && b - mo > 0 ? b - mo : null;
+      if (fa != null && mo != null) out.push(t('a11y.parBoth', { f: fa, m: mo })); else if (fa != null) out.push(t('a11y.parF', { n: fa })); else if (mo != null) out.push(t('a11y.parM', { n: mo }));
+      var PF = P(F), fb = by(PF), pb = by(p), M = a11yMaps();
+      if (M.up[id] != null && fb != null && pb != null && fb > pb) {
+        var pd = dy(p);
+        if (pd != null && pd < fb) out.push(tn('a11y.diedBefore', fb - pd)); else out.push(t('a11y.atBirth', { n: fb - pb }));
+      }
+      var e1 = dy(p) != null ? dy(p) : isLiving(p) ? new Date().getFullYear() : null, e2 = dy(PF) != null ? dy(PF) : isLiving(PF) ? new Date().getFullYear() : null;
+      if (pb != null && fb != null && e1 != null && e2 != null) { var ov = Math.min(e1, e2) - Math.max(pb, fb); if (ov >= 1) out.push(tn('a11y.overlap', ov)); else if (!(M.up[id] != null && dy(p) != null && dy(p) < fb)) out.push(t('a11y.noOverlap')); }
+    }
+    var mar = [];
+    if (id === F) p.fams.forEach(function(fid){ var f = G.families.get(fid); if (f && f.marr && f.marr.year != null) mar.push(f.marr.year); });
+    else if (spousesOf(id).indexOf(F) >= 0) p.fams.forEach(function(fid){ var f = G.families.get(fid); if (f && (f.husb === F || f.wife === F) && f.marr && f.marr.year != null) mar.push(f.marr.year); });
+    mar.forEach(function(y){ out.push(a11yCap(t('tl.married', { year: y }))); });
+    var ak = { profile: 'actProfile', select: 'actSelect', 'focus-anc': 'actSelect', promote: 'actPromote', swap: 'actSwap' }[act];
+    if (ak) out.push(t('a11y.' + ak));
+    return { short: short, full: out.join(' ') };
+  }
   window.TreeLine = {
-    norm: normTxt, bidi: bidi,   // V6.51: shared with the search module
+    norm: normTxt, bidi: bidi, a11yDescribe: function(id, act){ try { return a11yDescribe(id, act); } catch (e) { return null; } },   // V6.57 a11y   // V6.51: shared with the search module
     setData: function(g, fname){ if (factsOn) exitFacts(); factsFile = fname || null; factsOpened = new Date(); G = g; PL.reset(); pinId = null; recent = []; if (listOn) exitList(); listTop = 0; renderRuler(); },
     range: function(){ return PL.range(); },
     row: function(id){ return P(id) ? PL.row(id) : ''; },
@@ -9900,13 +10023,13 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.55', since: 'V5.45', date: [2026, 10, 26],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.57', since: 'V5.45', date: [2026, 10, 27],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
   notes: [
-    "Fact cards: open them from a person’s profile to see their bloodline in numbers — when each generation was born, how long men and women lived, how the age at death changed over time, family sizes, places and given names.",
-    "Missing data becomes a research list: every fact card shows who lacks a date, place or name. Open the list right on the card, or go through the people one by one with Find gaps.",
+    "Fact cards: open them from a person’s profile to see their bloodline in numbers — when each generation was born, how long men and women lived, how the age at death changed over time, family sizes, places and given names — and who still lacks a date or place.",
+    "Keyboard and screen reader: move between people with the arrow keys. A screen reader tells each person’s relation to the selected person, their life, their parents’ ages and how long they lived at the same time.",
     "Search shows People, Places and Notes. It also finds birthplaces and places where people lived. Names in Cyrillic and Hebrew are found too.",
     "Phone, tablet and small laptop: the timeline uses the full screen width, and the start page fits the screen without scrolling, also at 1366 × 768. On a phone, tap a name to open the profile full screen; the arrow button brings you back to the timeline.",
     "All people: after you open a file, a list shows everyone in it — by last name, by name or by family. Pick a person to open their timeline."
@@ -10090,6 +10213,170 @@ window.ImpCheck = (function(){
   document.querySelectorAll('#settingsMenu .menu-help').forEach(function(d){ d.addEventListener('click', function(e){ if (!e.target.closest('a')) e.stopPropagation(); }); });
 })();
 </script>
+<script>
+/* ═══ V6.56–V6.57 — keyboard + screen reader (spec §28, Free). Rule: mouse and touch see no change; keyboard users see focus rings only.
+   Attributes, visually hidden text, one focus ring on the timeline. Texts: I18N 'a11y.*' (12 languages). ═══ */
+(function(){
+  var svg = document.getElementById('mainSvg'), outer = document.getElementById('timelineOuter');
+  var es = document.getElementById('emptyState'), lv = document.getElementById('listView'), fv = document.getElementById('factsView');
+  var tlTitle = document.getElementById('tlTitle'), tlHelp = document.getElementById('tlHelp'), live = document.getElementById('a11yLive');
+  var kb = false, wantPid = null, lastPid = null, ring = null, order = [], seq = 0, mode = 'full';
+  document.getElementById('skipLink').textContent = t('a11y.skip');
+  function say(msg) { live.textContent = ''; setTimeout(function(){ live.textContent = msg; }, 60); }
+
+  // ── landmarks + headings (attributes only) ──
+  var hdr = document.querySelector('.header'); hdr.setAttribute('role', 'banner');
+  var hh = hdr.querySelector('h1'); if (hh) hh.setAttribute('role', 'none');
+  es.setAttribute('role', 'main');
+  function startHeading() { var st = es.querySelector('#emptyCopy strong'); if (st && st.id !== 'startTitle') { st.id = 'startTitle'; st.setAttribute('role', 'heading'); st.setAttribute('aria-level', '1'); } es.setAttribute('aria-labelledby', 'startTitle'); }
+  startHeading(); new MutationObserver(startHeading).observe(document.getElementById('emptyCopy'), { childList: true, subtree: true });
+  function listHeading() { var h = lv && lv.querySelector('.pl-title'); if (h && h.getAttribute('aria-level') !== '1') h.setAttribute('aria-level', '1'); }
+  if (lv) new MutationObserver(listHeading).observe(lv, { childList: true, subtree: true });
+  outer.setAttribute('role', 'main'); outer.setAttribute('aria-labelledby', 'tlTitle');
+  var rs = document.getElementById('rulerSvg'); if (rs) rs.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('role', 'group'); svg.setAttribute('aria-labelledby', 'tlTitle'); svg.setAttribute('aria-describedby', 'tlHelp');
+
+  document.addEventListener('keydown', function(e){ if (!e.ctrlKey && !e.metaKey && !e.altKey) kb = true; }, true);
+  document.addEventListener('pointerdown', function(){ kb = false; }, true);
+
+  // ── timeline people ──
+  function isPerson(el) { return el.hasAttribute('data-act') && !el.closest('[aria-hidden="true"]'); }
+  function clean(s) { return s.replace(/[↳⧉]/g, '').replace(/[\s\u00a0]+/g, ' ').replace(/ · /g, ', ').trim(); }
+  function focalName() { var n = document.querySelector('#headerFocal .hf-name'); return n ? n.textContent : ''; }
+  var cache = {};
+  function labelPerson(el) {
+    var pid = el.getAttribute('data-pid'), act = el.getAttribute('data-act'), key = pid + '|' + act, d = cache[key];
+    if (d === undefined) { d = cache[key] = window.TreeLine.a11yDescribe(pid, act); }
+    var txt = d ? (mode === 'short' ? d.short : d.full) : clean(el.textContent);
+    el.setAttribute('aria-label', txt);
+  }
+  function relabel() { order.forEach(labelPerson); }
+  function process() {
+    if (!svg.firstChild) return;
+    hideRing(); cache = {};
+    tlTitle.textContent = t('a11y.tl', { name: focalName() }); tlHelp.textContent = t('a11y.help');
+    var items = [], people = [];
+    svg.querySelectorAll('text').forEach(function(el){
+      if (isPerson(el)) {
+        if (!el.id) el.id = 'a11y-' + (++seq);
+        el.setAttribute('role', 'button'); el.setAttribute('tabindex', '-1');
+        if (el.classList.contains('focal-name')) el.setAttribute('aria-current', 'true'); else el.removeAttribute('aria-current');
+        people.push(el); items.push(el);
+      } else if (el.classList.contains('gen-head')) {
+        if (!el.id) el.id = 'a11y-' + (++seq);
+        var num = el.previousElementSibling && el.previousElementSibling.classList.contains('gen-num-text') ? el.previousElementSibling.textContent : '';
+        var parts = el.querySelectorAll('tspan').length ? [].map.call(el.querySelectorAll('tspan'), function(x){ return clean(x.textContent); }).filter(Boolean).join(', ') : clean(el.textContent);
+        el.setAttribute('role', 'heading'); el.setAttribute('aria-level', '2'); el.setAttribute('aria-label', (num ? num + ', ' : '') + parts);
+        items.push(el);
+      } else if (!el.closest('[role]')) el.setAttribute('aria-hidden', 'true');
+    });
+    var y = new Map(); items.forEach(function(el){ try { var b = el.getBBox(); y.set(el, b.y * 10000 + b.x); } catch (_) { y.set(el, 0); } });
+    items.sort(function(a, b){ return y.get(a) - y.get(b); });
+    people.sort(function(a, b){ return y.get(a) - y.get(b); });
+    svg.setAttribute('aria-owns', items.map(function(el){ return el.id; }).join(' '));
+    order = people; relabel();
+    var pick = (wantPid && pickPid(wantPid)) || (lastPid && pickPid(lastPid)) || svg.querySelector('text.focal-name') || people[0];
+    if (pick) pick.setAttribute('tabindex', '0');
+    if (wantPid && pick) { var o = outer.scrollTop, l = outer.scrollLeft; pick.focus({ preventScroll: true }); outer.scrollTop = o; outer.scrollLeft = l; }
+    wantPid = null;
+  }
+  function pickPid(pid) {
+    if (pid === '__focal__') return svg.querySelector('text.focal-name');
+    var f = order.filter(function(el){ return el.getAttribute('data-pid') === pid; });
+    return f.filter(function(el){ return el.classList.contains('focal-name'); })[0] || f[0] || null;
+  }
+  function hideRing() { if (ring && ring.parentNode) ring.parentNode.removeChild(ring); ring = null; }
+  function showRing(el) {
+    hideRing(); if (!el.matches(':focus-visible')) return;
+    var b = el.getBBox(), r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    r.setAttribute('class', 'kb-ring'); r.setAttribute('x', b.x - 7); r.setAttribute('y', b.y - 4); r.setAttribute('width', b.width + 14); r.setAttribute('height', b.height + 8); r.setAttribute('rx', 7);
+    r.setAttribute('aria-hidden', 'true'); ring = r; el.parentNode.insertBefore(r, el);
+  }
+  new MutationObserver(function(ms){
+    var real = ms.some(function(m){ return [].some.call(m.addedNodes, function(n){ return !(n.classList && n.classList.contains('kb-ring')); }); });
+    if (real) requestAnimationFrame(process);
+  }).observe(svg, { childList: true });
+  svg.addEventListener('focusin', function(e){
+    var el = e.target; if (!isPerson(el)) return;
+    order.forEach(function(p){ p.setAttribute('tabindex', p === el ? '0' : '-1'); });
+    lastPid = el.getAttribute('data-pid'); showRing(el);
+  });
+  svg.addEventListener('focusout', function(){ hideRing(); });
+  svg.addEventListener('keydown', function(e){
+    var el = e.target; if (!isPerson(el)) return;
+    var i = order.indexOf(el), n = null;
+    if (e.key === 'ArrowDown') n = order[Math.min(order.length - 1, i + 1)];
+    else if (e.key === 'ArrowUp') n = order[Math.max(0, i - 1)];
+    else if (e.key === 'Home') n = order[0];
+    else if (e.key === 'End') n = order[order.length - 1];
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {   // V6.57: short / full descriptions (skip the long sentence)
+      e.preventDefault(); mode = e.key === 'ArrowLeft' ? 'short' : 'full'; relabel();
+      say(t(mode === 'short' ? 'a11y.short' : 'a11y.full') + (mode === 'full' ? ' ' + el.getAttribute('aria-label') : ''));
+      return;
+    }
+    else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault(); var act = el.getAttribute('data-act'); wantPid = el.getAttribute('data-pid');
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+      setTimeout(function(){ if (wantPid && document.activeElement === el) wantPid = null; }, 0);
+      if (act === 'profile') say(t('a11y.ppOpen'));
+      return;
+    }
+    if (n) { e.preventDefault(); n.focus(); }
+  });
+  new MutationObserver(function(){
+    var a = document.activeElement;
+    if (kb && outer.style.display === 'block' && !svg.contains(a) && (!a || a === document.body || (es.contains(a) && es.style.display === 'none'))) wantPid = '__focal__';
+  }).observe(outer, { attributes: true, attributeFilter: ['style'] });
+
+  // ── skip link ──
+  document.getElementById('skipLink').addEventListener('click', function(e){
+    e.preventDefault();
+    var tgt = null;
+    if (fv && !fv.hidden) tgt = fv.querySelector('button, [href]');
+    else if (lv && !lv.hidden) tgt = lv.querySelector('button, [href], [tabindex="0"]');
+    else if (outer.style.display === 'block') tgt = svg.querySelector('text[tabindex="0"]');
+    else tgt = es.querySelector('input:not([hidden]), button:not([hidden])');
+    if (tgt) tgt.focus();
+  });
+
+  // ── Menu, About, Find gaps (V6.57) ──
+  var menu = document.getElementById('settingsMenu'), sBtn = document.getElementById('settingsBtn');
+  if (menu) menu.removeAttribute('role');   // disclosure, not an ARIA menu (no menuitems)
+  var themes = document.querySelectorAll('.theme-option[data-theme]');
+  function themePressed() { themes.forEach(function(o){ o.setAttribute('aria-pressed', o.classList.contains('active') ? 'true' : 'false'); }); }
+  themePressed(); themes.forEach(function(o){ o.addEventListener('click', function(){ setTimeout(themePressed, 0); }); });
+  var about = document.getElementById('aboutBtn'), aboutPop = document.getElementById('aboutPop');
+  if (about && aboutPop) about.addEventListener('click', function(){ if (!kb) return; setTimeout(function(){ if (about.getAttribute('aria-expanded') === 'true') { var f = aboutPop.querySelector('button, [href], input, select'); if (f) f.focus(); } }, 30); });
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Escape') return;
+    var trig = ['settingsBtn', 'gapsBtn', 'aboutBtn'].map(function(id){ return document.getElementById(id); }).filter(function(b){ return b && b.getAttribute('aria-expanded') === 'true'; })[0];
+    if (menu && menu.classList.contains('open')) { menu.classList.remove('open'); sBtn.setAttribute('aria-expanded', 'false'); trig = sBtn; }
+    if (trig) setTimeout(function(){ var a = document.activeElement; if (!a || a === document.body || !a.offsetParent) trig.focus(); }, 0);
+  }, true);
+
+  // ── Fact cards (V6.57): one finding per card, honest chart labels, valid toggle ──
+  function factsA11y() {
+    if (!fv || fv.hidden) return;
+    fv.querySelectorAll('[role="radiogroup"]').forEach(function(g){ g.setAttribute('role', 'group'); g.querySelectorAll('[role="radio"]').forEach(function(b){ b.removeAttribute('role'); b.removeAttribute('aria-checked'); }); });
+    fv.querySelectorAll('.fc-card').forEach(function(c){
+      var h = c.querySelector('h3'), title = h ? h.textContent.trim() : '', ins = c.querySelector('.fc-insight');
+      c.querySelectorAll('.fc-ghostwrap [role="img"]').forEach(function(x){ x.setAttribute('aria-hidden', 'true'); });   // ghost charts show invented example values
+      c.querySelectorAll('[role="img"]').forEach(function(x){ var l = (x.getAttribute('aria-label') || '').trim(); if (!l || l === title) x.setAttribute('aria-label', title + (ins ? '. ' + ins.textContent.trim() : '')); });
+      if (ins || c.querySelector('.a11y-find')) return;
+      var v = '', k = 'a11y.fcTop', li = c.querySelector('.fc-top5 li');
+      if (li) v = [].filter.call(li.children, function(x){ return !x.classList.contains('fc-rank'); }).map(function(x){ return (x.children.length ? [].map.call(x.children, function(y){ return y.textContent.trim(); }).join(' ') : x.textContent).replace(/\s+/g, ' ').trim(); }).join(', ');
+      else if ((li = c.querySelector('.fc-rows li'))) { k = 'a11y.fcMost'; var nm = li.querySelector('.fc-rname'), val = li.querySelector('.fc-rval'); v = (nm ? nm.textContent.trim() : '') + (val ? ', ' + val.textContent.trim() : ''); }
+      if (!v) return;
+      var p = document.createElement('p'); p.className = 'sr-only a11y-find'; p.textContent = t(k, { v: v });
+      var top = c.querySelector('.fc-card-top'); if (top && top.nextSibling) c.insertBefore(p, top.nextSibling); else c.appendChild(p);
+    });
+  }
+  if (fv) { var fq = false; new MutationObserver(function(){ if (fq) return; fq = true; requestAnimationFrame(function(){ fq = false; factsA11y(); }); }).observe(fv, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] }); }
+
+  document.addEventListener('tl-lang', function(){ document.getElementById('skipLink').textContent = t('a11y.skip'); if (svg.firstChild) process(); });
+})();
+</script>
+
 <script type="text/plain" id="sampleGed">
 0 HEAD
 1 SOUR TreeLine
