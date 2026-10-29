@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.64</title>
+<title>TreeLine V6.67</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -2166,7 +2166,7 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
    Emakimono (one hairline time axis per block) · Shibui dropped (owner: too serious) — wash as V6.62. ═══ */
 .tour-in { padding-top: 45px; }
 /* Yamato-hi columns + Ma */
-.tour-item { grid-template-columns: minmax(0, 1fr) minmax(0, 1.414fr); gap: 91px; padding: 91px 0; position: relative; }
+.tour-item { grid-template-columns: minmax(0, 1fr) minmax(0, 1.414fr); gap: 91px; padding: 64px 0 91px; position: relative; }   /* top 64 in every block: titles level */
 .tour-item + .tour-item { border-top: 0; }
 /* Emakimono: a hairline time axis with one marker, instead of divider lines */
 .tour-item::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.42), rgba(255,255,255,0.10) 70%, rgba(255,255,255,0)); }
@@ -2175,10 +2175,8 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
 /* Kanso + Shibui type: fewer words per line, quieter body */
 .tour-copy h3 { font-size: 32px; letter-spacing: -0.01em; line-height: 1.2; }
 .tour-copy p { margin-top: 23px; max-width: 26em; line-height: 1.7; }
-/* Fukinsei: vertical steps (text stays left — decision S) */
-.tour-item:nth-child(3) .tour-copy { padding-top: 64px; }
-.tour-item:nth-child(4) .tour-copy { padding-top: 23px; }
-.tour-item:nth-child(5) .tour-copy { padding-top: 91px; }
+/* V6.65: no vertical steps (fukinsei removed, owner) — every title sits at the same height in its block, level with the picture's top */
+.tour-item .tour-copy { padding-top: 0; }
 /* Jo-ha-kyū: jo = the first block slow and large */
 .tour-item:nth-child(2) { padding: 64px 0 128px; }
 /* ha = middle blocks compact */
@@ -10178,7 +10176,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.64', since: 'V5.45', date: [2026, 10, 29],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.67', since: 'V5.45', date: [2026, 10, 29],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
@@ -10608,6 +10606,19 @@ window.ImpCheck = (function(){
       }
     });
   }
+  // V6.67: one column (≤ 900 px) → the text starts at its picture's left edge and is as wide as the picture (pictures stay centred)
+  function alignCopy() {
+    var one = window.matchMedia('(max-width: 900px)').matches;
+    frames.forEach(function(f){
+      var item = f.closest('.tour-item'), copy = item && item.querySelector('.tour-copy');
+      if (!copy) return;
+      if (!one) { copy.style.marginLeft = ''; copy.style.maxWidth = ''; return; }
+      var F = f.getBoundingClientRect(), I = item.getBoundingClientRect();
+      copy.style.marginLeft = Math.max(0, Math.round(F.left - I.left)) + 'px';
+      copy.style.maxWidth = Math.round(F.width) + 'px';
+    });
+  }
+  var _fit = fit; fit = function(){ _fit(); alignCopy(); };
   fit(); window.addEventListener('resize', fit);
   if (window.ResizeObserver) { var ro = new ResizeObserver(fit); frames.forEach(function(f){ ro.observe(f.parentNode); }); }
   // closing CTA = the same actions as the hero (one load path)
