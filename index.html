@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.68</title>
+<title>TreeLine V6.69</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -2217,7 +2217,7 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
 #settingsMenu :is(.menu-item, .theme-option, .menu-help summary):focus-visible { background: var(--accent-tint); outline: 2px solid var(--header-accent); outline-offset: -2px; }
 #settingsMenu .lang-sel:focus-visible { outline: 2px solid var(--header-accent); outline-offset: 2px; border-color: var(--header-accent); }
 
-/* ═══ V6.68 — privacy policy (owner 2026-10-30): About = inline disclosure, footer + privacy line = centred dialog (no page jump).
+/* ═══ V6.68 — privacy policy (owner 2026-10-30): one centred dialog (no page jump) from About (V6.69), the footer and the privacy line.
    Footer = logo left, 2 × 2 one-line links right (≤ 900 px: one column). ↗ only on links that leave the page. ═══ */
 .nw { white-space: nowrap; }
 .tour-foot li span.nw { display: inline; }   /* the V6.60 rule ".tour-foot li span { display: block }" must not break the line */
@@ -2226,10 +2226,6 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
 .privacy-note .priv-open { font-weight: 600; color: var(--header-accent); text-decoration: underline; text-underline-offset: 3px; background: none; border: 0; padding: 0; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; }
 .privacy-note .priv-open:focus-visible, .ab-pp-btn:focus-visible { outline: 2px solid var(--header-accent); outline-offset: 2px; border-radius: 2px; }
 .ab-pp-btn { background: none; border: 0; padding: 0; font: inherit; color: var(--header-accent); font-weight: 600; cursor: pointer; text-decoration: underline; }
-.ab-pp-btn svg { width: 0.8em; height: 0.8em; margin-left: 0.25em; vertical-align: -0.02em; transition: transform .15s; }
-.ab-pp-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
-.ab-pp { margin-top: 10px; padding: 12px 14px; border-radius: 10px; background: var(--hover-bg, rgba(127,127,127,0.08)); color: var(--header-title); }
-.ab-pp[hidden] { display: none; }
 .pp-doc { font-size: 14px; line-height: 1.55; }
 .pp-doc h3 { font-size: 14px; font-weight: 700; margin: 14px 0 2px; }
 .pp-doc p { margin: 0 0 6px; }
@@ -10217,8 +10213,8 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 </script>
 
 <script>
-/* V6.68 — Privacy policy (owner 2026-10-30). One source, two places: About (inline disclosure) and a dialog
-   (footer + privacy line; centred, the page does not jump). Body in English only (owner); a note says so in other languages.
+/* V6.68 — Privacy policy (owner 2026-10-30). One dialog, opened from About (V6.69), the footer and the privacy line
+   (centred, the page does not jump). Body in English only (owner); a note says so in other languages.
    Facts: GEDCOM in browser only · localStorage only for the language · GitHub Pages logs IPs · place links → Google Maps. */
 window.TLPrivacy = (function(){
   var EXT = '<svg class="ext-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
@@ -10249,10 +10245,10 @@ window.TLPrivacy = (function(){
   }
   var dlg, body, back = null;
   function fill() { if (body) body.innerHTML = html(); }
-  function open() {
+  function open(returnTo) {
     dlg = dlg || document.getElementById('privDlg'); body = body || document.getElementById('privBody');
     if (!dlg || dlg.open) return;
-    back = document.activeElement; fill(); body.scrollTop = 0;
+    back = returnTo || document.activeElement; fill(); body.scrollTop = 0;
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
     var c = dlg.querySelector('.pd-close'); if (c) c.focus();
   }
@@ -10273,7 +10269,7 @@ window.TLPrivacy = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.68', since: 'V5.45', date: [2026, 10, 30],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.69', since: 'V5.45', date: [2026, 10, 30],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
@@ -10291,7 +10287,6 @@ var RELEASE = {
   function e(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function A(url, txt) { return '<a href="' + e(url) + '" target="_blank" rel="noopener noreferrer">' + e(txt) + '</a>'; }
   function AX(url, txt, label) { return '<a href="' + e(url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + e(label).replace(/"/g, '&quot;') + '">' + TLPrivacy.tail(e(txt)) + '</a>'; }
-  var ppOpen = false;
   function build() {
     var d = RELEASE.date;
     pop.innerHTML = '<div class="ab-head"><div><div class="ab-title">TreeLine ' + e(RELEASE.version) + '</div><div class="ab-date">' + e(t('about.released', { date: tDate(d[0], d[1], d[2]) })) + '</div></div><button class="ab-close" aria-label="' + e(t('about.close')) + '">✕</button></div>' +
@@ -10300,8 +10295,7 @@ var RELEASE = {
       // V6.68: one line each, the same texts as the footer; ↗ on links that leave the page; aria-label = the whole line
       '<li>' + tRich('about.dl', { link: { html: AX(RELEASE.repoUrl, t('about.dllink'), t('about.dl', { link: t('about.dllink') })) } }) + '</li>' +
       '<li>' + tRich('about.fb', { link: { html: AX(RELEASE.issuesUrl, t('about.fblink'), t('about.fb', { link: t('about.fblink') })) } }) + '</li>' +
-      '<li>' + tRich('about.pp', { link: { html: '<button type="button" class="ab-pp-btn" aria-expanded="' + ppOpen + '" aria-controls="abPP">' + e(t('about.pplink')) + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' } }) +
-        '<div class="ab-pp" id="abPP"' + (ppOpen ? '' : ' hidden') + '>' + TLPrivacy.html() + '</div></li>' +
+      '<li>' + tRich('about.pp', { link: { html: '<button type="button" class="ab-pp-btn" aria-haspopup="dialog">' + e(t('about.pplink')) + '</button>' } }) + '</li>' +   // V6.69: opens the same dialog as the footer and the privacy line
       '<li>' + tRich('about.author', { name: { html: AX(RELEASE.authorUrl, RELEASE.authorName, t('about.author', { name: RELEASE.authorName })) } }) + '</li></ul></div>';
   }
   build(); document.addEventListener('tl-lang', build);
@@ -10309,7 +10303,7 @@ var RELEASE = {
   btn.addEventListener('click', function(ev){ ev.stopPropagation(); open(pop.hidden); });
   TLPops.reg(function(){ return !pop.hidden; }, function(){ open(false); }, function(t){ return pop.contains(t) || btn.contains(t); });
   pop.addEventListener('click', function(ev){ ev.stopPropagation(); if (ev.target.closest('.ab-close')) open(false);
-    var pb = ev.target.closest('.ab-pp-btn'); if (pb) { ppOpen = !ppOpen; pb.setAttribute('aria-expanded', String(ppOpen)); var r = document.getElementById('abPP'); if (r) { r.hidden = !ppOpen; if (ppOpen) pop.scrollTop += pb.getBoundingClientRect().top - pop.getBoundingClientRect().top - 16; } } });   // the opened line stays at the top
+    if (ev.target.closest('.ab-pp-btn')) { open(false); TLPrivacy.open(btn); } });   // About closes first; focus returns to the About button
   document.addEventListener('click', function(){ if (!pop.hidden) open(false); });
   document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && !pop.hidden) open(false); });
 })();
