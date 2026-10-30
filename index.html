@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TreeLine V6.67</title>
+<title>TreeLine V6.68</title>
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
 <link rel="canonical" href="https://hseeberg.github.io/TreeLine/">
@@ -2216,6 +2216,47 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
 #settingsMenu :focus-visible, #gapsPop :focus-visible, #aboutPop :focus-visible { outline-color: var(--header-accent); }
 #settingsMenu :is(.menu-item, .theme-option, .menu-help summary):focus-visible { background: var(--accent-tint); outline: 2px solid var(--header-accent); outline-offset: -2px; }
 #settingsMenu .lang-sel:focus-visible { outline: 2px solid var(--header-accent); outline-offset: 2px; border-color: var(--header-accent); }
+
+/* ═══ V6.68 — privacy policy (owner 2026-10-30): About = inline disclosure, footer + privacy line = centred dialog (no page jump).
+   Footer = logo left, 2 × 2 one-line links right (≤ 900 px: one column). ↗ only on links that leave the page. ═══ */
+.nw { white-space: nowrap; }
+.tour-foot li span.nw { display: inline; }   /* the V6.60 rule ".tour-foot li span { display: block }" must not break the line */
+.ext-i { width: 0.8em; height: 0.8em; margin-left: 0.2em; vertical-align: -0.05em; }
+.lnk-btn { background: none; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.privacy-note .priv-open { font-weight: 600; color: var(--header-accent); text-decoration: underline; text-underline-offset: 3px; background: none; border: 0; padding: 0; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.privacy-note .priv-open:focus-visible, .ab-pp-btn:focus-visible { outline: 2px solid var(--header-accent); outline-offset: 2px; border-radius: 2px; }
+.ab-pp-btn { background: none; border: 0; padding: 0; font: inherit; color: var(--header-accent); font-weight: 600; cursor: pointer; text-decoration: underline; }
+.ab-pp-btn svg { width: 0.8em; height: 0.8em; margin-left: 0.25em; vertical-align: -0.02em; transition: transform .15s; }
+.ab-pp-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.ab-pp { margin-top: 10px; padding: 12px 14px; border-radius: 10px; background: var(--hover-bg, rgba(127,127,127,0.08)); color: var(--header-title); }
+.ab-pp[hidden] { display: none; }
+.pp-doc { font-size: 14px; line-height: 1.55; }
+.pp-doc h3 { font-size: 14px; font-weight: 700; margin: 14px 0 2px; }
+.pp-doc p { margin: 0 0 6px; }
+.pp-doc .pp-meta { color: var(--header-sub); font-size: 13px; }
+.pp-doc .pp-lead { font-weight: 600; }
+.pp-doc .pp-en { color: var(--header-sub); font-style: italic; }
+.pp-doc a { color: var(--header-accent); font-weight: 600; overflow-wrap: anywhere; }
+.priv-dlg { position: fixed; inset: 0; margin: auto; height: fit-content; width: min(680px, calc(100vw - 32px)); max-height: min(85vh, 860px); max-height: min(85dvh, 860px); padding: 0; border: 1px solid var(--panel-border); border-radius: 14px; background: var(--panel-bg); color: var(--header-title); box-shadow: var(--shadow); overflow: hidden; }
+.priv-dlg[open] { display: flex; flex-direction: column; }
+.priv-dlg::backdrop { background: rgba(20, 10, 16, 0.5); }
+.pd-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 20px 12px 24px; border-bottom: 1px solid var(--panel-border); }
+.pd-head h2 { margin: 0; font-size: 20px; font-weight: 700; }
+.pd-body { overflow-y: auto; overscroll-behavior: contain; padding: 4px 24px 24px; }
+.pd-body .pp-doc { font-size: 16px; line-height: 1.6; max-width: 36em; }
+.pd-body .pp-doc h3 { font-size: 16px; margin-top: 20px; }
+.pd-body .pp-doc .pp-meta { font-size: 14px; margin-top: 14px; }
+@media (max-width: 480px) { .pd-head { padding: 14px 12px 10px 16px; } .pd-body { padding: 4px 16px 20px; } .pd-body .pp-doc { font-size: 15px; } }
+/* footer: logo left, links right */
+.tour-foot-in { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 91px; align-items: start; }
+.tour-foot-logo { margin: 0; }
+.tour-foot ul { grid-template-columns: repeat(2, minmax(0, max-content)); grid-template-rows: auto auto; grid-auto-flow: column; gap: 11px 64px; justify-content: end; }
+.tour-foot li { min-width: 0; }
+.tour-foot .lnk-btn { color: #FFFFFF; }
+.tour-foot .lnk-btn:hover { text-decoration-thickness: 2px; }
+.tour-foot .lnk-btn:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 2px; border-radius: 2px; }
+@media (max-width: 1100px) { .tour-foot-in { column-gap: 45px; } .tour-foot ul { column-gap: 45px; } }
+@media (max-width: 900px) { .tour-foot-in { display: block; } .tour-foot-logo { margin-bottom: 23px; } .tour-foot ul { grid-template-columns: minmax(0, 1fr); grid-auto-flow: row; gap: 11px; justify-content: stretch; } }
 </style>
 </head>
 <body class="is-start">
@@ -2299,7 +2340,7 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
       <p class="gh-foot" data-i18n="help.desktop">Desktop programs (Family Tree Maker, RootsMagic, MacFamilyTree, Gramps): look for File → Export → GEDCOM.</p>
     </div>
   </details>
-  <div class="privacy-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span data-i18n="start.privacy">Your file stays on this computer. Nothing is uploaded and saved online. No cookies and no tracking.</span></div>
+  <div class="privacy-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="pn-text"><span data-i18n="start.privacy">Your file stays on this computer. Nothing is uploaded and saved online. No cookies and no tracking.</span> <button type="button" class="priv-open" aria-haspopup="dialog" data-i18n="priv.title">Privacy policy</button></span></div>
   </div>
   <div class="hero-visual">
     <svg class="hero-tl" viewBox="0 0 580 453" role="img" aria-label="Example timeline from the sample family: Albert Brandt and his siblings, the chosen person Arthur Brandt with his siblings, and Arthur’s children" data-i18n-aria="start.heroAria" data-i18n-vars='{"a":"Albert Brandt","b":"Arthur Brandt","c":"Arthur"}'><path class="hv-band" d="M20 62H536.6V164H20A12 12 0 0 1 8 152V74A12 12 0 0 1 20 62Z"/><path class="hv-band" d="M20 214H536.6V316H20A12 12 0 0 1 8 304V226A12 12 0 0 1 20 214Z"/><path class="hv-band" d="M20 366H536.6V443H20A12 12 0 0 1 8 431V378A12 12 0 0 1 20 366Z"/><rect x="12" y="214" width="517.2" height="40" rx="8" class="hv-focal-m"/><rect x="246" y="30" width="230.60000000000002" height="423" class="hv-stripe"/><line x1="246" y1="30" x2="246" y2="453" class="hv-grid"/><text x="246" y="18" text-anchor="middle" class="hv-axis">1900</text><line x1="361.3" y1="30" x2="361.3" y2="453" class="hv-grid"/><text x="361.3" y="18" text-anchor="middle" class="hv-axis">1950</text><line x1="476.6" y1="30" x2="476.6" y2="453" class="hv-grid"/><text x="476.6" y="18" text-anchor="middle" class="hv-axis">2000</text><line x1="536.6" y1="26" x2="536.6" y2="453" class="hv-today"/><line x1="0" y1="30" x2="580" y2="30" class="hv-rule"/><line x1="292.1" y1="88" x2="292.1" y2="228" class="hv-conn-m"/><line x1="356.7" y1="240" x2="356.7" y2="380" class="hv-conn-child hv-conn-m"/><line x1="361.3" y1="240" x2="361.3" y2="403" class="hv-conn-child hv-conn-m"/><line x1="368.2" y1="240" x2="368.2" y2="426" class="hv-conn-child hv-conn-m"/><rect x="222.9" y="76" width="156.9" height="12" rx="6" class="hv-heir-m "/><circle cx="222.9" cy="82" r="5" class="hv-node hv-node-m"/><rect x="232.2" y="98" width="172.9" height="6" rx="3" class="hv-heir-f"/><rect x="229.9" y="124" width="193.7" height="8" rx="4" class="hv-sib-f"/><rect x="236.8" y="147" width="170.6" height="8" rx="4" class="hv-sib-f"/><rect x="292.1" y="228" width="170.7" height="12" rx="6" class="hv-heir-m "/><circle cx="292.1" cy="234" r="5" class="hv-node hv-node-m"/><rect x="294.4" y="250" width="235.3" height="6" rx="3" class="hv-sib-f"/><rect x="296.7" y="276" width="212.2" height="8" rx="4" class="hv-sib-m"/><rect x="299" y="299" width="203" height="8" rx="4" class="hv-sib-f"/><rect x="356.7" y="380" width="163.8" height="8" rx="4" class="hv-sib-f"/><rect x="361.3" y="403" width="175.3" height="8" rx="4" class="hv-sib-m"/><rect x="368.2" y="426" width="168.4" height="8" rx="4" class="hv-sib-m"/><text x="210.9" y="87" text-anchor="end" class="hv-heir-name">Albert Brandt (1890–1958)</text><text x="224.2" y="104" text-anchor="end" class="hv-spouse">+Florence Pickering (1894–1969)</text><text x="221.9" y="132" text-anchor="end" class="hv-sib">Edith Brandt (1893–1977)</text><text x="228.8" y="155" text-anchor="end" class="hv-sib">Maja Brandt (1896–1970)</text><text x="280.1" y="239" text-anchor="end" class="hv-heir-name">Arthur Brandt (1920–1994)</text><text x="286.4" y="256" text-anchor="end" class="hv-spouse">+Dorothy Whitaker (1921–2023)</text><text x="288.7" y="284" text-anchor="end" class="hv-sib">Henry Brandt (1922–2014)</text><text x="291" y="307" text-anchor="end" class="hv-sib">Joan Brandt (1923–2011)</text><text x="348.7" y="388" text-anchor="end" class="hv-sib">Margaret Brandt (1948–2019) ↳</text><text x="353.3" y="411" text-anchor="end" class="hv-sib">Peter Brandt (1950–) ↳</text><text x="360.2" y="434" text-anchor="end" class="hv-sib">Paul Brandt (1953–) ↳</text><circle cx="20" cy="48" r="11" class="hv-num"/><text x="20" y="51.5" text-anchor="middle" class="hv-num-t">7</text><text x="38" y="52" class="hv-head" data-i18n="tl.childrenOf" data-i18n-vars='{"name":"Axel Brandt"}'>Children of Axel Brandt</text><circle cx="20" cy="200" r="11" class="hv-num"/><text x="20" y="203.5" text-anchor="middle" class="hv-num-t">8</text><text x="38" y="204" class="hv-head" data-i18n="tl.childrenOf" data-i18n-vars='{"name":"Albert Brandt"}'>Children of Albert Brandt</text><circle cx="20" cy="352" r="11" class="hv-num"/><text x="20" y="355.5" text-anchor="middle" class="hv-num-t">9</text><text x="38" y="356" class="hv-head" data-i18n="tl.childrenOf" data-i18n-vars='{"name":"Arthur Brandt"}'>Children of Arthur Brandt</text></svg>
@@ -2311,9 +2352,10 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
 <!-- V6.58–V6.59 — start-page tour (spec §2.1e): empty start page only; hidden after a file is loaded -->
 <section class="tour" id="tour" aria-labelledby="tourTitle">
 <div class="tour-wash" id="tourWash" aria-hidden="true"></div><div class="tour-in"><h2 class="sr-only" id="tourTitle" tabindex="-1" data-i18n="tour.hint">What you can do with TreeLine</h2><article class="tour-item tour-search"><div class="tour-copy"><h3 data-i18n="tour.search.t"></h3><p data-i18n="tour.search.d"></p></div><div class="tour-stage"><div class="tour-shot" role="img" data-i18n-aria="tour.search.a"><div class="tour-frame" data-comp="search" aria-hidden="true" inert></div></div></div></article><article class="tour-item tour-facts"><div class="tour-copy"><h3 data-i18n="tour.facts.t"></h3><p data-i18n="tour.facts.d"></p></div><div class="tour-stage"><div class="tour-shot" role="img" data-i18n-aria="tour.facts.a"><div class="tour-frame" data-comp="facts" aria-hidden="true" inert></div></div></div></article><article class="tour-item tour-gaps"><div class="tour-copy"><h3 data-i18n="tour.gaps.t"></h3><p data-i18n="tour.gaps.d"></p></div><div class="tour-stage"><div class="tour-shot" role="img" data-i18n-aria="tour.gaps.a"><div class="tour-frame" data-comp="gaps" aria-hidden="true" inert></div></div></div></article><article class="tour-item tour-list"><div class="tour-copy"><h3 data-i18n="tour.list.t"></h3><p data-i18n="tour.list.d"></p></div><div class="tour-stage"><div class="tour-shot" role="img" data-i18n-aria="tour.list.a"><div class="tour-frame" data-comp="list" aria-hidden="true" inert></div></div></div></article></div>
-<div class="tour-cta"><div class="tour-cta-card"><h2 data-i18n="tour.cta.t">See your own family on a timeline</h2><button class="load-ged-btn" id="tourChooseBtn" type="button" data-i18n="start.choose">Choose GEDCOM file</button><button class="sample-btn" id="tourSampleBtn" type="button"><span data-i18n="start.sample">Try it with a sample family</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button><div class="privacy-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span data-i18n="start.privacy">Your file stays on this computer.</span></div></div></div>
+<div class="tour-cta"><div class="tour-cta-card"><h2 data-i18n="tour.cta.t">See your own family on a timeline</h2><button class="load-ged-btn" id="tourChooseBtn" type="button" data-i18n="start.choose">Choose GEDCOM file</button><button class="sample-btn" id="tourSampleBtn" type="button"><span data-i18n="start.sample">Try it with a sample family</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button><div class="privacy-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="pn-text"><span data-i18n="start.privacy">Your file stays on this computer.</span> <button type="button" class="priv-open" aria-haspopup="dialog" data-i18n="priv.title">Privacy policy</button></span></div></div></div>
 </section>
-<footer class="tour-foot" id="tourFoot"><div class="tour-foot-in"><p class="tour-foot-logo"><svg viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5"/><rect x="9" y="13" width="19" height="5" rx="2.5"/><rect x="5" y="20" width="14" height="5" rx="2.5"/></svg>TreeLine</p><ul><li></li><li></li><li></li></ul></div></footer>
+<footer class="tour-foot" id="tourFoot"><div class="tour-foot-in"><p class="tour-foot-logo"><svg viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="6" width="17" height="5" rx="2.5"/><rect x="9" y="13" width="19" height="5" rx="2.5"/><rect x="5" y="20" width="14" height="5" rx="2.5"/></svg>TreeLine</p><ul><li></li><li></li><li></li><li></li></ul></div></footer>
+<dialog class="priv-dlg" id="privDlg" aria-labelledby="privTitle"><div class="pd-head"><h2 id="privTitle" data-i18n="priv.title">Privacy policy</h2><button type="button" class="ab-close pd-close" data-i18n-aria="about.close" aria-label="Close">✕</button></div><div class="pd-body" id="privBody"></div></dialog>
 
 <div class="timeline-outer" id="timelineOuter">
   <div class="sticky-ruler-wrap" id="rulerWrap">
@@ -2598,10 +2640,9 @@ I18N.en = {
   'about.close': 'Close',
   'about.new': 'What’s new',
   'about.project': 'The project',                                  // V6.2: About heading over download, feedback, author
-  'about.gh1': 'Want TreeLine on your own computer? {link}. It works offline in your browser.',
-  'about.gh1link': 'Download a copy from GitHub',                   // link text inside about.gh1
-  'about.gh2': 'Ideas or feedback? Add them under {link}.',
-  'about.gh2link': 'Issues on GitHub',                              // link text inside about.gh2
+  
+  
+  
   'about.author': 'Created and designed by {name}',
   // ── Import check (V5.43): shown only when something is wrong; each problem = title, cause, 2 steps ──
   'imp.badge': "Problems found in this file – show",
@@ -2860,10 +2901,9 @@ I18N.et = {
   'about.close': 'Sulge',
   'about.new': 'Mis on uut',
   'about.project': 'Projektist',
-  'about.gh1': 'Soovid TreeLine’i oma arvutisse? {link}. See töötab sinu brauseris ka ilma internetita.',
-  'about.gh1link': 'Laadi koopia alla GitHubist',
-  'about.gh2': 'Ideed või tagasiside? Lisa need siia: {link}.',
-  'about.gh2link': 'GitHubi Issues',
+  
+  
+  
   'about.author': 'Loonud ja disaininud {name}',
   'imp.badge': "Failis leiti probleeme – näita",
   'imp.whatToDo': "Mida teha",
@@ -3029,9 +3069,8 @@ I18N.de = {
   'month.7': 'Juli', 'month.8': 'Aug.', 'month.9': 'Sept.', 'month.10': 'Okt.', 'month.11': 'Nov.', 'month.12': 'Dez.',
   'date.dmy': '{d}. {m} {y}', 'date.my': '{m} {y}',
   'about.aria': 'Über TreeLine', 'about.released': 'Veröffentlicht am {date}', 'about.close': 'Schließen', 'about.new': 'Neu in dieser Version',
-  'about.gh1': 'Möchten Sie TreeLine auf Ihrem eigenen Computer? {link}. Es funktioniert offline in Ihrem Browser.',
-  'about.gh1link': 'Kopie von GitHub herunterladen', 'about.gh2': 'Ideen oder Feedback? Schreiben Sie sie unter {link}.',
-  'about.gh2link': 'Issues auf GitHub', 'about.author': 'Erstellt und gestaltet von {name}',
+  
+  'about.author': 'Erstellt und gestaltet von {name}',
   'imp.badge': "Probleme in dieser Datei gefunden – anzeigen",
   'imp.whatToDo': "Was tun",
   'imp.alsoFound': "Außerdem gefunden",
@@ -3194,9 +3233,8 @@ I18N.fi = {
   'month.7': 'heinäk.', 'month.8': 'elok.', 'month.9': 'syysk.', 'month.10': 'lokak.', 'month.11': 'marrask.', 'month.12': 'jouluk.',
   'date.dmy': '{d}. {m} {y}', 'date.my': '{m} {y}',
   'about.aria': 'Tietoja TreeLinesta', 'about.released': 'Julkaistu {date}', 'about.close': 'Sulje', 'about.new': 'Uutta',
-  'about.gh1': 'Haluatko TreeLinen omalle tietokoneellesi? {link}. Se toimii selaimessa myös ilman verkkoyhteyttä.',
-  'about.gh1link': 'Lataa kopio GitHubista', 'about.gh2': 'Ideoita tai palautetta? Lisää ne kohtaan {link}.',
-  'about.gh2link': 'Issues GitHubissa', 'about.author': 'Suunnitellut ja toteuttanut {name}',
+  
+  'about.author': 'Suunnitellut ja toteuttanut {name}',
   'imp.badge': "Tiedostosta löytyi ongelmia – näytä",
   'imp.whatToDo': "Mitä tehdä",
   'imp.alsoFound': "Löytyi myös",
@@ -3359,9 +3397,8 @@ I18N.sv = {
   'month.7': 'juli', 'month.8': 'aug', 'month.9': 'sep', 'month.10': 'okt', 'month.11': 'nov', 'month.12': 'dec',
   'date.dmy': '{d} {m} {y}', 'date.my': '{m} {y}',
   'about.aria': 'Om TreeLine', 'about.released': 'Publicerad {date}', 'about.close': 'Stäng', 'about.new': 'Nytt',
-  'about.gh1': 'Vill du ha TreeLine på din egen dator? {link}. Det fungerar offline i din webbläsare.',
-  'about.gh1link': 'Ladda ner en kopia från GitHub', 'about.gh2': 'Idéer eller feedback? Lägg till dem under {link}.',
-  'about.gh2link': 'Issues på GitHub', 'about.author': 'Skapad och formgiven av {name}',
+  
+  'about.author': 'Skapad och formgiven av {name}',
   'imp.badge': "Problem hittades i filen – visa",
   'imp.whatToDo': "Vad du kan göra",
   'imp.alsoFound': "Hittades också",
@@ -3672,10 +3709,9 @@ I18N.es = {
   'about.released': "Publicado el {date}",
   'about.close': "Cerrar",
   'about.new': "Novedades",
-  'about.gh1': "¿Quiere TreeLine en su propio equipo? {link}. Funciona sin conexión en su navegador.",
-  'about.gh1link': "Descargue una copia de GitHub",
-  'about.gh2': "¿Ideas o comentarios? Añádalos en {link}.",
-  'about.gh2link': "Issues en GitHub",
+  
+  
+  
   'about.author': "Creado y diseñado por {name}",
   'imp.badge': "Se encontraron problemas en este archivo: ver",
   'imp.whatToDo': "Qué hacer",
@@ -3987,10 +4023,9 @@ I18N.fr = {
   'about.released': "Publié le {date}",
   'about.close': "Fermer",
   'about.new': "Nouveautés",
-  'about.gh1': "Vous voulez TreeLine sur votre ordinateur ? {link}. Il fonctionne hors ligne dans votre navigateur.",
-  'about.gh1link': "Téléchargez une copie depuis GitHub",
-  'about.gh2': "Des idées ou des remarques ? Ajoutez-les dans {link}.",
-  'about.gh2link': "les Issues sur GitHub",
+  
+  
+  
   'about.author': "Créé et conçu par {name}",
   'imp.badge': "Problèmes trouvés dans ce fichier – afficher",
   'imp.whatToDo': "Que faire",
@@ -4302,10 +4337,9 @@ I18N.nl = {
   'about.released': "Uitgebracht op {date}",
   'about.close': "Sluiten",
   'about.new': "Nieuw",
-  'about.gh1': "Wilt u TreeLine op uw eigen computer? {link}. Het werkt offline in uw browser.",
-  'about.gh1link': "Download een kopie van GitHub",
-  'about.gh2': "Ideeën of feedback? Voeg ze toe bij {link}.",
-  'about.gh2link': "Issues op GitHub",
+  
+  
+  
   'about.author': "Gemaakt en ontworpen door {name}",
   'imp.badge': "Problemen gevonden in dit bestand – tonen",
   'imp.whatToDo': "Wat te doen",
@@ -4617,10 +4651,9 @@ I18N.lv = {
   'about.released': "Publicēts {date}",
   'about.close': "Aizvērt",
   'about.new': "Jaunumi",
-  'about.gh1': "Vēlaties TreeLine savā datorā? {link}. Tas darbojas jūsu pārlūkā arī bezsaistē.",
-  'about.gh1link': "Lejupielādējiet kopiju no GitHub",
-  'about.gh2': "Idejas vai atsauksmes? Pievienojiet tās šeit: {link}.",
-  'about.gh2link': "GitHub Issues",
+  
+  
+  
   'about.author': "Izveidojis un noformējis {name}",
   'imp.badge': "Failā atrastas problēmas – rādīt",
   'imp.whatToDo': "Ko darīt",
@@ -4932,10 +4965,9 @@ I18N.lt = {
   'about.released': "Išleista {date}",
   'about.close': "Uždaryti",
   'about.new': "Naujienos",
-  'about.gh1': "Norite TreeLine savo kompiuteryje? {link}. Jis veikia jūsų naršyklėje ir be interneto.",
-  'about.gh1link': "Atsisiųskite kopiją iš GitHub",
-  'about.gh2': "Idėjų ar atsiliepimų? Pridėkite juos čia: {link}.",
-  'about.gh2link': "GitHub Issues",
+  
+  
+  
   'about.author': "Sukūrė ir suprojektavo {name}",
   'imp.badge': "Faile rasta problemų – rodyti",
   'imp.whatToDo': "Ką daryti",
@@ -5247,10 +5279,9 @@ I18N.no = {
   'about.released': "Publisert {date}",
   'about.close': "Lukk",
   'about.new': "Nytt",
-  'about.gh1': "Vil du ha TreeLine på din egen datamaskin? {link}. Den fungerer uten nett i nettleseren din.",
-  'about.gh1link': "Last ned en kopi fra GitHub",
-  'about.gh2': "Ideer eller tilbakemeldinger? Legg dem til under {link}.",
-  'about.gh2link': "Issues på GitHub",
+  
+  
+  
   'about.author': "Laget og designet av {name}",
   'imp.badge': "Fant problemer i filen – vis",
   'imp.whatToDo': "Hva du kan gjøre",
@@ -5562,10 +5593,9 @@ I18N.da = {
   'about.released': "Udgivet {date}",
   'about.close': "Luk",
   'about.new': "Nyt",
-  'about.gh1': "Vil du have TreeLine på din egen computer? {link}. Den virker offline i din browser.",
-  'about.gh1link': "Hent en kopi fra GitHub",
-  'about.gh2': "Idéer eller feedback? Tilføj dem under {link}.",
-  'about.gh2link': "Issues på GitHub",
+  
+  
+  
   'about.author': "Skabt og designet af {name}",
   'imp.badge': "Der er fundet problemer i filen – vis",
   'imp.whatToDo': "Hvad du kan gøre",
@@ -5603,6 +5633,20 @@ Object.assign(I18N.lv, {'tour.hint': "Ko varat darīt ar TreeLine", 'tour.search
 Object.assign(I18N.lt, {'tour.hint': "Ką galite daryti su TreeLine", 'tour.search.t': "Raskite giminaičius per kelias sekundes", 'tour.search.d': "Dideliame giminės medyje vieną asmenį sunku rasti slenkant. Ieškokite pagal vardą, vietą ar žodį pastabose. Smulkios rašybos klaidos netrukdo.", 'tour.search.a': "Iš pavyzdinės šeimos: paieškos rezultatai", 'tour.facts.t': "Jūsų giminė skaičiais", 'tour.facts.d': "Vardų sąrašas neparodo, kokia didelė yra giminė. Faktų kortelės suskaičiuoja palikuonis karta po kartos – per tėvus ir motinas.", 'tour.facts.a': "Iš pavyzdinės šeimos: faktų kortelės", 'tour.gaps.t': "Žinokite, ką tirti toliau", 'tour.gaps.d': "Dideliame faile sunku pastebėti trūkstamas datas ir vietas. Pažymėkite, ko trūksta, peržiūrėkite asmenis po vieną ir eksportuokite sąrašą.", 'tour.gaps.a': "Iš pavyzdinės šeimos: Rasti spragas", 'tour.list.t': "Visi asmenys aiškiuose sąrašuose", 'tour.list.d': "Laiko juosta rodo vieną šeimą vienu metu. Sąrašo rodinys rodo visus jūsų failo asmenis: pagal pavardę, pagal vardą arba šeimomis.", 'tour.list.a': "Iš pavyzdinės šeimos: sąrašo rodinys šeimomis", 'tour.cta.t': "Pamatykite savo giminę laiko juostoje"});
 Object.assign(I18N.no, {'tour.hint': "Hva du kan gjøre med TreeLine", 'tour.search.t': "Finn slektninger på sekunder", 'tour.search.d': "I et stort slektstre er det vanskelig å finne én person ved å rulle. Søk etter et navn, et sted eller et ord i et notat. Små skrivefeil gjør ingenting.", 'tour.search.a': "Fra eksempelfamilien: søkeresultater", 'tour.facts.t': "Slekten din i tall", 'tour.facts.d': "En liste med navn viser ikke hvor stor en slektslinje er. Faktakort teller etterkommerne generasjon for generasjon, gjennom fedre og mødre.", 'tour.facts.a': "Fra eksempelfamilien: faktakort", 'tour.gaps.t': "Vit hvem du skal forske på neste", 'tour.gaps.d': "Manglende datoer og steder er vanskelige å se i en stor fil. Kryss av for det som mangler, gå gjennom personene én etter én og eksporter listen.", 'tour.gaps.a': "Fra eksempelfamilien: Finn hull", 'tour.list.t': "Alle personer i tydelige lister", 'tour.list.d': "Tidslinjen viser én familie om gangen. Listevisning viser alle i filen din: etter etternavn, etter fornavn eller familie for familie.", 'tour.list.a': "Fra eksempelfamilien: listevisning, familie for familie", 'tour.cta.t': "Se din egen slekt på en tidslinje"});
 Object.assign(I18N.da, {'tour.hint': "Hvad du kan gøre med TreeLine", 'tour.search.t': "Find slægtninge på få sekunder", 'tour.search.d': "I et stort slægtstræ er det svært at finde én person ved at rulle. Søg efter et navn, et sted eller et ord i en note. Små stavefejl gør ikke noget.", 'tour.search.a': "Fra eksempelfamilien: søgeresultater", 'tour.facts.t': "Din slægt i tal", 'tour.facts.d': "En liste med navne viser ikke, hvor stor en slægtslinje er. Faktakort tæller efterkommerne generation for generation, gennem fædre og mødre.", 'tour.facts.a': "Fra eksempelfamilien: faktakort", 'tour.gaps.t': "Find ud af, hvem du skal forske i næste gang", 'tour.gaps.d': "Manglende datoer og steder er svære at se i en stor fil. Sæt kryds ved det, der mangler, gå personerne igennem én ad gangen, og eksportér listen.", 'tour.gaps.a': "Fra eksempelfamilien: Find huller", 'tour.list.t': "Alle personer i overskuelige lister", 'tour.list.d': "Tidslinjen viser én familie ad gangen. Listevisning viser alle i din fil: efter efternavn, efter fornavn eller familie for familie.", 'tour.list.a': "Fra eksempelfamilien: listevisning, familie for familie", 'tour.cta.t': "Se din egen slægt på en tidslinje"});
+
+// V6.68 — footer + About links (one line each) and the privacy policy (spec §2.1c). Policy body itself stays English.
+Object.assign(I18N.en, {'about.dl': "Download an offline copy from {link}", 'about.dllink': "GitHub", 'about.fb': "Share ideas and feedback on {link}", 'about.fblink': "GitHub", 'about.pp': "Read the {link}", 'about.pplink': "privacy policy", 'priv.title': "Privacy policy", 'priv.en': "The privacy policy is in English."});
+Object.assign(I18N.et, {'about.dl': "Laadi alla võrguühenduseta koopia {link}", 'about.dllink': "GitHubist", 'about.fb': "Jaga ideid ja tagasisidet {link}", 'about.fblink': "GitHubis", 'about.pp': "Loe {link}", 'about.pplink': "privaatsuspoliitikat", 'priv.title': "Privaatsuspoliitika", 'priv.en': "Privaatsuspoliitika on inglise keeles."});
+Object.assign(I18N.de, {'about.dl': "Laden Sie eine Offline-Kopie von {link} herunter", 'about.dllink': "GitHub", 'about.fb': "Teilen Sie Ideen und Feedback auf {link}", 'about.fblink': "GitHub", 'about.pp': "Lesen Sie die {link}", 'about.pplink': "Datenschutzerklärung", 'priv.title': "Datenschutzerklärung", 'priv.en': "Die Datenschutzerklärung ist auf Englisch."});
+Object.assign(I18N.fi, {'about.dl': "Lataa offline-kopio {link}", 'about.dllink': "GitHubista", 'about.fb': "Jaa ideoita ja palautetta {link}", 'about.fblink': "GitHubissa", 'about.pp': "Lue {link}", 'about.pplink': "tietosuojaseloste", 'priv.title': "Tietosuojaseloste", 'priv.en': "Tietosuojaseloste on englanniksi."});
+Object.assign(I18N.sv, {'about.dl': "Ladda ner en offlinekopia från {link}", 'about.dllink': "GitHub", 'about.fb': "Dela idéer och feedback på {link}", 'about.fblink': "GitHub", 'about.pp': "Läs {link}", 'about.pplink': "integritetspolicyn", 'priv.title': "Integritetspolicy", 'priv.en': "Integritetspolicyn är på engelska."});
+Object.assign(I18N.es, {'about.dl': "Descargue una copia sin conexión desde {link}", 'about.dllink': "GitHub", 'about.fb': "Comparta ideas y comentarios en {link}", 'about.fblink': "GitHub", 'about.pp': "Lea la {link}", 'about.pplink': "política de privacidad", 'priv.title': "Política de privacidad", 'priv.en': "La política de privacidad está en inglés."});
+Object.assign(I18N.fr, {'about.dl': "Téléchargez une copie hors ligne depuis {link}", 'about.dllink': "GitHub", 'about.fb': "Partagez vos idées et remarques sur {link}", 'about.fblink': "GitHub", 'about.pp': "Lisez la {link}", 'about.pplink': "politique de confidentialité", 'priv.title': "Politique de confidentialité", 'priv.en': "La politique de confidentialité est en anglais."});
+Object.assign(I18N.nl, {'about.dl': "Download een offline kopie van {link}", 'about.dllink': "GitHub", 'about.fb': "Deel ideeën en feedback op {link}", 'about.fblink': "GitHub", 'about.pp': "Lees het {link}", 'about.pplink': "privacybeleid", 'priv.title': "Privacybeleid", 'priv.en': "Het privacybeleid is in het Engels."});
+Object.assign(I18N.lv, {'about.dl': "Lejupielādējiet bezsaistes kopiju no {link}", 'about.dllink': "GitHub", 'about.fb': "Dalieties ar idejām un atsauksmēm vietnē {link}", 'about.fblink': "GitHub", 'about.pp': "Izlasiet {link}", 'about.pplink': "privātuma politiku", 'priv.title': "Privātuma politika", 'priv.en': "Privātuma politika ir angļu valodā."});
+Object.assign(I18N.lt, {'about.dl': "Atsisiųskite be interneto veikiančią kopiją iš {link}", 'about.dllink': "GitHub", 'about.fb': "Pasidalykite idėjomis ir atsiliepimais svetainėje {link}", 'about.fblink': "GitHub", 'about.pp': "Perskaitykite {link}", 'about.pplink': "privatumo politiką", 'priv.title': "Privatumo politika", 'priv.en': "Privatumo politika pateikta anglų kalba."});
+Object.assign(I18N.no, {'about.dl': "Last ned en frakoblet kopi fra {link}", 'about.dllink': "GitHub", 'about.fb': "Del ideer og tilbakemeldinger på {link}", 'about.fblink': "GitHub", 'about.pp': "Les {link}", 'about.pplink': "personvernerklæringen", 'priv.title': "Personvernerklæring", 'priv.en': "Personvernerklæringen er på engelsk."});
+Object.assign(I18N.da, {'about.dl': "Download en offlinekopi fra {link}", 'about.dllink': "GitHub", 'about.fb': "Del idéer og feedback på {link}", 'about.fblink': "GitHub", 'about.pp': "Læs {link}", 'about.pplink': "privatlivspolitikken", 'priv.title': "Privatlivspolitik", 'priv.en': "Privatlivspolitikken er på engelsk."});
 
 (function(){
   var lang = 'en';
@@ -10173,18 +10217,71 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 </script>
 
 <script>
+/* V6.68 — Privacy policy (owner 2026-10-30). One source, two places: About (inline disclosure) and a dialog
+   (footer + privacy line; centred, the page does not jump). Body in English only (owner); a note says so in other languages.
+   Facts: GEDCOM in browser only · localStorage only for the language · GitHub Pages logs IPs · place links → Google Maps. */
+window.TLPrivacy = (function(){
+  var EXT = '<svg class="ext-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
+  var MAIL = 'hannes.seeberg+treeline@gmail.com', UPDATED = '30 October 2026';
+  // the last word and ↗ stay on one line (no lone icon on a new line)
+  function tail(escTxt) { var i = escTxt.lastIndexOf(' '); return (i < 0 ? '' : escTxt.slice(0, i + 1)) + '<span class="nw">' + escTxt.slice(i + 1) + EXT + '</span>'; }
+  function X(u, txt) { return '<a href="' + u + '" target="_blank" rel="noopener noreferrer">' + tail(txt) + '</a>'; }
+  function html() {
+    var H = function(x){ return '<h3>' + x + '</h3>'; }, P = function(x){ return '<p>' + x + '</p>'; };
+    var en = (typeof tLang === 'function' && tLang() !== 'en') ? '<p class="pp-en" lang="' + (tLang() === 'xx' ? 'en' : tLang()) + '">' + String(t('priv.en')).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</p>' : '';
+    return '<div class="pp-doc" lang="en">' + en +
+      '<p class="pp-meta">Last updated: ' + UPDATED + '</p>' +
+      '<p class="pp-lead">Short version: Your family file stays on your computer. No account. No cookies. No tracking.</p>' +
+      H('1. Who is responsible') + P('TreeLine is made by Hannes Seeberg, Estonia.') +
+        P('Privacy questions: <a href="mailto:' + MAIL + '">' + MAIL + '</a>') +
+        P('Other questions and ideas: ' + X('https://github.com/hseeberg/TreeLine/issues', 'GitHub Issues') + '.') +
+      H('2. Your GEDCOM file') + P('TreeLine reads the file in your browser. The file is not uploaded, sent or saved anywhere. When you close the page, the data is gone. Photo links in the file are never loaded.') +
+      H('3. What TreeLine saves in your browser') + P('Only your language choice (localStorage, “treeline-lang”). It stays in this browser and is never sent. You can delete it in your browser settings.') +
+      H('4. Hosting') + P('TreeLine runs on GitHub Pages. GitHub logs the IP address of visitors for security. TreeLine’s author cannot see these logs. See the ' + X('https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement', 'GitHub Privacy Statement') + '.') +
+        P('A copy you download and use offline sends nothing.') +
+      H('5. Links to other sites') + P('Help links (genealogy services, GitHub) open in a new tab and do not tell the site where you came from. A place link opens Google Maps: Google receives the place name you clicked. A profile link opens your genealogy service. Those sites have their own privacy policies.') +
+      H('6. If you send an email') + P('Emails are received through Gmail (Google). Your email address and message are used only to answer you. They are deleted within 30 days after your question is answered.') +
+      H('7. Your rights') + P('TreeLine holds no data about you. The only exception is an email you send to us: you can ask to see it or to delete it.') +
+        P('For GitHub’s IP logs, contact GitHub (see section 4).') +
+        P('You can complain to the Estonian Data Protection Inspectorate: ' + X('https://www.aki.ee', 'www.aki.ee')) +
+      H('8. Changes') + P('Changes are shown on this page with a new date.') +
+    '</div>';
+  }
+  var dlg, body, back = null;
+  function fill() { if (body) body.innerHTML = html(); }
+  function open() {
+    dlg = dlg || document.getElementById('privDlg'); body = body || document.getElementById('privBody');
+    if (!dlg || dlg.open) return;
+    back = document.activeElement; fill(); body.scrollTop = 0;
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+    var c = dlg.querySelector('.pd-close'); if (c) c.focus();
+  }
+  function close() { if (dlg && dlg.open) dlg.close(); }
+  document.addEventListener('DOMContentLoaded', function(){
+    dlg = document.getElementById('privDlg'); body = document.getElementById('privBody');
+    if (!dlg) return;
+    dlg.addEventListener('click', function(ev){ if (ev.target === dlg || ev.target.closest('.pd-close')) close(); });   // backdrop or ✕
+    dlg.addEventListener('close', function(){ if (back && back.focus && document.contains(back)) back.focus(); back = null; });
+  });
+  document.addEventListener('click', function(ev){ var b = ev.target.closest && ev.target.closest('.priv-open'); if (b) { ev.preventDefault(); open(); } });
+  document.addEventListener('tl-lang', fill);
+  return { html: html, open: open, close: close, EXT: EXT, tail: tail };
+})();
+</script>
+
+<script>
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.67', since: 'V5.45', date: [2026, 10, 29],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.68', since: 'V5.45', date: [2026, 10, 30],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11: SEO only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
   // Rule (V6.61, owner): the 3 newest user-facing changes only, short; no "since" line. Replace — never append.
   notes: [
+    "Privacy policy: read how TreeLine handles your data — in About, under the privacy line and at the bottom of the start page.",
     "Translations: clearer and more consistent wording in all 11 languages — the same word for the same thing everywhere.",
-    "Start page: real examples from the sample family show what TreeLine can do — search, fact cards, Find gaps and List view.",
-    "Keyboard and screen reader: move between people with the arrow keys. A screen reader tells how each person is related to the selected one."
+    "Start page: real examples from the sample family show what TreeLine can do — search, fact cards, Find gaps and List view."
   ],
   repoUrl: 'https://github.com/hseeberg/TreeLine', issuesUrl: 'https://github.com/hseeberg/TreeLine/issues',
   authorName: 'Hannes Seeberg', authorUrl: 'https://www.linkedin.com/in/seeberg/'
@@ -10193,19 +10290,26 @@ var RELEASE = {
   var btn = document.getElementById('aboutBtn'), pop = document.getElementById('aboutPop');
   function e(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function A(url, txt) { return '<a href="' + e(url) + '" target="_blank" rel="noopener noreferrer">' + e(txt) + '</a>'; }
+  function AX(url, txt, label) { return '<a href="' + e(url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + e(label).replace(/"/g, '&quot;') + '">' + TLPrivacy.tail(e(txt)) + '</a>'; }
+  var ppOpen = false;
   function build() {
     var d = RELEASE.date;
     pop.innerHTML = '<div class="ab-head"><div><div class="ab-title">TreeLine ' + e(RELEASE.version) + '</div><div class="ab-date">' + e(t('about.released', { date: tDate(d[0], d[1], d[2]) })) + '</div></div><button class="ab-close" aria-label="' + e(t('about.close')) + '">✕</button></div>' +
       '<div class="ab-label">' + e(t('about.new')) + '</div><ul class="ab-notes">' + RELEASE.notes.map(function(n){ return '<li>' + e(n) + '</li>'; }).join('') + '</ul>' +
-      '<div class="ab-gh"><div class="ab-label ab-label-top">TreeLine</div><ul class="ab-notes ab-links"><li>' + tRich('about.gh1', { link: { html: A(RELEASE.repoUrl, t('about.gh1link')) } }) + '</li>' +
-      '<li>' + tRich('about.gh2', { link: { html: A(RELEASE.issuesUrl, t('about.gh2link')) } }) + '</li>' +
-      '<li>' + tRich('about.author', { name: { html: A(RELEASE.authorUrl, RELEASE.authorName) } }) + '</li></ul></div>';
+      '<div class="ab-gh"><div class="ab-label ab-label-top">TreeLine</div><ul class="ab-notes ab-links">' +
+      // V6.68: one line each, the same texts as the footer; ↗ on links that leave the page; aria-label = the whole line
+      '<li>' + tRich('about.dl', { link: { html: AX(RELEASE.repoUrl, t('about.dllink'), t('about.dl', { link: t('about.dllink') })) } }) + '</li>' +
+      '<li>' + tRich('about.fb', { link: { html: AX(RELEASE.issuesUrl, t('about.fblink'), t('about.fb', { link: t('about.fblink') })) } }) + '</li>' +
+      '<li>' + tRich('about.pp', { link: { html: '<button type="button" class="ab-pp-btn" aria-expanded="' + ppOpen + '" aria-controls="abPP">' + e(t('about.pplink')) + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' } }) +
+        '<div class="ab-pp" id="abPP"' + (ppOpen ? '' : ' hidden') + '>' + TLPrivacy.html() + '</div></li>' +
+      '<li>' + tRich('about.author', { name: { html: AX(RELEASE.authorUrl, RELEASE.authorName, t('about.author', { name: RELEASE.authorName })) } }) + '</li></ul></div>';
   }
   build(); document.addEventListener('tl-lang', build);
   function open(o){ pop.hidden = !o; btn.setAttribute('aria-expanded', String(o)); }
   btn.addEventListener('click', function(ev){ ev.stopPropagation(); open(pop.hidden); });
   TLPops.reg(function(){ return !pop.hidden; }, function(){ open(false); }, function(t){ return pop.contains(t) || btn.contains(t); });
-  pop.addEventListener('click', function(ev){ ev.stopPropagation(); if (ev.target.closest('.ab-close')) open(false); });
+  pop.addEventListener('click', function(ev){ ev.stopPropagation(); if (ev.target.closest('.ab-close')) open(false);
+    var pb = ev.target.closest('.ab-pp-btn'); if (pb) { ppOpen = !ppOpen; pb.setAttribute('aria-expanded', String(ppOpen)); var r = document.getElementById('abPP'); if (r) { r.hidden = !ppOpen; if (ppOpen) pop.scrollTop += pb.getBoundingClientRect().top - pop.getBoundingClientRect().top - 16; } } });   // the opened line stays at the top
   document.addEventListener('click', function(){ if (!pop.hidden) open(false); });
   document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && !pop.hidden) open(false); });
 })();
@@ -10555,19 +10659,17 @@ window.ImpCheck = (function(){
     });
   }
   apply(); document.addEventListener('tl-lang', apply);
-  // Footer (V6.60): the same texts as About → TreeLine (about.gh1, about.gh2, about.author), 12 languages
+  // Footer (V6.68): logo left, 2 × 2 one-line links (column 1: GitHub, column 2: privacy + author); same keys as About
   var foot = document.getElementById('tourFoot');
   function footer() {
     if (!foot || !window.RELEASE) return;
     function E(x){ return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-    function A(u, x){ return '<a href="' + E(u) + '" target="_blank" rel="noopener noreferrer">' + E(x) + '</a>'; }
-    // three columns: question on line 1, the sentence with the link on line 2 — split from the existing About texts (no new keys)
-    function two(html, li) { var m = /^(.*?[?？])\s+(.+)$/.exec(html); li.innerHTML = m ? '<span class="tf-q">' + m[1] + '</span><span>' + m[2] + '</span>' : '<span>' + html + '</span>'; }
+    function A(u, x, label){ return '<a href="' + E(u) + '" target="_blank" rel="noopener noreferrer" aria-label="' + E(label) + '">' + TLPrivacy.tail(E(x)) + '</a>'; }
     var li = foot.querySelectorAll('li');
-    two(tRich('about.gh1', { link: { html: A(RELEASE.repoUrl, t('about.gh1link')) } }), li[0]);
-    two(tRich('about.gh2', { link: { html: A(RELEASE.issuesUrl, t('about.gh2link')) } }), li[1]);
-    var au = t('about.author'), k = au.indexOf('{name}'), name = A(RELEASE.authorUrl, RELEASE.authorName);
-    li[2].innerHTML = k >= 0 ? '<span class="tf-q">' + E((au.slice(0, k) + au.slice(k + 6)).trim()) + '</span><span>' + name + '</span>' : '<span>' + tRich('about.author', { name: { html: name } }) + '</span>';
+    li[0].innerHTML = tRich('about.dl', { link: { html: A(RELEASE.repoUrl, t('about.dllink'), t('about.dl', { link: t('about.dllink') })) } });
+    li[1].innerHTML = tRich('about.fb', { link: { html: A(RELEASE.issuesUrl, t('about.fblink'), t('about.fb', { link: t('about.fblink') })) } });
+    li[2].innerHTML = tRich('about.pp', { link: { html: '<button type="button" class="lnk-btn priv-open" aria-haspopup="dialog">' + E(t('about.pplink')) + '</button>' } });
+    li[3].innerHTML = tRich('about.author', { name: { html: A(RELEASE.authorUrl, RELEASE.authorName, t('about.author', { name: RELEASE.authorName })) } });
   }
   footer(); document.addEventListener('tl-lang', footer);
   // Wash (V6.60): from the hero card's bottom edge to the closing CTA; desktop width = the hero's inner content edge
