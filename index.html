@@ -10215,10 +10215,11 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
 <script>
 /* V6.68 — Privacy policy (owner 2026-10-30). One dialog, opened from About (V6.69), the footer and the privacy line
    (centred, the page does not jump). Body in English only (owner); a note says so in other languages.
-   Facts: GEDCOM in browser only · localStorage only for the language · GitHub Pages logs IPs · place links → Google Maps. */
+   Facts: GEDCOM in browser only · localStorage only for the language · GitHub Pages logs IPs · place links → Google Maps
+   · V6.71: Google Search Console + Bing Webmaster Tools (no code on the page). */
 window.TLPrivacy = (function(){
   var EXT = '<svg class="ext-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
-  var MAIL = 'hannes.seeberg+treeline@gmail.com', UPDATED = '30 October 2026';
+  var MAIL = 'hannes.seeberg+treeline@gmail.com', UPDATED = '1 November 2026';
   // the last word and ↗ stay on one line (no lone icon on a new line)
   function tail(escTxt) { var i = escTxt.lastIndexOf(' '); return (i < 0 ? '' : escTxt.slice(0, i + 1)) + '<span class="nw">' + escTxt.slice(i + 1) + EXT + '</span>'; }
   function X(u, txt) { return '<a href="' + u + '" target="_blank" rel="noopener noreferrer">' + tail(txt) + '</a>'; }
@@ -10235,6 +10236,11 @@ window.TLPrivacy = (function(){
       H('3. What TreeLine saves in your browser') + P('Only your language choice (localStorage, “treeline-lang”). It stays in this browser and is never sent. You can delete it in your browser settings.') +
       H('4. Hosting') + P('TreeLine runs on GitHub Pages. GitHub logs the IP address of visitors for security. TreeLine’s author cannot see these logs. See the ' + X('https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement', 'GitHub Privacy Statement') + '.') +
         P('A copy you download and use offline sends nothing.') +
+        // V6.71 (owner 2026-11-01): search statistics — Google Search Console + Bing Webmaster Tools (verified). Text owner-approved.
+        P('<strong>Search statistics.</strong> The author uses Google Search Console and Bing Webmaster Tools. The only purpose is to help people find TreeLine in Google and Bing search.') +
+        P('These tools show the author only combined numbers: which search words showed TreeLine, and how many times people clicked the link. They do not show who you are.') +
+        P('There is no Google or Microsoft code on this page.') +
+        P('When you search in Google or Bing, the privacy policy of ' + X('https://policies.google.com/privacy', 'Google') + ' or ' + X('https://privacy.microsoft.com/privacystatement', 'Microsoft') + ' applies.') +
       H('5. Links to other sites') + P('Help links (genealogy services, GitHub) open in a new tab and do not tell the site where you came from. A place link opens Google Maps: Google receives the place name you clicked. A profile link opens your genealogy service. Those sites have their own privacy policies.') +
       H('6. If you send an email') + P('Emails are received through Gmail (Google). Your email address and message are used only to answer you. They are deleted within 30 days after your question is answered.') +
       H('7. Your rights') + P('TreeLine holds no data about you. The only exception is an email you send to us: you can ask to see it or to delete it.') +
@@ -10269,8 +10275,8 @@ window.TLPrivacy = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.70', since: 'V5.45', date: [2026, 11, 1],   // y, m, d — shown in the UI language (I18N date.dmy)
-  // V6.10–V6.11, V6.70: SEO only, no user value — notes unchanged by decision.
+  version: 'V6.71', since: 'V5.45', date: [2026, 11, 1],   // y, m, d — shown in the UI language (I18N date.dmy)
+  // V6.10–V6.11, V6.70–V6.71: SEO / policy text only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
   // Rule (V6.61, owner): the 3 newest user-facing changes only, short; no "since" line. Replace — never append.
