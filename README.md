@@ -58,16 +58,17 @@ born across 50 years. TreeLine puts time first.
 
 ## Privacy
 
-- Your GEDCOM .ged file stays in your browser. It is not
-  uploaded, sent or saved anywhere.
-- No account. No cookies. No analytics. No server processing.
+## Privacy
+
+_Last updated: 1 November 2026_
+
+- Your GEDCOM .ged file stays in your browser. It is not uploaded, sent or saved anywhere.
+- No account. No cookies. No analytics code. No server processing.
 - Photos linked in the .ged file are never loaded.
-- TreeLine saves only your language choice in your browser
-  (localStorage). It is never sent.
-- GitHub Pages logs visitor IP addresses for security.
-  The author cannot see these logs. To avoid this, run
-  TreeLine locally. See the GitHub Privacy Statement.
-- Full privacy policy: in the app, About → Privacy.
+- TreeLine saves only your language choice in your browser (localStorage). It is never sent.
+- GitHub Pages logs visitor IP addresses for security. The author cannot see these logs. To avoid this, run TreeLine locally. See the [GitHub Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+- Search statistics: the author uses Google Search Console and Bing Webmaster Tools, only to help people find TreeLine in search. They show only combined numbers, not who you are. There is no Google or Microsoft code on the page. When you search, the privacy policy of [Google](https://policies.google.com/privacy) or [Microsoft](https://privacy.microsoft.com/privacystatement) applies.
+- Full privacy policy: in the app, About → "privacy policy", or the link at the bottom of the start page.
 
 ## Run locally
 
