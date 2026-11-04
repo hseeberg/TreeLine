@@ -15,7 +15,7 @@ You see:
 ## Start
 
 1. Open TreeLine.
-2. Load the sample family, or your own GEDCOM file. GEDCOM (.ged) is the standard export format of Geni, MyHeritage, Ancestry and similar tools. The sample family is fictional. It contains no real persons.
+2. Load the sample family, or your own .ged file. A .ged file (the format is called GEDCOM) is the standard export of Geni, MyHeritage, Ancestry and similar tools. The sample family is fictional. It contains no real persons.
 3. Select a person. You see ancestors, siblings, partners and descendants.
 
 ## Features
@@ -58,11 +58,9 @@ born across 50 years. TreeLine puts time first.
 
 ## Privacy
 
-## Privacy
+_Last updated: 4 November 2026_
 
-_Last updated: 1 November 2026_
-
-- Your GEDCOM .ged file stays in your browser. It is not uploaded, sent or saved anywhere.
+- Your .ged file stays on your device, in your browser. It is not uploaded, sent or saved anywhere.
 - No account. No cookies. No analytics code. No server processing.
 - Photos linked in the .ged file are never loaded.
 - TreeLine saves only your language choice in your browser (localStorage). It is never sent.
@@ -72,14 +70,14 @@ _Last updated: 1 November 2026_
 
 ## Run locally
 
-1. Download `index.html` from [Releases](https://github.com/hseeberg/TreeLine/blob/main/index.html).
+1. Download [`index.html`](https://github.com/hseeberg/TreeLine/blob/main/index.html).
 2. Open it in your browser. No installation. No server.
 
 ## Details
 
 - One HTML file
 - Tested in: Google Chrome
-- Current version: 6.49
+- Current version: 6.72
 
 ## License
 
