@@ -2,7 +2,7 @@
 <html lang="en" data-tl-theme="light" data-tl-bg="sunset">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>TreeLine. See your family tree on a timeline.</title><!-- V6.70 (owner 2026-11-01): SEO title = og:title, no version. Version lives in About only. -->
 <!-- V6.10–V6.11: SEO + link preview + machine-readable description -->
 <meta name="description" content="See every life in your family tree side by side on one timeline. Open a GEDCOM file from Geni, Ancestry or MyHeritage. Free. Your file stays on your device.">
@@ -38,6 +38,13 @@
    Type: Atkinson Hyperlegible Next (Braille Institute; built for low-vision legibility).
    Colour carries meaning only: blue = male, rose = female. UI chrome stays neutral ink. */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* V6.73 C16 — devices with a status bar / home bar (spec §21.3 rule 8). All tokens are 0 on desktop → layout unchanged. */
+:root { --sa-top: env(safe-area-inset-top, 0px); --sa-bottom: env(safe-area-inset-bottom, 0px); --sa-left: env(safe-area-inset-left, 0px); --sa-right: env(safe-area-inset-right, 0px); }
+html { scroll-padding-top: var(--sa-top); }
+body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: var(--sa-top); background: var(--hdr-sunset); z-index: 9000; pointer-events: none; }   /* status-bar band (EQ24 = B) */
+body.is-start:not(.is-scrolled)::before { display: none; }   /* start page: band only after scrolling (Q68 = B) */
+body:not(.is-start) .timeline-outer::after, .pl-scroll::after { content: ""; display: block; height: var(--sa-bottom); }   /* last row clear of the home bar */
+#saProbe { position: fixed; top: 0; left: 0; width: 0; height: var(--sa-top); visibility: hidden; pointer-events: none; }
 
 :root {
   /* dark */
@@ -150,14 +157,14 @@ body {
 .header {
   width: calc(100% + 48px);
   margin: 0 -24px 32px;
-  padding: 14px 32px;
+  padding: calc(14px + var(--sa-top)) calc(32px + var(--sa-right)) 14px calc(32px + var(--sa-left));
   background: var(--band-bg);
   border-bottom: 1px solid var(--band-stroke);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 32px;
-  min-height: 72px;
+  min-height: calc(72px + var(--sa-top));
 }
 .header-titles h1 {
   display: flex;
@@ -371,7 +378,7 @@ svg text { font-family: var(--font); }
 .load-ged-btn.hidden { display: none; }
 
 /* Parse progress */
-.parse-progress-wrap { position: fixed; top: 0; left: 0; right: 0; height: 4px; z-index: 200; display: none; }
+.parse-progress-wrap { position: fixed; top: var(--sa-top); left: 0; right: 0; height: 4px; z-index: 200; display: none; }
 .parse-progress-wrap.active { display: block; }
 .parse-progress-bar { height: 100%; background: linear-gradient(90deg, var(--male-primary), var(--female-primary)); width: 0%; transition: width 0.1s ease; }
 
@@ -529,7 +536,7 @@ html[data-tl-theme="light"] .load-ged-btn { background: var(--brand); color: #FF
 .privacy-note svg { margin-top: 3px; }
 .header { position: relative; z-index: 30; }
 .hero-backdrop {
-  position: fixed; left: 0; right: 0; top: 72px; bottom: 0; width: 100%; height: calc(100vh - 72px);
+  position: fixed; left: 0; right: 0; top: calc(72px + var(--sa-top)); bottom: 0; width: 100%; height: calc(100vh - 72px - var(--sa-top));
   z-index: 0; pointer-events: none;
   filter: blur(7px); opacity: 0.75;
   -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent);
@@ -546,7 +553,7 @@ html[data-tl-theme="light"] .load-ged-btn { background: var(--brand); color: #FF
 .person-selector-wrap { position: relative; flex: 0 0 auto; width: 440px; max-width: 100%; min-width: 0; }
 .person-input { height: 52px; font-size: 17px; }
 .person-dropdown { z-index: 60; }
-.header { padding-top: 10px; padding-bottom: 10px; }
+.header { padding-top: calc(10px + var(--sa-top)); padding-bottom: 10px; }
 .header .settings-btn { height: 52px; }
 .header .person-input:focus-visible { outline: none; }
 /* V4.6 — app-bar variant: same size and dropdown, dark surface so it doesn't compete with the chart */
@@ -847,7 +854,7 @@ html:not([data-tl-theme="light"]) .today-line, html:not([data-tl-theme="light"])
 
 /* ═══ V5.0 — Profile panel (variant D) ═══ */
 .profile-panel {
-  position: fixed; top: 72px; right: 0; bottom: 0; width: 380px; z-index: 20;
+  position: fixed; top: calc(72px + var(--sa-top)); right: 0; bottom: 0; width: 380px; z-index: 20;
   background: var(--band-bg); border-left: 1px solid var(--panel-border);
   box-shadow: -8px 0 24px rgba(24,33,44,0.06);
   display: flex; flex-direction: column; transition: width 0.25s ease;
@@ -874,7 +881,7 @@ body.profile-collapsed .pp-rail-label {
   writing-mode: vertical-rl; font-size: 14px; font-weight: 700; color: var(--header-sub); white-space: nowrap; transform-origin: center;
 }
 body.profile-collapsed .pp-toggle { left: 50%; transform: translateX(-50%); }
-.pp-scroll { overflow-y: auto; padding: 28px 28px 40px; flex: 1; }
+.pp-scroll { overflow-y: auto; padding: 28px 28px calc(40px + var(--sa-bottom)); flex: 1; }
 .pp-in { animation: tlRise 0.35s ease-out both; }
 .pp-kicker { font-size: 13px; font-weight: 700; color: var(--header-accent); margin-bottom: 4px; }
 .pp-name { font-size: 24px; line-height: 1.2; font-weight: 700; color: var(--header-title); letter-spacing: -0.01em; }
@@ -1102,7 +1109,7 @@ body:not(.is-start) .home-link:hover { opacity: 0.85; }
    The page itself no longer scrolls in the timeline view. Pure CSS sticky — no JS sync (spec: JS sync caused axis drift). */
 body:not(.is-start) { height: 100vh; overflow: hidden; padding-bottom: 0; }
 body:not(.is-start) .header { margin-bottom: 0; }
-body:not(.is-start) .timeline-outer { height: calc(100vh - 72px); overflow: auto; }
+body:not(.is-start) .timeline-outer { height: calc(100vh - 72px - var(--sa-top)); overflow: auto; }
 body:not(.is-start) .sticky-ruler-wrap { padding-top: 24px; background: var(--bg); }
 
 /* ═══ V5.28 — sample family: button under the start-page example + header badge */
@@ -1182,7 +1189,7 @@ html[data-tl-theme="dark"] { --imp-bg: #3a2e17; --imp-border: #8a6a2a; --imp-tex
 
 /* ═══ V6.0 — start page after loading · All people list · List view · loading status ═══ */
 /* card: same size before and after loading (no jump); 40 / 60 */
-.empty-state { max-width: 1280px; grid-template-columns: 2fr 3fr; height: clamp(600px, calc(100vh - 72px - 14vh), 860px); }
+.empty-state { max-width: 1280px; grid-template-columns: 2fr 3fr; height: clamp(600px, calc(100vh - 72px - var(--sa-top) - 14vh), 860px); }
 .hero-copy { overflow-y: auto; min-height: 0; justify-content: flex-start; }
 /* centred while it fits; when help is opened and it no longer fits, it scrolls from the top (nothing is cut off) */
 .hero-copy::before, .hero-copy::after { content: ''; flex: 1 0 0; }
@@ -1252,7 +1259,7 @@ html[data-tl-theme="dark"] { --imp-bg: #3a2e17; --imp-border: #8a6a2a; --imp-tex
 @media (prefers-reduced-motion: reduce) { .ls-spin { animation-duration: 2.4s; } }
 
 /* "Drawing the timeline…" — only becomes visible when drawing takes longer than 300 ms (compositor animation) */
-.tl-busy { position: fixed; z-index: 60; left: 50%; top: 96px; transform: translateX(-50%); display: flex; align-items: center; gap: 12px;
+.tl-busy { position: fixed; z-index: 60; left: 50%; top: calc(96px + var(--sa-top)); transform: translateX(-50%); display: flex; align-items: center; gap: 12px;
   padding: 10px 18px; border-radius: 999px; background: var(--panel-bg); border: 1px solid var(--panel-border); box-shadow: var(--shadow);
   font-size: 15px; font-weight: 600; color: var(--header-title); opacity: 0; animation: tlBusyIn .2s ease-out .3s forwards; pointer-events: none; }
 .tl-busy[hidden] { display: none; }
@@ -1268,7 +1275,7 @@ html[data-tl-theme="dark"] { --imp-bg: #3a2e17; --imp-border: #8a6a2a; --imp-tex
 /* List view replaces the timeline */
 .list-view[hidden] { display: none; }
 body.is-listview .timeline-outer, body.is-listview .sticky-ruler-wrap { display: none !important; }
-.list-view { width: 100%; align-self: stretch; height: calc(100vh - 72px); padding: 24px 0 20px; box-sizing: border-box; display: flex; }
+.list-view { width: 100%; align-self: stretch; height: calc(100vh - 72px - var(--sa-top)); padding: 24px 0 20px; box-sizing: border-box; display: flex; }
 .list-view .plist { flex: 1 1 auto; }
 .list-view .plist { max-width: 1180px; margin: 0 auto; }
 
@@ -1331,7 +1338,7 @@ body.is-listview .timeline-outer, body.is-listview .sticky-ruler-wrap { display:
 .pl-more { height: 1px; }
 .pp-view svg { width: 18px; height: 18px; }
 /* Menu is taller now (Help first): it scrolls inside the window instead of running off the screen */
-.settings-menu { max-height: calc(100vh - 96px); overflow-y: auto; overscroll-behavior: contain; }
+.settings-menu { max-height: calc(100vh - 96px - var(--sa-top) - var(--sa-bottom)); overflow-y: auto; overscroll-behavior: contain; }
 
 /* ═══ V6.1 ═══ */
 /* search gets the first look; Open another file is quieter; no sample link after loading */
@@ -1431,19 +1438,19 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
 }
 @supports (height: 100dvh) {
   body:not(.is-start) { height: 100dvh; }
-  body:not(.is-start) .timeline-outer { height: calc(100dvh - 72px); }
+  body:not(.is-start) .timeline-outer { height: calc(100dvh - 72px - var(--sa-top)); }
 }
 @media (max-width: 700px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
   /* one pane at a time: the profile is a full-screen layer; closing it shows the timeline */
   .profile-panel { position: fixed; top: 0 !important; left: 0; right: 0; bottom: 0; width: 100% !important; max-width: none; height: 100dvh; z-index: 90; box-shadow: none; }
   body.profile-collapsed .profile-panel, body.profile-collapsed .profile-panel[hidden] { display: none; }
-  .pp-toggle { top: 10px; left: 10px; transform: none; width: 44px; height: 44px; z-index: 3; }
+  .pp-toggle { top: calc(10px + var(--sa-top)); left: calc(10px + var(--sa-left)); transform: none; width: 44px; height: 44px; z-index: 3; }
   .pp-toggle svg { width: 20px; height: 20px; transform: rotate(180deg); }
-  .pp-scroll { padding: 68px 20px 40px; }
+  .pp-scroll { padding: calc(68px + var(--sa-top)) calc(20px + var(--sa-right)) calc(40px + var(--sa-bottom)) calc(20px + var(--sa-left)); }
 }
 @media (max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
   /* header: row 1 = logo + About + Menu; row 2 = search + icon buttons. Never wider than the screen (spec §21.3) */
-  .header { flex-wrap: wrap; gap: 8px 8px; padding: 10px 16px; min-height: 0; justify-content: flex-start; }
+  .header { flex-wrap: wrap; gap: 8px 8px; padding: calc(10px + var(--sa-top)) calc(16px + var(--sa-right)) 10px calc(16px + var(--sa-left)); min-height: 0; justify-content: flex-start; }
   .header-right { display: contents; }
   .header-titles { order: 1; flex: 0 1 auto; min-width: 0; }
   .header .settings-wrap { order: 2; margin-left: auto; }
@@ -1460,20 +1467,20 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
 @media (pointer: coarse) { .pp-toggle { width: 44px; height: 44px; } .about-btn { min-height: 44px; } .header .settings-btn { min-height: 48px; } .gaps-pop { max-width: calc(100vw - 16px); } }
 @media (max-width: 900px) { .empty-state .person-selector-wrap { width: 100%; max-width: none; } }   /* start page: search = same width as the buttons under it (§21.3) */
 @media (pointer: coarse) { .drop-hint { display: none; } }   /* a phone or tablet has no drag-and-drop */
-@media (max-width: 900px) { .about-pop { position: fixed; left: 8px; right: 8px; top: 64px; width: auto; max-height: calc(100dvh - 80px); overflow: auto; } }
+@media (max-width: 900px) { .about-pop { position: fixed; left: calc(8px + var(--sa-left)); right: calc(8px + var(--sa-right)); top: calc(64px + var(--sa-top)); width: auto; max-height: calc(100dvh - 80px - var(--sa-top) - var(--sa-bottom)); overflow: auto; } }
 @media (pointer: coarse) { .ab-close { width: 44px; height: 44px; } .pl-seg button { min-height: 44px; } }
 @media (min-width: 701px) and (max-width: 900px) { .header-titles { flex: 1 1 calc(100% - 130px); } .header .person-selector-wrap { flex: 1 1 240px; } }
 @media (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
   /* landscape phone: one-row header, as low as possible (spec §21.3 rule 9) */
-  .header { flex-wrap: nowrap; padding-top: 4px; padding-bottom: 4px; gap: 8px; }
+  .header { flex-wrap: nowrap; padding-top: calc(4px + var(--sa-top)); padding-bottom: 4px; gap: 8px; }
   .header-titles { flex: 0 1 auto; }
   .header .settings-wrap { order: 7; margin-left: 0; }
   .header .person-selector-wrap { flex: 1 1 200px; }
   .header .person-input { height: 48px; }
 }
 /* V6.16: pop-ups never run off the screen — they scroll inside (same as the Menu). Seen on a 1280 px tablet: About and Find gaps could not be scrolled. */
-.about-pop, .gaps-pop { max-height: calc(100vh - 120px); max-height: calc(100dvh - 120px); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
-@media (max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) { .gaps-pop { max-height: calc(100vh - 150px); max-height: calc(100dvh - 150px); } }
+.about-pop, .gaps-pop { max-height: calc(100vh - 120px - var(--sa-top) - var(--sa-bottom)); max-height: calc(100dvh - 120px - var(--sa-top) - var(--sa-bottom)); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+@media (max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) { .gaps-pop { max-height: calc(100vh - 150px - var(--sa-top) - var(--sa-bottom)); max-height: calc(100dvh - 150px - var(--sa-top) - var(--sa-bottom)); } }
 /* ═══ V6.72 C10 — Find gaps: the pop-up fits the visible height; only the list scrolls; the footer with `Show N people` is always visible ═══ */
 .gaps-pop:not([hidden]) { display: flex; flex-direction: column; overflow: hidden; }
 .gp-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; margin: 0 -16px; padding: 0 16px; }
@@ -1560,7 +1567,7 @@ body.is-start .header .pin-back { display: none; }
 /* ═══ V6.23 — Fact card (spec §23). Lo-fi: neutral, readable, no Sunset in the data (principle 9) ═══ */
 .facts-view[hidden] { display: none; }
 body.is-factsview .timeline-outer, body.is-factsview .sticky-ruler-wrap, body.is-factsview .list-view { display: none !important; }
-.facts-view { width: 100%; align-self: stretch; height: calc(100vh - 72px); height: calc(100dvh - 72px); overflow-y: auto; padding: 24px 16px 40px; box-sizing: border-box; color: var(--header-title); }
+.facts-view { width: 100%; align-self: stretch; height: calc(100vh - 72px - var(--sa-top)); height: calc(100dvh - 72px - var(--sa-top)); overflow-y: auto; padding: 24px 16px calc(40px + var(--sa-bottom)); box-sizing: border-box; color: var(--header-title); }
 .fc-wrap { max-width: 1180px; margin: 0 auto; }
 .fc-head { background: var(--band-bg); border: 1px solid var(--panel-border); border-radius: 16px; padding: 20px 22px; margin-bottom: 16px; }
 .fc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
@@ -2093,7 +2100,7 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
 }
 /* tall screens (> 820 px): keep the V6.54 look — same card height and gap as before */
 @media (min-width: 901px) and (min-height: 821px) {
-  .empty-state { margin-top: 7vh; min-height: clamp(600px, calc(100vh - 72px - 14vh), 860px); }
+  .empty-state { margin-top: 7vh; min-height: clamp(600px, calc(100vh - 72px - var(--sa-top) - 14vh), 860px); }
   .hero-visual { padding-top: 110px; }
 }
 
@@ -2119,7 +2126,7 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
 #tourTitle:focus { outline: none; }
 .tour-item { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 64px; align-items: start; padding: 64px 0; }
 .tour-item + .tour-item { border-top: 1px solid rgba(255,255,255,0.18); }
-.tour-copy { position: sticky; top: 32px; padding-top: 8px; }
+.tour-copy { position: sticky; top: calc(32px + var(--sa-top)); padding-top: 8px; }
 .tour-copy h3 { margin: 0; color: #FFFFFF; font-size: 34px; line-height: 1.15; font-weight: 700; letter-spacing: -0.015em; text-wrap: balance; }
 .tour-copy p { margin: 16px 0 0; color: #FFFFFF; font-size: 18px; line-height: 1.6; max-width: 30em; }
 .tour-stage { display: flex; justify-content: center; align-items: flex-start; color: var(--header-title); }
@@ -2169,7 +2176,7 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
 
 /* V6.62 — footer after the closing CTA: on the Sunset itself, no band (owner choice 2026-10-28, variant A).
    Known: white text on the lightest part of the Sunset ≈ 2.3:1 (< WCAG 4.5:1) — spec §10 known defects. Logo + three columns. */
-.tour-foot { display: block; max-width: none; align-self: stretch; margin: 0 -24px; color: #FFFFFF; background: none; }
+.tour-foot { display: block; max-width: none; align-self: stretch; margin: 0 -24px; color: #FFFFFF; background: none; padding-bottom: var(--sa-bottom); }
 .empty-state.is-loaded ~ .tour-foot, body:not(.is-start) .tour-foot { display: none !important; }
 .tour-foot-in { max-width: 1280px; margin: 0 auto; padding: 40px 96px 48px; font-size: 18px; line-height: 1.6; }
 .tour-foot-logo { display: flex; align-items: center; gap: 10px; margin: 0 0 24px; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
@@ -2184,7 +2191,7 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
 .tour-foot a:hover { text-decoration-thickness: 2px; }
 .tour-foot a:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 2px; border-radius: 2px; }
 @media (max-width: 900px) { .tour-foot-in { padding: 32px 40px 40px; font-size: 17px; } .tour-foot ul { grid-template-columns: minmax(0, 1fr); gap: 20px; } }
-@media (max-width: 900px) { .tour-foot { margin-bottom: -80px; padding-bottom: 80px; } }   /* the phone start page keeps 80 px under the card; the footer band fills it */
+@media (max-width: 900px) { .tour-foot { margin-bottom: -80px; padding-bottom: calc(80px + var(--sa-bottom)); } }   /* the phone start page keeps 80 px under the card; the footer band fills it */
 /* ═══ V6.64 — layout below the hero after Japanese classical layout principles (owner 2026-10-29, from the exp-ma experiment).
    Ma (space) · Kanso (only the essential) · Yamato-hi 1 : √2 (columns + spacing 8·11·16·23·32·45·64·91·128) ·
    Fukinsei (vertical steps, text stays left) · Jo-ha-kyū (slow start, compact middle, quick end) ·
@@ -2231,7 +2238,7 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
 
 /* ═══ V6.56–V6.57 a11y — visible only with keyboard focus ═══ */
 .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
-.skip-link { position: fixed; top: 14px; left: 14px; z-index: 10000; transform: translateY(calc(-100% - 80px)); padding: 12px 18px; border-radius: 12px; background: #FFFFFF; color: #1E1A26; font-family: inherit; font-weight: 600; font-size: 15px; line-height: 1.2; text-decoration: none; box-shadow: none; }
+.skip-link { position: fixed; top: calc(14px + var(--sa-top)); left: calc(14px + var(--sa-left)); z-index: 10000; transform: translateY(calc(-100% - 80px)); padding: 12px 18px; border-radius: 12px; background: #FFFFFF; color: #1E1A26; font-family: inherit; font-weight: 600; font-size: 15px; line-height: 1.2; text-decoration: none; box-shadow: none; }
 .skip-link:focus { transform: none; box-shadow: 0 8px 24px rgba(36,32,44,0.25); outline: 2px solid var(--header-accent); outline-offset: 3px; }
 @media (prefers-reduced-motion: no-preference) { .skip-link { transition: transform 0.15s ease-out; } }
 #mainSvg text[role="button"]:focus { outline: none; }
@@ -7258,6 +7265,14 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     return s.replace(/\s+/g, ' ').trim();
   }
 
+  function splitName(s) { // V6.73 C15: the parts of the shown name, same delimiter rule as cleanName → {g, s} (whitespace collapsed; text after the surname is in the name only)
+    s = String(s || ''); let o = -1, c = -1;
+    for (let i = 0; i < s.length; i++) if (s[i] === '/' && (i === 0 || /\s/.test(s[i-1])) && i + 1 < s.length && !/\s/.test(s[i+1])) { o = i; break; }
+    if (o >= 0) for (let i = s.length - 1; i > o; i--) if (s[i] === '/' && (i === s.length - 1 || /\s/.test(s[i+1])) && !/\s/.test(s[i-1])) { c = i; break; }
+    const W = x => x.replace(/\s+/g, ' ').trim();
+    return (o >= 0 && c > o) ? { g: W(s.slice(0, o)), s: W(s.slice(o + 1, c)) } : { g: W(s), s: '' };
+  }
+
   const LINE_RE = /^(\d+)\s+(?:(@[^@]+@)\s+)?(\S+)(?:\s+([\s\S]*))?$/;
 
   function tokeniseLines(text) {
@@ -7285,7 +7300,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     for (const {level,tag,value} of rec.children) {
       if (level===1) {
         ctx=tag; subCtx=null;
-        if (tag==='NAME') { nameN++; if (nameN===1) indi.name=cleanName(value); } // V5.45: the first NAME is the primary name; later ones are alternatives (profile panel)
+        if (tag==='NAME') { nameN++; if (nameN===1) { indi.name=cleanName(value); indi.nm=splitName(value); } } // V5.45: the first NAME is the primary name; later ones are alternatives (profile panel)
         else if (tag==='SEX') indi.sex=value==='M'?'M':value==='F'?'F':'U';   // V6.15 §6.2: anything else → U (neutral)
         else if (tag==='BIRT') indi.birth={year:null,place:'',approx:false,isRange:false,yearLo:null,yearHi:null};
         else if (tag==='DEAT') indi.death={year:null,place:'',approx:false};
@@ -7315,7 +7330,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       const gw=(indi.givn||'').trim().split(/\s+/).filter(Boolean), sw=(indi.surn||'').trim().split(/\s+/).filter(Boolean);
       if (sw.length>1&&gw.length>=sw.length) {
         const lead=sw.slice(0,-1), tail=gw.slice(gw.length-lead.length);
-        if (lead.every((w,i)=>w===tail[i])) { indi.givn=gw.slice(0,gw.length-lead.length).join(' '); indi.name=[indi.givn,indi.surn.trim()].join(' '); }
+        if (lead.every((w,i)=>w===tail[i])) { indi.givn=gw.slice(0,gw.length-lead.length).join(' '); indi.name=[indi.givn,indi.surn.trim()].join(' '); indi.nm={g:indi.givn.replace(/\s+/g,' ').trim(),s:indi.surn.replace(/\s+/g,' ').trim()}; }
       }
     }
     if (indi.marnm&&indi.givn) { // V6.44: some exports write the full married name in _MARNM ("Dorothy Brandt") → keep only the last name
@@ -7332,6 +7347,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       if (sur&&key(indi.marnm)!==key(sur)) {
         indi.nameShort=[giv,indi.marnm].filter(Boolean).join(' ');
         indi.name=indi.nameShort+' ('+sur+')';
+        indi.nm={g:giv,s:sur,m:indi.marnm.replace(/\s+/g,' ').trim()}; // V6.73 C15: name = given + married + (surname)
       }
     }
     if (indi.birth&&indi.birth.year===null&&!indi.birth.isRange&&!indi.birth.place) indi.birth=null;
@@ -8516,14 +8532,14 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   function sec(title, inner) { return '<section class="pp-sec"><h3>' + esc(title) + '</h3>' + inner + '</section>'; }
   (function(){
     var panel = document.getElementById('profilePanel'), ticking = false;
-    function place() { ticking = false; var hb = document.querySelector('.header').getBoundingClientRect().bottom; panel.style.top = Math.max(0, hb) + 'px'; }
+    function place() { ticking = false; var hb = document.querySelector('.header').getBoundingClientRect().bottom; panel.style.top = Math.max(((document.getElementById('saProbe')||{}).offsetHeight||0), hb) + 'px'; }
     window.addEventListener('scroll', function(){ if (!ticking) { ticking = true; requestAnimationFrame(place); } }, { passive: true });
     window.addEventListener('resize', place);
     place();
   })();
   (function(){   // V6.16: the header can change height (two rows on narrow screens) → keep the profile panel top under it
     var panel = document.getElementById('profilePanel'), hd = document.querySelector('.header');
-    if (window.ResizeObserver) new ResizeObserver(function(){ panel.style.top = Math.max(0, hd.getBoundingClientRect().bottom) + 'px'; }).observe(hd);
+    if (window.ResizeObserver) new ResizeObserver(function(){ panel.style.top = Math.max(((document.getElementById('saProbe')||{}).offsetHeight||0), hd.getBoundingClientRect().bottom) + 'px'; }).observe(hd);
   })();
   // V6.16 phone: close = back to the timeline (button, Esc, system Back); tap on a name or a list row opens the profile
   function closeProfileNarrow() {
@@ -8777,21 +8793,13 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     //   marriage (_MARNM). A name with variants is in the group as written AND in one group per part:
     //   "Brandt / Brant" → "Brandt / Brant", "Brandt", "Brant"; "Brandt-Moore" → "Brandt-Moore", "Brandt", "Moore".   (V6.51: §22 — sample-family names only)
     //   So group sizes do not add up to the file total (by design). No last name → "No last name" group, last.
-    function surnamesOf(p) {
-      var base = [], out = [], seen = {};
-      var s1 = p.surn;
-      if (!s1) { var raw = String(((p.raw || []).find(function(c){ return c.level === 1 && c.tag === 'NAME'; }) || {}).value || ''), a = raw.indexOf('/'), b = raw.lastIndexOf('/'); if (a >= 0 && b > a) s1 = raw.slice(a + 1, b); }
-      [s1, p.marnm].forEach(function(x){ if (x) base.push(x); });
-      function add(x) { x = String(x).replace(/\s+/g, ' ').trim(); var k = x.toLocaleLowerCase(); if (x && !seen[k]) { seen[k] = 1; out.push(x); } }
-      base.forEach(function(x){ add(x); String(x).split(/\s*[\/\-\u2010-\u2013]\s*/).forEach(add); });
-      return out;
-    }
+    function surnamesOf(p) { return lastNamesOf(p); }   // V6.73: shared with people().surnameKeys
     function surData() {
       if (data.sur) return data.sur;
       var coll = new Intl.Collator(tLang() === 'xx' ? 'en' : tLang(), { sensitivity: 'base' }), map = {}, keys = [], none = [];
       G.individuals.forEach(function(p, id){
         var ss = surnamesOf(p); if (!ss.length) { none.push(id); return; }
-        ss.forEach(function(x){ var k = x.toLocaleLowerCase(); if (!map[k]) { map[k] = { sur: x, list: [] }; keys.push(k); } map[k].list.push(id); });
+        ss.forEach(function(x){ var k = surKey(x); if (!map[k]) { map[k] = { sur: x, list: [] }; keys.push(k); } map[k].list.push(id); });
       });
       function byName(a, b) { var na = P(a).name, nb = P(b).name; if (!na !== !nb) return na ? -1 : 1; return coll.compare(na || '', nb || '') || (by(P(a)) || 0) - (by(P(b)) || 0); }
       var gs = keys.map(function(k){ return map[k]; }).sort(function(a, b){ return coll.compare(sortKey(a.sur), sortKey(b.sur)) || coll.compare(a.sur, b.sur); });   // V6.49: brackets ignored
@@ -9669,6 +9677,17 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     if (ak) out.push(t('a11y.' + ak));
     return { short: short, full: out.join(' ') };
   }
+  // ═══ V6.73 — last names of a person (§19) and the group key (Q72): one rule for the Last names list AND people().surnameKeys
+  function surKey(x) { return String(x).normalize('NFC').toLowerCase(); }   // locale-independent (was toLocaleLowerCase)
+  function lastNamesOf(p) {
+    var base = [], out = [], seen = {};
+    var s1 = p.surn;
+    if (!s1) { var raw = String(((p.raw || []).find(function(c){ return c.level === 1 && c.tag === 'NAME'; }) || {}).value || ''), a = raw.indexOf('/'), b = raw.lastIndexOf('/'); if (a >= 0 && b > a) s1 = raw.slice(a + 1, b); }
+    [s1, p.marnm].forEach(function(x){ if (x) base.push(x); });
+    function add(x) { x = String(x).replace(/\s+/g, ' ').trim(); var k = surKey(x); if (x && !seen[k]) { seen[k] = 1; out.push(x); } }
+    base.forEach(function(x){ add(x); String(x).split(/\s*[\/\-\u2010-\u2013]\s*/).forEach(add); });
+    return out;
+  }
   // ═══ V6.72 — public data API (C4, Q63; spec §29). apiVersion 1. Additive: reads the SAME functions as the Fact card
   // (factSet, factsCompute); the Fact card itself is not changed. Language-independent data, no HTML, no translated strings.
   // Every call is wrapped: an error returns null and never breaks the page.
@@ -9689,6 +9708,8 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     return {
       id: String(x).replace(/@/g, ''), name: p.name || '', sex: p.sex === 'M' || p.sex === 'F' ? p.sex : 'U', gen: dist,
       birth: apiDate(p, 'BIRT'), death: apiDate(p, 'DEAT'), birthPlace: apiPlace(p, 'BIRT'), deathPlace: apiPlace(p, 'DEAT'), living: !!isLiving(p),
+      given: (p.nm && p.nm.g) || null, surname: (p.nm && p.nm.s) || null, marriedSurname: (p.nm && p.nm.m) || null,   // V6.73 C15 (apiVersion 2)
+      surnameKeys: lastNamesOf(p).map(surKey).filter(function(k, i, a){ return a.indexOf(k) === i; }),
       parentIds: bioParents(x).map(function(y){ return String(y).replace(/@/g, ''); }),
       families: (p.fams || []).map(function(fid){ var f = G.families.get(fid); if (!f) return null; var sp = f.husb === x ? f.wife : f.husb;
         return { spouseId: sp && P(sp) ? String(sp).replace(/@/g, '') : null, childIds: f.children.filter(function(c){ return P(c) && bioIn(c, fid); }).map(function(c){ return String(c).replace(/@/g, ''); }) }; }).filter(Boolean)
@@ -9712,7 +9733,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var gens = Object.keys(R.gens).sort(function(x, y){ return x - y; });
     function top(map, n) { return topList(map, n).top.map(function(e){ return { label: e[0], v: e[1] }; }); }
     return {
-      apiVersion: 1, subject: idOut(k), dir: a.dir, siblings: a.sibs, n: R.n,
+      apiVersion: 2, subject: idOut(k), dir: a.dir, siblings: a.sibs, n: R.n,
       perGeneration: gens.map(function(g){ return { gen: D(g), v: R.gens[g], n: R.gens[g], small: R.gens[g] < 30 }; }),
       lifespanPerGeneration: ['M', 'F'].reduce(function(o, sx){ o[sx] = gens.map(function(g){ var L = R.lifeGenS[sx][g] || [], r = V(L); r.gen = D(g); r.hidden = whyHidden(L, R.genPopS[sx][g]); return r; }); return o; }, {}),
       lifespanAll: V(R.lifeAll),
@@ -9725,8 +9746,9 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       missing: Object.keys(R.gapIds).reduce(function(o, g){ o[g] = R.gapIds[g].map(idOut); return o; }, {})
     };
   }
+  (function(){ function upd(){ document.body.classList.toggle('is-scrolled', (window.scrollY || 0) > 0); } window.addEventListener('scroll', upd, { passive: true }); upd(); })();   // V6.73 C16 Q68: start-page band after scrolling
   window.TreeLine = Object.assign(window.TreeLine || {}, {   // V6.72: keeps a hook a host set before load (onDownload, C12)
-    apiVersion: 1,
+    apiVersion: 2,   // V6.73 C15: additive name fields on people()
     people: function(id, dir, opts){ try { return apiPeople(id, dir, opts); } catch (e) { return null; } },   // V6.72 C4
     facts: function(id, dir, opts){ try { return apiFacts(id, dir, opts); } catch (e) { return null; } },     // V6.72 C4
     norm: normTxt, bidi: bidi, a11yDescribe: function(id, act){ try { return a11yDescribe(id, act); } catch (e) { return null; } },   // V6.57 a11y   // V6.51: shared with the search module
@@ -10067,7 +10089,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       return;
     }
     if (!dd.classList.contains('open') || !dd.closest('.empty-state')) { st.position = st.zIndex = st.left = st.top = st.bottom = st.width = st.maxHeight = st.right = ''; return; }
-    var r = dd.parentNode.getBoundingClientRect(), below = visBottom() - r.bottom - 22, hb = document.querySelector('.header').getBoundingClientRect().bottom, above = r.top - Math.max(0, hb) - 18;   // upward list stops under the header
+    var r = dd.parentNode.getBoundingClientRect(), below = visBottom() - r.bottom - 22, hb = document.querySelector('.header').getBoundingClientRect().bottom, above = r.top - Math.max(((document.getElementById('saProbe')||{}).offsetHeight||0), hb) - 18;   // upward list stops under the header
     st.position = 'fixed'; st.zIndex = '120'; centreDropdown(r, true);
     if (below >= 240 || below >= above) { st.top = (r.bottom + 6) + 'px'; st.bottom = 'auto'; st.maxHeight = Math.min(640, below) + 'px'; }
     else { st.top = 'auto'; st.bottom = (window.innerHeight - r.top + 6) + 'px'; st.maxHeight = Math.min(640, above) + 'px'; }   // little room below → opens upward
@@ -10083,7 +10105,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var sc = personInput.parentNode; while (sc && sc !== document.body) { var oy = getComputedStyle(sc).overflowY; if ((oy === 'auto' || oy === 'scroll') && sc.scrollHeight > sc.clientHeight) break; sc = sc.parentNode; }
     if (!sc || sc === document.body) sc = document.scrollingElement;
     var top = sc === document.scrollingElement ? 0 : sc.getBoundingClientRect().top;
-    var hd = document.querySelector('.header'), pos = getComputedStyle(hd).position, hb = (pos === 'fixed' || pos === 'sticky' || sc !== document.scrollingElement) ? Math.max(0, hd.getBoundingClientRect().bottom) : 0, y = Math.max(top, hb) + 12;   // a header that scrolls away with the page takes no room
+    var hd = document.querySelector('.header'), pos = getComputedStyle(hd).position, hb = (pos === 'fixed' || pos === 'sticky' || sc !== document.scrollingElement) ? Math.max(((document.getElementById('saProbe')||{}).offsetHeight||0), hd.getBoundingClientRect().bottom) : ((document.getElementById('saProbe')||{}).offsetHeight||0), y = Math.max(top, hb) + 12;   // V6.73 C16: never under the status bar   // a header that scrolls away with the page takes no room
     var d = personInput.getBoundingClientRect().top - y; if (Math.abs(d) < 4) return;
     var rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     sc.scrollBy({ top: d, behavior: rm ? 'auto' : 'smooth' });
@@ -10393,15 +10415,15 @@ window.TLPrivacy = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.72', since: 'V5.45', date: [2026, 11, 4],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.73', since: 'V5.45', date: [2026, 11, 4],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11, V6.70–V6.71: SEO / policy text only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
   // Rule (V6.61, owner): the 3 newest user-facing changes only, short; no "since" line. Replace — never append.
   notes: [
+    "Fills the whole screen on tablets and phones, with controls clear of the status bar.",
     "Tablets: the timeline reaches the screen edge, Find gaps always shows its main button, and the keyboard no longer covers the name list.",
-    "Find gaps export: TreeLine no longer says a CSV is saved when it cannot know, and the message no longer moves the profile.",
-    "Clearer words: the start page speaks of your .ged file, and your file stays on this device — also on tablets and phones."
+    "Find gaps export: TreeLine no longer says a CSV is saved when it cannot know, and the message no longer moves the profile."
   ],
   repoUrl: 'https://github.com/hseeberg/TreeLine', issuesUrl: 'https://github.com/hseeberg/TreeLine/issues',
   authorName: 'Hannes Seeberg', authorUrl: 'https://www.linkedin.com/in/seeberg/'
@@ -10484,7 +10506,7 @@ window.ImpCheck = (function(){
     if (!pop) { pop = document.createElement('div'); pop.id = 'impPop'; pop.className = 'imp-card imp-pop'; pop.setAttribute('role', 'dialog'); pop.hidden = true; document.body.appendChild(pop); }
     pop.innerHTML = html(); pop.setAttribute('aria-label', t('imp.' + issues[0].k + '.t'));
     var r = badge.getBoundingClientRect(), hd = document.querySelector('.header').getBoundingClientRect();
-    pop.style.top = (hd.bottom + 8) + 'px'; pop.style.left = Math.max(16, Math.min(r.left - 12, innerWidth - 476)) + 'px';
+    var saT = ((document.getElementById('saProbe')||{}).offsetHeight||0); pop.style.top = ((saT > 0 ? Math.max(saT, hd.bottom) : hd.bottom) + 8) + 'px'; pop.style.left = Math.max(16, Math.min(r.left - 12, innerWidth - 476)) + 'px';
     pop.hidden = false; badge.setAttribute('aria-expanded', 'true');
     var ok = pop.querySelector('[data-imp="ok"]'); if (ok) ok.focus();
   }
@@ -18292,5 +18314,6 @@ window.ImpCheck = (function(){
 1 NAME TreeLine sample data
 0 TRLR
 </script>
+<div id="saProbe" aria-hidden="true"></div>
 </body>
 </html>
