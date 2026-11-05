@@ -77,7 +77,7 @@ born across 50 years. TreeLine puts time first.
 
 - One HTML file
 - Tested in: Google Chrome
-- Current version: 6.72
+- Current version: 6.75
 
 ## License
 
