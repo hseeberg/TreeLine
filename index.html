@@ -1615,6 +1615,15 @@ body.is-factsview .timeline-outer, body.is-factsview .sticky-ruler-wrap, body.is
 .fc-opt input { width: 20px; height: 20px; margin: 0; accent-color: var(--header-accent); }
 .fc-scope { margin: 12px 0 4px; font-size: 17px; line-height: 1.45; font-weight: 600; max-width: 70ch; }
 .fc-src { margin: 0; font-size: 14px; color: var(--header-sub); }
+/* V6.77 C19 (Q86 = C, Secondary; Q88 = A) — host action slot: own row after the source line, secondary button (§6.8), arrow right (same as See fact cards). Drawn only when a host registered an action (spec §29.4). */
+.fc-hostact { margin: 16px 0 0; }
+.fc-hostbtn { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; max-width: 100%; box-sizing: border-box; padding: 8px 16px 8px 18px; border-radius: 10px;
+  font: inherit; font-size: 16px; font-weight: 700; line-height: 1.3; text-align: start; color: var(--header-accent); background: transparent;
+  border: 1.5px solid color-mix(in srgb, var(--header-accent) 55%, transparent); cursor: pointer; }
+.fc-hostbtn span { overflow-wrap: anywhere; }
+.fc-hostbtn svg { width: 20px; height: 20px; flex: none; }
+.fc-hostbtn:hover { background: var(--accent-tint); border-color: var(--header-accent); }
+.fc-hostbtn:focus-visible { outline: 2px solid var(--header-accent); outline-offset: 2px; background: var(--accent-tint); }
 .fc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .fc-card { background: var(--band-bg); border-radius: 14px; box-shadow: 0 1px 3px rgba(24,33,44,.10), 0 4px 14px rgba(24,33,44,.06); padding: 18px 18px 16px; min-width: 0; }
 .fc-wide { grid-column: span 2; }
@@ -9415,6 +9424,17 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var tie = !T.ties.length ? '' : '<p class="fc-tie">' + esc(T.ties.length <= 5 ? t('fact.tie', { n: fNum(T.tieN), list: T.ties.join(', ') }) : tn('fact.tieMany', T.ties.length, { c: fNum(T.tieN) })) + '</p>';
     return card2({ title: title, body: rows(T.top, cls, function(k){ return kind ? '<button type="button" class="fc-plink" data-fplace="' + kind + '" data-fpv="' + esc(k) + '">' + esc(k) + '</button>' : esc(k); }) + tie, rules: rules, gaps: gaps });
   }
+  // ═══ V6.77 C19 — host action slot (spec §29.4, apiVersion 3). Core names no host feature. Def = window.TreeLine.action
+  // (set before Core loads, or by registerAction()). No valid def / label not a non-empty string / label throws → nothing drawn.
+  var HOST_GO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  function hostActValid(d) { return !!d && typeof d === 'object' && d.place === 'facts' && typeof d.label === 'function' && typeof d.run === 'function'; }
+  function hostAct() { var d = window.TreeLine && window.TreeLine.action; return hostActValid(d) ? d : null; }
+  function hostActBtn() {
+    var d = hostAct(); if (!d) return '';
+    var lab; try { lab = d.label(window.tLang ? window.tLang() : 'en', factsDir); } catch (e) { console.error(e); return ''; }
+    if (typeof lab !== 'string' || !lab.trim()) return '';
+    return '<p class="fc-hostact"><button type="button" class="fc-hostbtn" data-fhost><span>' + esc(lab.trim()) + '</span>' + HOST_GO + '</button></p>';
+  }
   function renderFacts() {
     var host = document.getElementById('factsView'), p = P(factsSubj); if (!host || !p) return;
     var cnt = factCounts(factsSubj), sibN = factsSibs ? factSet(factsSubj, 'anc', true).ids.length : cnt.a;
@@ -9434,6 +9454,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     if (anc) h += '<label class="fc-opt"><input type="checkbox" data-fsibs' + (factsSibs ? ' checked' : '') + '> ' + esc(t('fact.sibOpt')) + '</label>';
     h += '</div><p class="fc-scope">' + esc(tn(scopeKey, R.n, { name: nm })) + '</p><p class="fc-src">' + esc(src) + '</p>';
     if (!R.n) { host.innerHTML = h + '</header>' + noData(t(anc ? 'fact.noAnc' : 'fact.noDesc')) + '</div>'; return; }
+    h += hostActBtn();   // V6.77 C19: host action slot (only with data; noData → no button, Q89 = B)
     factsGaps = R.gapIds;
     // Generation keys + labels (Q43: ancestors ↑1 ↑2 …, oldest on the left = time runs left → right)
     var gk = Object.keys(R.gens).map(Number).sort(function(a, b){ return anc ? b - a : a - b; });
@@ -9558,6 +9579,11 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   });
   document.getElementById('factsView').addEventListener('click', function(e){
     if (e.target.closest('[data-fclose]')) { closeFacts(); return; }
+    if (e.target.closest('[data-fhost]')) {   // V6.77 C19: Core calls run and shows nothing; the host owns all further UI. Errors never break the page (Q90).
+      var ha = hostAct(); if (!ha) return;
+      try { var hr = ha.run({ id: String(factsSubj).replace(/@/g, ''), dir: factsDir, siblings: factsDir === 'anc' && !!factsSibs }); if (hr && typeof hr.then === 'function') hr.then(null, function(err){ console.error(err); }); } catch (err) { console.error(err); }
+      return;
+    }
     var d = e.target.closest('[data-fdir]');
     if (d && !d.disabled) { factsDir = d.getAttribute('data-fdir'); if (factsDir === 'desc') factsSibs = false; history.replaceState(Object.assign({}, history.state || {}, { dir: factsDir }), ''); renderFacts(); var nb = document.querySelector('[data-fdir="' + factsDir + '"]'); if (nb) nb.focus(); return; }
     var n = e.target.closest('[data-fgo]');
@@ -9765,7 +9791,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var gens = Object.keys(R.gens).sort(function(x, y){ return x - y; });
     function top(map, n) { return topList(map, n).top.map(function(e){ return { label: e[0], v: e[1] }; }); }
     return {
-      apiVersion: 2, subject: idOut(k), dir: a.dir, siblings: a.sibs, n: R.n,
+      apiVersion: 3, subject: idOut(k), dir: a.dir, siblings: a.sibs, n: R.n,
       perGeneration: gens.map(function(g){ return { gen: D(g), v: R.gens[g], n: R.gens[g], small: R.gens[g] < 30 }; }),
       lifespanPerGeneration: ['M', 'F'].reduce(function(o, sx){ o[sx] = gens.map(function(g){ var L = R.lifeGenS[sx][g] || [], r = V(L); r.gen = D(g); r.hidden = whyHidden(L, R.genPopS[sx][g]); return r; }); return o; }, {}),
       lifespanAll: V(R.lifeAll),
@@ -9780,7 +9806,11 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   }
   (function(){ function upd(){ document.body.classList.toggle('is-scrolled', (window.scrollY || 0) > 0); } window.addEventListener('scroll', upd, { passive: true }); upd(); })();   // V6.73 C16 Q68: start-page band after scrolling
   window.TreeLine = Object.assign(window.TreeLine || {}, {   // V6.72: keeps a hook a host set before load (onDownload, C12)
-    apiVersion: 2,   // V6.73 C15: additive name fields on people()
+    apiVersion: 3,   // V6.73 C15: additive name fields on people() · V6.77 C19: registerAction / action (host action slot)
+    registerAction: function(def){   // V6.77 C19 (spec §29.4): max 1 action; a new valid def replaces the old one; invalid def → ignored
+      try { if (!hostActValid(def)) return; window.TreeLine.action = def;
+        if (factsOn) { var fv = document.getElementById('factsView'), y = fv.scrollTop; renderFacts(); fv.scrollTop = y; } } catch (e) { console.error(e); }
+    },
     people: function(id, dir, opts){ try { return apiPeople(id, dir, opts); } catch (e) { return null; } },   // V6.72 C4
     facts: function(id, dir, opts){ try { return apiFacts(id, dir, opts); } catch (e) { return null; } },     // V6.72 C4
     norm: normTxt, bidi: bidi, a11yDescribe: function(id, act){ try { return a11yDescribe(id, act); } catch (e) { return null; } },   // V6.57 a11y   // V6.51: shared with the search module
@@ -10458,7 +10488,8 @@ window.TLPrivacy = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.76', since: 'V5.45', date: [2026, 11, 5],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.77', since: 'V5.45', date: [2026, 11, 5],   // y, m, d — shown in the UI language (I18N date.dmy)
+  // V6.77 (C19): host API only, no user value in Free — notes unchanged.
   // V6.10–V6.11, V6.70–V6.71: SEO / policy text only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
