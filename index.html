@@ -1517,13 +1517,17 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
 /* ═══ V6.75 Q79 = C + Q81 (owner 2026-11-05) — 901–1279 px: one row in every language. Fixed by width (class .hdr-mid, set in fit()),
    never by measuring → the header does not change between people, views or languages.
    1) Open another .ged file = icon (aria-label + tooltip)  2) no mirrored side columns  3) search ≥ 140 px, hint may end in …
-   4) Sample data pill ≤ 7em with …  · The search results card keeps its own size (centreDropdown, same card as the start page). ═══ */
-.header.hdr-mid .header-titles, .header.hdr-mid .header-end { flex: 0 0 auto; min-width: 0; }
+   4) Sample data pill: full text; it ends in … only when the search is already at 140 px (V6.76, Q85 = A)
+   · The search results card keeps its own size (centreDropdown, same card as the start page). ═══ */
+.header.hdr-mid .header-titles { flex: 0 1 auto; min-width: 0; }   /* shrinks only after the search (flex-shrink 1 vs 1000) */
+.header.hdr-mid .header-titles h1 { min-width: 0; }
+.header.hdr-mid .header-titles h1 > :not(.sample-badge) { flex-shrink: 0; }   /* logo + About never shrink */
+.header.hdr-mid .header-end { flex: 0 0 auto; min-width: 0; }
 .header.hdr-mid #openAnotherBtn > span[data-i18n] { display: none; }
 .header.hdr-mid #openAnotherBtn { padding: 0 14px; }
-.header.hdr-mid .person-selector-wrap { flex: 1 1 auto; width: auto; min-width: 140px; }
+.header.hdr-mid .person-selector-wrap { flex: 1 1000 auto; width: auto; min-width: 140px; }
 .header.hdr-mid .person-input { width: 100%; min-width: 0; text-overflow: ellipsis; }
-.header.hdr-mid .sample-badge { max-width: 7em; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0; }
+.header.hdr-mid .sample-badge { overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0; }
 .ab-since { margin: 6px 0 0; font-size: 15px; color: var(--header-sub); }
 
 /* ═══ V6.17 ═══ */
@@ -10454,7 +10458,7 @@ window.TLPrivacy = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.75', since: 'V5.45', date: [2026, 11, 5],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.76', since: 'V5.45', date: [2026, 11, 5],   // y, m, d — shown in the UI language (I18N date.dmy)
   // V6.10–V6.11, V6.70–V6.71: SEO / policy text only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
   // Notes stay in English for now (open question, spec §i18n).
