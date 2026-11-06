@@ -8848,7 +8848,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       gs.forEach(function(g){ g.ch = g.none ? '' : letterOf(g.sur); g.list.sort(byName); g.n = g.list.length; g.rows = g.list.map(function(id){ return { k: 'p', id: id, gen: 0, d: 0 }; }); g.ids = {}; g.list.forEach(function(id){ g.ids[id] = 1; }); });
       return (data.sur = gs);
     }
-    // V6.49 (owner, variant A): leading brackets/punctuation are ignored for sorting and the letter filter — "(Andruse Simo)" sorts and filters under A.
+    // V6.49 (owner, variant A): leading brackets/punctuation are ignored for sorting and the letter filter — "(Moore Hale)" sorts and filters under M.
     //   The name is still SHOWN as written (name rule §3.1b). Names starting with a digit or with no letter → "#".
     function sortKey(x) { return String(x).replace(/^[^\p{L}\p{N}]+/u, ''); }
     function letterOf(x) { var c = sortKey(x).charAt(0).toLocaleUpperCase(); return /\p{L}/u.test(c) ? c : '#'; }
@@ -9183,7 +9183,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       Object.keys(cs).forEach(function(c){ R.cKeys[c] = (R.cKeys[c] || 0) + 1; (R.cIds[c] = R.cIds[c] || []).push(x); var L = R.cLabels[c] = R.cLabels[c] || {}; L[cs[c]] = (L[cs[c]] || 0) + 1; });
       if (!Object.keys(cs).length) { R.gapIds.country.push(x); if (anyPlace && unk) R.cUnknown++; }   // V6.35: Find gaps also for no place at all
       var nm = p.sex === 'M' ? R.namesM : p.sex === 'F' ? R.namesF : null;
-      // V6.26: only the placeholder word is dropped; the person's real given names still count (`Jaan ?` → Jaan)
+      // V6.26: only the placeholder word is dropped; the person's real given names still count (`Edith ?` → Edith)
       var gn = givenNames(p), real = gn.filter(function(w){ return !HIDDEN_RE.test(w); }), hk = gn.filter(function(w){ return HIDDEN_RE.test(w); });
       if (hk.length) { R.namesHidden++; R.gapIds.hidname.push(x); var kd = hidKind(hk[0]); R.hidKinds[kd] = (R.hidKinds[kd] || 0) + 1; }
       if (nm) real.forEach(function(w){ nm[w] = (nm[w] || 0) + 1; });
@@ -10488,7 +10488,8 @@ window.TLPrivacy = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.77', since: 'V5.45', date: [2026, 11, 5],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.78', since: 'V5.45', date: [2026, 11, 6],   // y, m, d — shown in the UI language (I18N date.dmy)
+  // V6.78 (Q98): code comments only — notes unchanged.
   // V6.77 (C19): host API only, no user value in Free — notes unchanged.
   // V6.10–V6.11, V6.70–V6.71: SEO / policy text only, no user value — notes unchanged by decision.
   // Rule (spec §2.1c, changed V6.9): a short summary of the BIGGEST changes since the last summarised release (now: since V5.45). Replace — never append.
