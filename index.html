@@ -1021,7 +1021,6 @@ body.profile-collapsed .gaps-bar { display: none; }
 .gb-flash-ic svg { width: 16px; height: 16px; }
 .gb-flash-ok { color: var(--header-title); } .gb-flash-ok .gb-flash-ic { color: var(--header-accent); }
 .gb-flash-hint { color: var(--header-sub); } .gb-flash-hint .gb-flash-ic { color: var(--header-sub); }
-.gb-flash-grow { z-index: 4; background: var(--panel-bg); border-radius: 8px; box-shadow: var(--shadow); margin: -6px -8px 0; padding: 6px 8px 8px; }   /* C14 exception to §26.3: host text > 2 lines overlays */
 @media (prefers-reduced-motion: no-preference) { .gb-flash { animation: gbFade .12s ease-out; } }
 @keyframes gbFade { from { opacity: 0; } }
 
@@ -1166,6 +1165,23 @@ body.profile-collapsed .pp-rail-pin { display: flex; position: absolute; top: 14
 .gb-list, .gb-exp, .gb-menu button { white-space: nowrap; }
 .gb-nav { flex-wrap: wrap; row-gap: 8px; }
 .gb-btn, .gb-list, .gb-exp-wrap { flex-shrink: 0; }   /* buttons keep their width; the row wraps instead (long languages) */
+/* ═══ V6.79 C21 (Q94–Q97) — message slot: 0 px at rest; it grows to fit the whole message (120 ms, JS gbSetSlot), the profile moves with it.
+   Replaces the C11 reserved 2 lines and the C14 overlay. §26.4 exception for this bar only. */
+.gb-slot { position: static; margin: 0; min-height: 0; overflow: hidden; }
+.gb-flash { position: static; padding-top: 8px; }
+/* ═══ V6.79 C22 (Q100–Q101) — row 2 is one line, full text: panel 440 px while Find gaps results are open (lt needs 417 px).
+   Still too narrow (phone, zoom) → 2 fixed rows: ‹ 1/N › / List · Export (class gb-two, JS gbFit). Export menu grows wider, never taller. */
+.gb-nav { flex-wrap: nowrap; }
+.gb-acts { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
+.gb-acts .gb-list { margin-left: 0; }
+.gb-nav.gb-two { flex-wrap: wrap; row-gap: 8px; }
+.gb-nav.gb-two .gb-acts { flex-basis: 100%; margin-left: 0; }
+.gb-menu { width: max-content; }
+body.gaps-wide:not(.profile-collapsed) .profile-panel { width: 440px; }
+@media (min-width: 1101px) {
+  body.has-profile.gaps-wide:not(.profile-collapsed) { padding-right: 440px; }
+  body.has-profile.gaps-wide:not(.profile-collapsed) .header { width: calc(100% + 24px + 440px); margin-right: -440px; }
+}
 /* still no room (long language, narrow window) → Find gaps and Menu show only their icon; the name moves to the tooltip.
    "Open another file" keeps its text (main function, decision 2026-10-16) — except 901–1279 px: icon only (V6.75, Q79 = C, owner 2026-11-05) */
 .header.hdr-compact .settings-btn:not(#openAnotherBtn) > span[data-i18n] { display: none; }
@@ -8300,9 +8316,32 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   function gapsGo(i) { if (!gaps) return; if (gaps.flash) { gbTok++; gaps.flash = ''; gbLive(''); } gaps.i = Math.max(0, Math.min(gaps.ids.length - 1, i)); gaps.listOpen = !!gaps.keepList; gaps.keepList = false; go({ focal: gaps.ids[gaps.i], ov: {} }, true); }
   function CS(k) { return t('gaps.short.' + k); }   // V5.37: short field names, I18N gaps.short.*
   function missingOf(id) { if (!gaps) return []; return Object.keys(gaps.crit).filter(function(k){ return lacks(id, k, gaps.pm, null); }); }
+  var gbLast = {};
+  function gbSetSlot(slot, html, anim) {   // V6.79 C21: grow / shrink once to the new height (120 ms); no animation → jump
+    if (slot._html === html) { if (!anim && slot.style.height) { clearTimeout(slot._t); slot.style.transition = 'none'; slot.style.height = ''; } return; }
+    var h0 = slot.getBoundingClientRect().height;
+    slot._html = html; slot.innerHTML = html;
+    clearTimeout(slot._t); slot.style.transition = 'none'; slot.style.height = '';
+    if (!anim) return;
+    var h1 = slot.getBoundingClientRect().height;
+    if (Math.abs(h1 - h0) < 1) return;
+    slot.style.height = h0 + 'px'; void slot.offsetHeight;
+    slot.style.transition = 'height .12s ease-out'; slot.style.height = h1 + 'px';
+    slot._t = setTimeout(function(){ slot.style.transition = ''; slot.style.height = ''; }, 160);
+  }
+  function gbFit() {   // V6.79 C22: row 2 on one line; if it does not fit, 2 fixed rows (Q101)
+    var nav = document.querySelector('#gapsBar .gb-nav'); if (!nav) return;
+    nav.classList.remove('gb-two');
+    if (nav.scrollWidth > nav.clientWidth + 1) nav.classList.add('gb-two');
+    var m = nav.querySelector('.gb-menu'); if (!m) return;   // the menu grows wider, never taller; keep it on screen (8 px edge)
+    m.style.transform = ''; var r = m.getBoundingClientRect(), vw = document.documentElement.clientWidth, dx = Math.min(0, vw - 8 - r.right);
+    if (r.left + dx < 8) dx = 8 - r.left;
+    if (dx) m.style.transform = 'translateX(' + Math.round(dx) + 'px)';
+  }
+  window.addEventListener('resize', function(){ if (gaps) gbFit(); });
   function renderGapsBar(id) {
     var bar = document.getElementById('gapsBar');
-    if (!gaps) { bar.hidden = true; document.getElementById('profilePanel').classList.remove('gaps-on'); return; }
+    if (!gaps) { bar.hidden = true; bar.innerHTML = ''; gbLast = {}; document.getElementById('profilePanel').classList.remove('gaps-on'); document.body.classList.remove('gaps-wide'); return; }
     var k = gaps.ids.indexOf(id); if (k >= 0) gaps.i = k;
     var what = Object.keys(gaps.crit).map(function(c){ return c === 'par' ? CS(gaps.pm === 'both' ? 'parBoth' : gaps.pm === 'one' ? 'parOne' : 'parAny') : CS(c); }).join(' + ');
     gaps.what = what;
@@ -8311,24 +8350,33 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       '<div class="gb-nav"><button class="gb-btn" data-gb="prev" aria-label="' + esc(t('gaps.prev')) + '"' + (gaps.i <= 0 || k < 0 ? (k < 0 ? '' : ' disabled') : '') + '>‹</button>' +
       '<span class="gb-pos">' + (k >= 0 ? (gaps.i + 1) + ' / ' + gaps.ids.length : '– / ' + gaps.ids.length) + '</span>' +
       '<button class="gb-btn" data-gb="next" aria-label="' + esc(t('gaps.next')) + '"' + (k >= 0 && gaps.i >= gaps.ids.length - 1 ? ' disabled' : '') + '>›</button>' +
-      '<button class="gb-list' + (gaps.listOpen ? ' on' : '') + '" data-gb="list">☰ ' + esc(t('gaps.list')) + '</button>' +
+      '<div class="gb-acts"><button class="gb-list' + (gaps.listOpen ? ' on' : '') + '" data-gb="list">☰ ' + esc(t('gaps.list')) + '</button>' +
       '<div class="gb-exp-wrap"><button class="gb-exp" data-gb="export" aria-haspopup="menu" aria-expanded="' + (gaps.expOpen ? 'true' : 'false') + '">' + esc(t('gaps.export')) + ' ▾</button>' +
-      (gaps.expOpen ? '<div class="gb-menu" role="menu"><button role="menuitem" data-gb="copy">' + esc(t('gaps.copy')) + '</button><button role="menuitem" data-gb="csv">' + esc(t('gaps.csv')) + '</button></div>' : '') + '</div>' +
+      (gaps.expOpen ? '<div class="gb-menu" role="menu"><button role="menuitem" data-gb="copy">' + esc(t('gaps.copy')) + '</button><button role="menuitem" data-gb="csv">' + esc(t('gaps.csv')) + '</button></div>' : '') + '</div></div>' +
       '</div>' +
-      '<div class="gb-slot">' + (gaps.flash && gaps.flash.lang === tLang() ? '<div class="gb-flash gb-flash-' + gaps.flash.kind + '" aria-hidden="true"><span class="gb-flash-ic">' + (gaps.flash.kind === 'ok' ? GB_IC_OK : GB_IC_HINT) + '</span><span class="gb-flash-tx">' + esc(gaps.flash.text) + '</span></div>' : '') + '</div>';   // V6.72 T1: reserved 2-line slot, never moves the profile (C11)
+      '';
+    var slotH = gaps.flash && gaps.flash.lang === tLang() ? '<div class="gb-flash gb-flash-' + gaps.flash.kind + '" aria-hidden="true"><span class="gb-flash-ic">' + (gaps.flash.kind === 'ok' ? GB_IC_OK : GB_IC_HINT) + '</span><span class="gb-flash-tx">' + esc(gaps.flash.text) + '</span></div>' : '';
+    var listH = '';
     if (gaps.listOpen) {
-      h += '<div class="gb-items">' + gaps.ids.map(function(x, j){
+      listH += '<div class="gb-items">' + gaps.ids.map(function(x, j){
         var q = P(x); return '<button class="gb-item' + (j === gaps.i && k >= 0 ? ' cur' : '') + '" data-gi="' + j + '"><span class="pp-dot pp-dot-' + (sexKey(q)) + '"></span><span class="gb-nm">' + esc(nameOf(q)) + '<small>' + esc(yearsLabel(q)) + ' · ' + esc(missingOf(x).map(CS).join(', ')) + '</small></span></button>';
       }).join('') + '</div>';
     }
-    bar.innerHTML = h; bar.hidden = false; document.getElementById('profilePanel').classList.add('gaps-on');
-    var fl = bar.querySelector('.gb-flash'), slot = bar.querySelector('.gb-slot');
-    if (fl && slot) fl.classList.toggle('gb-flash-grow', fl.scrollHeight > slot.clientHeight + 1);   // V6.72 C14: host text over 2 lines overlays (spec §26.3 exception)
+    // V6.79 C21: 3 fixed parts; the slot stays in the DOM so its height can animate. Animate only while the bar stays on the same person in the same language (Q95).
+    var anim = !bar.hidden && gbLast.id === id && gbLast.lang === tLang() && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if (!bar.querySelector(':scope > .gb-slot')) bar.innerHTML = '<div class="gb-main"></div><div class="gb-slot"></div><div class="gb-listbox"></div>';
+    bar.children[0].innerHTML = h; bar.children[2].innerHTML = listH;
+    bar.hidden = false; document.getElementById('profilePanel').classList.add('gaps-on'); document.body.classList.add('gaps-wide');
+    gbSetSlot(bar.children[1], slotH, anim);
+    gbLast = { id: id, lang: tLang() };
+    gbFit();
   }
   document.getElementById('gapsBar').addEventListener('click', function(e){
     var b = e.target.closest('[data-gb],[data-gi]'); if (!b || !gaps) return;
     var a = b.getAttribute('data-gb');
-    gbTok++; gbSay(null);   // V6.72: the next action clears the message; an older pending save can no longer write one
+    gbTok++;   // V6.72: the next action clears the message; an older pending save can no longer write one
+    if (a === 'list' || a === 'export' || a === 'copy' || a === 'csv') gbSay(null);   // V6.79 C21 (Q95): bar stays → animated shrink
+    else if (gaps.flash) { gaps.flash = ''; gbLive(''); }   // step, list pick, close → instant (the next render has no message)
     if (b.hasAttribute('data-gi')) return gapsGo(+b.getAttribute('data-gi'));
     if (a === 'prev') { var k = gaps.ids.indexOf(state.focal); gapsGo(k < 0 ? gaps.i : k - 1); }
     else if (a === 'next') { var k2 = gaps.ids.indexOf(state.focal); gapsGo(k2 < 0 ? gaps.i : k2 + 1); }
@@ -9060,6 +9108,23 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     }
     return true;
   }
+  // V6.80 C23 (spec §29.5, apiVersion 4): relation of a child to one family, for the host API only (Core's own sets keep bioIn).
+  // 'birth' (no PEDI / PEDI birth) · 'adopted' (PEDI adopted* or an ADOP event → this family) · 'foster' (PEDI foster*) · other PEDI → as written, trimmed, lower case.
+  function relIn(cid, fid) {
+    var raw = (P(cid) || {}).raw || [], cur = null, ped = null, adop = false;
+    for (var i = 0; i < raw.length; i++) {
+      var r = raw[i];
+      if (r.level === 1) cur = r;
+      else if (cur && r.level === 2) {
+        if (cur.tag === 'FAMC' && cur.value === fid && r.tag === 'PEDI' && ped == null) ped = String(r.value || '').trim().toLowerCase();
+        if (cur.tag === 'ADOP' && r.tag === 'FAMC' && r.value === fid) adop = true;
+      }
+    }
+    if (ped && /^adopted/.test(ped)) return 'adopted';
+    if (ped && /^foster/.test(ped)) return 'foster';
+    if (adop) return 'adopted';
+    return !ped || ped === 'birth' ? 'birth' : ped;
+  }
   function bioKids(id) {
     var p = P(id), out = [];
     if (!p) return out;
@@ -9770,7 +9835,9 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       surnameKeys: lastNamesOf(p).map(surKey).filter(function(k, i, a){ return a.indexOf(k) === i; }),
       parentIds: bioParents(x).map(function(y){ return String(y).replace(/@/g, ''); }),
       families: (p.fams || []).map(function(fid){ var f = G.families.get(fid); if (!f) return null; var sp = f.husb === x ? f.wife : f.husb;
-        return { spouseId: sp && P(sp) ? String(sp).replace(/@/g, '') : null, childIds: f.children.filter(function(c){ return P(c) && bioIn(c, fid); }).map(function(c){ return String(c).replace(/@/g, ''); }) }; }).filter(Boolean)
+        var seen = {}, kids = f.children.filter(function(c){ if (!P(c) || seen[c]) return false; seen[c] = 1; return true; });   // V6.80 C23: duplicate CHIL → once, first wins
+        return { spouseId: sp && P(sp) ? String(sp).replace(/@/g, '') : null, childIds: f.children.filter(function(c){ return P(c) && bioIn(c, fid); }).map(function(c){ return String(c).replace(/@/g, ''); }),
+          children: kids.map(function(c){ return { id: String(c).replace(/@/g, ''), rel: relIn(c, fid) }; }) }; }).filter(Boolean)
     };
   }
   function apiId(id) { if (id == null || !G) return null; id = String(id); if (P(id)) return id; if (P('@' + id + '@')) return '@' + id + '@'; return null; }
@@ -9791,7 +9858,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var gens = Object.keys(R.gens).sort(function(x, y){ return x - y; });
     function top(map, n) { return topList(map, n).top.map(function(e){ return { label: e[0], v: e[1] }; }); }
     return {
-      apiVersion: 3, subject: idOut(k), dir: a.dir, siblings: a.sibs, n: R.n,
+      apiVersion: 4, subject: idOut(k), dir: a.dir, siblings: a.sibs, n: R.n,
       perGeneration: gens.map(function(g){ return { gen: D(g), v: R.gens[g], n: R.gens[g], small: R.gens[g] < 30 }; }),
       lifespanPerGeneration: ['M', 'F'].reduce(function(o, sx){ o[sx] = gens.map(function(g){ var L = R.lifeGenS[sx][g] || [], r = V(L); r.gen = D(g); r.hidden = whyHidden(L, R.genPopS[sx][g]); return r; }); return o; }, {}),
       lifespanAll: V(R.lifeAll),
@@ -9806,12 +9873,13 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   }
   (function(){ function upd(){ document.body.classList.toggle('is-scrolled', (window.scrollY || 0) > 0); } window.addEventListener('scroll', upd, { passive: true }); upd(); })();   // V6.73 C16 Q68: start-page band after scrolling
   window.TreeLine = Object.assign(window.TreeLine || {}, {   // V6.72: keeps a hook a host set before load (onDownload, C12)
-    apiVersion: 3,   // V6.73 C15: additive name fields on people() · V6.77 C19: registerAction / action (host action slot)
+    apiVersion: 4,   // V6.73 C15: additive name fields on people() · V6.77 C19: registerAction / action (host action slot) · V6.80 C23: personData() + families[].children
     registerAction: function(def){   // V6.77 C19 (spec §29.4): max 1 action; a new valid def replaces the old one; invalid def → ignored
       try { if (!hostActValid(def)) return; window.TreeLine.action = def;
         if (factsOn) { var fv = document.getElementById('factsView'), y = fv.scrollTop; renderFacts(); fv.scrollTop = y; } } catch (e) { console.error(e); }
     },
     people: function(id, dir, opts){ try { return apiPeople(id, dir, opts); } catch (e) { return null; } },   // V6.72 C4
+    personData: function(id){ try { var k = apiId(id); return k ? apiPerson(k, null) : null; } catch (e) { return null; } },   // V6.80 C23: any person in the file, gen = null
     facts: function(id, dir, opts){ try { return apiFacts(id, dir, opts); } catch (e) { return null; } },     // V6.72 C4
     norm: normTxt, bidi: bidi, a11yDescribe: function(id, act){ try { return a11yDescribe(id, act); } catch (e) { return null; } },   // V6.57 a11y   // V6.51: shared with the search module
     setData: function(g, fname){ if (factsOn) exitFacts(); factsFile = fname || null; factsOpened = new Date(); G = g; PL.reset(); pinId = null; recent = []; if (listOn) exitList(); listTop = 0; renderRuler(); },
@@ -10488,7 +10556,9 @@ window.TLPrivacy = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.78', since: 'V5.45', date: [2026, 11, 6],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.80', since: 'V5.45', date: [2026, 11, 6],   // y, m, d — shown in the UI language (I18N date.dmy)
+  // V6.80 (C23): host API only, no user value in Free — notes unchanged.
+  // V6.79 (C21 + C22): Find gaps bar — note 1 replaced the oldest note.
   // V6.78 (Q98): code comments only — notes unchanged.
   // V6.77 (C19): host API only, no user value in Free — notes unchanged.
   // V6.10–V6.11, V6.70–V6.71: SEO / policy text only, no user value — notes unchanged by decision.
@@ -10496,9 +10566,9 @@ var RELEASE = {
   // Notes stay in English for now (open question, spec §i18n).
   // Rule (V6.61, owner): the 3 newest user-facing changes only, short; no "since" line. Replace — never append.
   notes: [
+    "Find gaps: no empty space under the buttons, and the buttons stay on one line in every language.",
     "Remembers your Light or Dark mode choice. New Automatic mode follows your device.",
-    "Tablets and small windows: the top bar fits the screen in every language, and the logo stays in the same place.",
-    "Fills the whole screen on tablets and phones, with controls clear of the status bar."
+    "Tablets and small windows: the top bar fits the screen in every language, and the logo stays in the same place."
   ],
   repoUrl: 'https://github.com/hseeberg/TreeLine', issuesUrl: 'https://github.com/hseeberg/TreeLine/issues',
   authorName: 'Hannes Seeberg', authorUrl: 'https://www.linkedin.com/in/seeberg/'
