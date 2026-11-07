@@ -1289,6 +1289,9 @@ html[data-tl-theme="dark"] { --imp-bg: #3a2e17; --imp-border: #8a6a2a; --imp-tex
 /* header: List view / Timeline view switch */
 .view-btn.pre-render { display: none; }
 .view-btn .vb-ic-tl { display: none; }
+/* V6.83 Q83: the button is as wide as its longer label (List view / Timeline) in the current language → Pin, search and Find gaps never move between views */
+.view-btn > span[data-i18n] { display: inline-flex; flex-direction: column; align-items: center; }
+.view-btn > span[data-i18n]::after { content: attr(data-alt); height: 0; overflow: hidden; visibility: hidden; white-space: nowrap; }
 .view-btn.is-list .vb-ic-tl { display: block; }
 .view-btn.is-list .vb-ic-list { display: none; }
 
@@ -1467,6 +1470,11 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
   .pp-toggle { top: calc(10px + var(--sa-top)); left: calc(10px + var(--sa-left)); transform: none; width: 44px; height: 44px; z-index: 3; }
   .pp-toggle svg { width: 20px; height: 20px; transform: rotate(180deg); }
   .pp-scroll { padding: calc(68px + var(--sa-top)) calc(20px + var(--sa-right)) calc(40px + var(--sa-bottom)) calc(20px + var(--sa-left)); }
+  /* V6.82 Q102 = C: Find gaps row 1 starts on the profile action text line (clear of ‹); text wraps, the bar grows only when needed.
+     Q107: ✕ on the same line as ‹. Status-bar inset (--sa-top) kept clear. */
+  .gaps-bar { padding-top: calc(10px + var(--sa-top)); padding-right: calc(20px + var(--sa-right)); }
+  .gb-top { padding-left: calc(39px + var(--sa-left)); min-height: 44px; }
+  .gb-top .gb-sum { margin-top: 12px; }
 }
 @media (max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
   /* header: row 1 = logo + About + Menu; row 2 = search + icon buttons. Never wider than the screen (spec §21.3) */
@@ -1484,6 +1492,9 @@ mark.pp-hit { background: color-mix(in srgb, var(--header-accent) 24%, transpare
   body:not(.is-start) .timeline-outer { height: auto; flex: 1 1 0; min-height: 0; }
   .gaps-pop { position: fixed; left: 8px; right: 8px; top: auto; width: auto; max-height: 80dvh; overflow: auto; }
 }
+/* V6.83 Q91 = B, Q91a = A (owner 2026-11-07): timeline header ≤ 384 px shows the logo mark only → row 1 (logo · About · List view · Menu) fits in all 12 languages.
+   The word stays in the accessibility tree (visually hidden, not display:none) → the home link keeps its name. Fixed by width. Accepted: `xx` drops Menu at 385–399 px. */
+@media (max-width: 384px) { body:not(.is-start) .header #pageTitle { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; } }
 @media (pointer: coarse) { .pp-toggle { width: 44px; height: 44px; } .about-btn { min-height: 44px; } .header .settings-btn { min-height: 48px; } .gaps-pop { max-width: calc(100vw - 16px); } }
 @media (max-width: 900px) { .empty-state .person-selector-wrap { width: 100%; max-width: none; } }   /* start page: search = same width as the buttons under it (§21.3) */
 @media (pointer: coarse) { .drop-hint { display: none; } }   /* a phone or tablet has no drag-and-drop */
@@ -2093,6 +2104,8 @@ html:not([data-tl-theme="light"]) .fc-al-fill { box-shadow: inset 0 2px 0 rgba(2
 .pp-stack .pp-facts-btn.pp-primary:disabled { background: transparent; color: var(--header-sub); border: 1.5px solid var(--panel-border); filter: none; }
 .pp-stack .pp-facts-btn.pp-primary:disabled .pp-facts-2 { color: var(--header-sub); }
 .pp-stack .pp-facts-btn .pp-facts-go { margin-left: auto; }
+.pp-stack .pp-facts-btn.pp-primary { padding-left: 13px; gap: 10px; }   /* V6.82 Q108: icon centre + text start = the other profile actions (24 px icon, no border) */
+.pp-stack .pp-facts-btn.pp-primary:disabled { padding-left: 11.5px; }   /* 1.5 px border when disabled */
 /* switch row: a setting, not a button — no border; the switch shows the state (WAI-ARIA switch pattern) */
 .pp-switch { color: var(--header-title); background: transparent; border: 1.5px solid transparent; padding-right: 8px; }
 .pp-switch:hover { background: var(--accent-tint); }
@@ -8047,6 +8060,16 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   var bandTops = [], focalY = null, genFirst = false, centerNext = false;
   // V6.20: a person picked from the list (start page / List view) or from search opens in the middle of the timeline's visible area
   var NAME_PAD = 12;   // V6.81 Q104: px kept free left of the selected person's name
+  // V6.82 Q105 (Editor T33): the selected person's partner names (rows inside the focal highlight) also keep their start ≥ NAME_PAD.
+  // The selected person wins: the partner limit never pushes the selected person's birth point out of view on the right.
+  function partnerLimit(svg, k, svgLeft, lim, anchorPx, visW) {
+    var hl = svg.querySelector('rect.focal-hl'); if (!hl) return lim;
+    var hb = hl.getBBox(), px = null;
+    svg.querySelectorAll('text.partner-text').forEach(function(t){ var b = t.getBBox(), cy = b.y + b.height / 2; if (cy >= hb.y && cy <= hb.y + hb.height && (px == null || b.x < px)) px = b.x; });
+    if (px == null) return lim;
+    var pl = svgLeft + px * k - NAME_PAD, floor = svgLeft + anchorPx - visW + NAME_PAD;
+    return Math.min(lim, Math.max(pl, floor));
+  }
   function centerOnFocal() {
     var o = document.getElementById('timelineOuter'), svg = document.getElementById('mainSvg');
     if (!state || !svg.viewBox.baseVal || !svg.viewBox.baseVal.height || !o.clientHeight) return;
@@ -8062,7 +8085,8 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var right = oR.right, pnl = document.getElementById('profilePanel');
     if (!NARROW.matches && pnl && !pnl.hidden) right = Math.min(right, pnl.getBoundingClientRect().left);
     var anchor = (bb.x + bb.width + 16) * k;   // birth point = where the name ends and the bar begins
-    o.scrollLeft = Math.max(0, Math.min(svgLeft + anchor - (right - oR.left) / 2, svgLeft + bb.x * k - NAME_PAD));   // V6.81 Q104: the name start is never cut at the left
+    var lim = partnerLimit(svg, k, svgLeft, svgLeft + bb.x * k - NAME_PAD, anchor, right - oR.left);   // V6.81 Q104 + V6.82 Q105
+    o.scrollLeft = Math.max(0, Math.min(svgLeft + anchor - (right - oR.left) / 2, lim));   // the name start is never cut at the left
   }
   function scrollToFocalGen() {
     var o = document.getElementById('timelineOuter'), svg = document.getElementById('mainSvg');
@@ -8079,7 +8103,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       if (!pnl.hidden) right = Math.min(right, pnl.getBoundingClientRect().left);
       var lbl = svg.querySelector('text.focal-name'), svgLeft = svg.getBoundingClientRect().left - oR.left + o.scrollLeft;
       var want = X(by) * k - (right - oR.left) * 0.55;
-      if (lbl) want = Math.min(want, svgLeft + lbl.getBBox().x * k - NAME_PAD);   // V6.81 Q104: the name start is never cut at the left
+      if (lbl) want = Math.min(want, partnerLimit(svg, k, svgLeft, svgLeft + lbl.getBBox().x * k - NAME_PAD, X(by) * k, right - oR.left));   // V6.81 Q104 + V6.82 Q105: name starts never cut at the left
       o.scrollLeft = Math.max(0, want);
     }
   }
@@ -8315,7 +8339,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     if (st.scope === 'view') { var order = {}; lastView.forEach(function(x, i){ order[x] = i; }); ids.sort(function(a, b){ return (order[a] || 0) - (order[b] || 0); }); }
     else ids.sort(function(a, b){ var x = estBirth(a), y = estBirth(b); if (x == null) return 1; if (y == null) return -1; return x - y; });
     gaps = { ids: ids, i: 0, crit: st.crit, pm: st.pm, listOpen: false, scope: st.scope, scopeName: nameOf(P(state.focal)), when: new Date() };
-    gpOpen(false); ppCollapsed = false; gapsGo(0);
+    gpOpen(false); ppCollapsed = false; wantProfile = true; gapsGo(0);   // V6.82 Q106: phone — results open with the profile
   });
   function gapsGo(i) { if (!gaps) return; if (gaps.flash) { gbTok++; gaps.flash = ''; gbLive(''); } gaps.i = Math.max(0, Math.min(gaps.ids.length - 1, i)); gaps.listOpen = !!gaps.keepList; gaps.keepList = false; centerNext = true; go({ focal: gaps.ids[gaps.i], ov: {} }, true); }   // V6.81 Q104: each step shows the person in the middle (§7, V6.20 rule)
   function CS(k) { return t('gaps.short.' + k); }   // V5.37: short field names, I18N gaps.short.*
@@ -9061,6 +9085,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   function setViewBtn() {
     var b = document.getElementById('viewBtn'), sp = b.querySelector('span[data-i18n]'), k = listOn ? 'view.timeline' : 'view.list';
     sp.setAttribute('data-i18n', k); sp.textContent = t(k);
+    sp.setAttribute('data-alt', t(listOn ? 'view.list' : 'view.timeline'));   // V6.83 Q83: the other label reserves its width → no move between views
     b.setAttribute('data-i18n-title', k + '.title'); b.title = t(k + '.title');
     b.classList.toggle('is-list', listOn);
   }
@@ -9675,7 +9700,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     if (e.target.closest('[data-fdstep]')) {   // explicit choice → step through on the timeline (old behaviour)
       var ids = drawerIds.slice(), crit = {}; crit[drawerKind] = 1; closeDrawer(); factsRemember();
       gaps = { ids: ids, i: 0, crit: crit, pm: 'any', listOpen: true, keepList: true, scope: 'all', scopeName: nameOf(P(factsSubj)), when: new Date() };
-      ppCollapsed = false; gapsGo(0);
+      ppCollapsed = false; wantProfile = true; gapsGo(0);   // V6.82 Q106
     }
   });
   document.getElementById('factsView').addEventListener('keydown', function(e){   // V6.39: SVG targets with role=button
@@ -10568,7 +10593,9 @@ window.TLPrivacy = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.81', since: 'V5.45', date: [2026, 11, 7],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.83', since: 'V5.45', date: [2026, 11, 7],   // y, m, d — shown in the UI language (I18N date.dmy)
+  // V6.83 (Q91 + Q83): header fits on small phones; desktop header no longer moves between views — note 3 replaced.
+  // V6.82 (Q102 + Q105–Q108): Find gaps on phones + partner name start — note 1 replaced.
   // V6.81 (C24 + C25 + Q104): host API (no Free user value) + Find gaps step centres the person — note 1 extended.
   // V6.80 (C23): host API only, no user value in Free — notes unchanged.
   // V6.79 (C21 + C22): Find gaps bar — note 1 replaced the oldest note.
@@ -10579,9 +10606,9 @@ var RELEASE = {
   // Notes stay in English for now (open question, spec §i18n).
   // Rule (V6.61, owner): the 3 newest user-facing changes only, short; no "since" line. Replace — never append.
   notes: [
-    "Find gaps: each step shows the person in the middle of the timeline, and the buttons stay on one line in every language.",
+    "Find gaps now works on phones: the results open together with the profile.",
     "Remembers your Light or Dark mode choice. New Automatic mode follows your device.",
-    "Tablets and small windows: the top bar fits the screen in every language, and the logo stays in the same place."
+    "The top bar stays in place when you switch views, and fits small phones in every language."
   ],
   repoUrl: 'https://github.com/hseeberg/TreeLine', issuesUrl: 'https://github.com/hseeberg/TreeLine/issues',
   authorName: 'Hannes Seeberg', authorUrl: 'https://www.linkedin.com/in/seeberg/'
@@ -10735,6 +10762,14 @@ window.ImpCheck = (function(){
     var HN = window.matchMedia('(max-width: 900px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse)');   // V6.17
     var MID = window.matchMedia('(min-width: 901px) and (max-width: 1279px)');   // V6.75 Q79/Q81: fixed compact one-row header
     var oaBtn = document.getElementById('openAnotherBtn'), sBadge = document.getElementById('sampleBadge');
+    // V6.83 Q83 = B (owner 2026-11-07): ≥ 1280 px the header state is fixed by width, per language — never by measuring.
+    // Per language: [icons (below = the 901–1279 px rule), labels with Pin icon-only, all labels]. Measured in the build test
+    // (V6.82, timeline + List view, sample data, embedded font): the state fits and the search hint is not cut (xx: no overflow).
+    // A new or changed translation → measure again. Unknown language → the widest row.
+    var HDR_FIT = { en: [1280, 1360, 1480], et: [1280, 1440, 1500], de: [1280, 1480, 1600], fi: [1320, 1520, 1620], sv: [1280, 1360, 1480],
+      es: [1320, 1600, 1740], fr: [1420, 1620, 1760], nl: [1280, 1480, 1580], lv: [1280, 1380, 1500], lt: [1320, 1560, 1680],
+      no: [1280, 1320, 1420], da: [1280, 1340, 1420], xx: [1280, 1580, 1760] };
+    function hdrFit() { return HDR_FIT[tLang()] || [1420, 1620, 1760]; }
     function fit() {
       // V6.41: give way in steps — 1) Pin drops its text label, 2) all buttons icon-only. Step 1 keeps the V6.40 behaviour for the other buttons.
       function over() { return hr.scrollWidth > hr.clientWidth + 1 || hd.scrollWidth > hd.clientWidth + 1 || !phFits(); }
@@ -10748,10 +10783,21 @@ window.ImpCheck = (function(){
         if (sw > 0) hd.style.setProperty('--side-w', sw + 'px');
       }
       var tight;
-      var mid = !HN.matches && MID.matches && !document.body.classList.contains('is-start');   // start page keeps its own header
+      var isStart = document.body.classList.contains('is-start'), W = window.innerWidth, T = hdrFit();
+      var mid = !HN.matches && !isStart && (MID.matches || W < T[0]);   // start page keeps its own header; V6.83 Q83: per-language icon limit
       hd.classList.toggle('hdr-mid', mid);
       if (HN.matches) { hd.classList.add('hdr-compact'); hd.style.removeProperty('--side-w'); tight = true; }
       else if (mid) { hd.classList.add('hdr-compact', 'pin-short'); hd.style.removeProperty('--side-w'); tight = true; }
+      else if (!isStart) {   // V6.83 Q83 = B: fixed by width + language. Safety net only if the table is wrong (zoomed text): one step down at a time.
+        hd.classList.remove('hdr-compact', 'pin-short'); hd.style.removeProperty('--side-w');
+        if (W < T[2]) hd.classList.add('pin-short');
+        if (W < T[1]) hd.classList.add('hdr-compact');
+        sides();
+        function spill() { return hr.scrollWidth > hr.clientWidth + 1 || hd.scrollWidth > hd.clientWidth + 1; }   // overflow only; the hint is covered by the table
+        if (spill() && !hd.classList.contains('pin-short')) { hd.classList.add('pin-short'); sides(); }
+        if (spill() && !hd.classList.contains('hdr-compact')) { hd.classList.add('hdr-compact'); sides(); }
+        tight = hd.classList.contains('hdr-compact');
+      }
       else {
         hd.classList.remove('hdr-compact', 'pin-short'); hd.style.removeProperty('--side-w');
         if (over()) hd.classList.add('pin-short');
