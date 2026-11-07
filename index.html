@@ -8046,6 +8046,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   // V5.34 — focal generation in view (sample family opens on Arthur's generation, not on the oldest ancestors)
   var bandTops = [], focalY = null, genFirst = false, centerNext = false;
   // V6.20: a person picked from the list (start page / List view) or from search opens in the middle of the timeline's visible area
+  var NAME_PAD = 12;   // V6.81 Q104: px kept free left of the selected person's name
   function centerOnFocal() {
     var o = document.getElementById('timelineOuter'), svg = document.getElementById('mainSvg');
     if (!state || !svg.viewBox.baseVal || !svg.viewBox.baseVal.height || !o.clientHeight) return;
@@ -8061,7 +8062,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var right = oR.right, pnl = document.getElementById('profilePanel');
     if (!NARROW.matches && pnl && !pnl.hidden) right = Math.min(right, pnl.getBoundingClientRect().left);
     var anchor = (bb.x + bb.width + 16) * k;   // birth point = where the name ends and the bar begins
-    o.scrollLeft = Math.max(0, svgLeft + anchor - (right - oR.left) / 2);
+    o.scrollLeft = Math.max(0, Math.min(svgLeft + anchor - (right - oR.left) / 2, svgLeft + bb.x * k - NAME_PAD));   // V6.81 Q104: the name start is never cut at the left
   }
   function scrollToFocalGen() {
     var o = document.getElementById('timelineOuter'), svg = document.getElementById('mainSvg');
@@ -8076,7 +8077,10 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     if (by != null) {
       var oR = o.getBoundingClientRect(), pnl = document.getElementById('profilePanel'), right = oR.right;
       if (!pnl.hidden) right = Math.min(right, pnl.getBoundingClientRect().left);
-      o.scrollLeft = Math.max(0, X(by) * k - (right - oR.left) * 0.55);
+      var lbl = svg.querySelector('text.focal-name'), svgLeft = svg.getBoundingClientRect().left - oR.left + o.scrollLeft;
+      var want = X(by) * k - (right - oR.left) * 0.55;
+      if (lbl) want = Math.min(want, svgLeft + lbl.getBBox().x * k - NAME_PAD);   // V6.81 Q104: the name start is never cut at the left
+      o.scrollLeft = Math.max(0, want);
     }
   }
   var PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>';
@@ -8313,7 +8317,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     gaps = { ids: ids, i: 0, crit: st.crit, pm: st.pm, listOpen: false, scope: st.scope, scopeName: nameOf(P(state.focal)), when: new Date() };
     gpOpen(false); ppCollapsed = false; gapsGo(0);
   });
-  function gapsGo(i) { if (!gaps) return; if (gaps.flash) { gbTok++; gaps.flash = ''; gbLive(''); } gaps.i = Math.max(0, Math.min(gaps.ids.length - 1, i)); gaps.listOpen = !!gaps.keepList; gaps.keepList = false; go({ focal: gaps.ids[gaps.i], ov: {} }, true); }
+  function gapsGo(i) { if (!gaps) return; if (gaps.flash) { gbTok++; gaps.flash = ''; gbLive(''); } gaps.i = Math.max(0, Math.min(gaps.ids.length - 1, i)); gaps.listOpen = !!gaps.keepList; gaps.keepList = false; centerNext = true; go({ focal: gaps.ids[gaps.i], ov: {} }, true); }   // V6.81 Q104: each step shows the person in the middle (§7, V6.20 rule)
   function CS(k) { return t('gaps.short.' + k); }   // V5.37: short field names, I18N gaps.short.*
   function missingOf(id) { if (!gaps) return []; return Object.keys(gaps.crit).filter(function(k){ return lacks(id, k, gaps.pm, null); }); }
   var gbLast = {};
@@ -8885,7 +8889,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     function surnamesOf(p) { return lastNamesOf(p); }   // V6.73: shared with people().surnameKeys
     function surData() {
       if (data.sur) return data.sur;
-      var coll = new Intl.Collator(tLang() === 'xx' ? 'en' : tLang(), { sensitivity: 'base' }), map = {}, keys = [], none = [];
+      var coll = new Intl.Collator(tLang() === 'xx' ? 'en' : tLang(), { sensitivity: 'base' }), map = Object.create(null), keys = [], none = [];   // V6.81: no prototype keys
       G.individuals.forEach(function(p, id){
         var ss = surnamesOf(p); if (!ss.length) { none.push(id); return; }
         ss.forEach(function(x){ var k = surKey(x); if (!map[k]) { map[k] = { sur: x, list: [] }; keys.push(k); } map[k].list.push(id); });
@@ -9803,7 +9807,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   // ═══ V6.73 — last names of a person (§19) and the group key (Q72): one rule for the Last names list AND people().surnameKeys
   function surKey(x) { return String(x).normalize('NFC').toLowerCase(); }   // locale-independent (was toLocaleLowerCase)
   function lastNamesOf(p) {
-    var base = [], out = [], seen = {};
+    var base = [], out = [], seen = Object.create(null);   // V6.81: no prototype keys (a last name like "Constructor" was dropped)
     var s1 = p.surn;
     if (!s1) { var raw = String(((p.raw || []).find(function(c){ return c.level === 1 && c.tag === 'NAME'; }) || {}).value || ''), a = raw.indexOf('/'), b = raw.lastIndexOf('/'); if (a >= 0 && b > a) s1 = raw.slice(a + 1, b); }
     [s1, p.marnm].forEach(function(x){ if (x) base.push(x); });
@@ -9833,12 +9837,20 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
       birth: apiDate(p, 'BIRT'), death: apiDate(p, 'DEAT'), birthPlace: apiPlace(p, 'BIRT'), deathPlace: apiPlace(p, 'DEAT'), living: !!isLiving(p),
       given: (p.nm && p.nm.g) || null, surname: (p.nm && p.nm.s) || null, marriedSurname: (p.nm && p.nm.m) || null,   // V6.73 C15 (apiVersion 2)
       surnameKeys: lastNamesOf(p).map(surKey).filter(function(k, i, a){ return a.indexOf(k) === i; }),
+      years: yearsLabel(p),   // V6.81 C24 (apiVersion 5): exactly the timeline label, signs + digits only, never translated
+      surnameLabels: lastNamesOf(p).map(surKey).filter(function(k, i, a){ return a.indexOf(k) === i; }).map(function(k){ return surLabel(k); }),   // V6.81 C25: §19 group label per key
       parentIds: bioParents(x).map(function(y){ return String(y).replace(/@/g, ''); }),
       families: (p.fams || []).map(function(fid){ var f = G.families.get(fid); if (!f) return null; var sp = f.husb === x ? f.wife : f.husb;
         var seen = {}, kids = f.children.filter(function(c){ if (!P(c) || seen[c]) return false; seen[c] = 1; return true; });   // V6.80 C23: duplicate CHIL → once, first wins
         return { spouseId: sp && P(sp) ? String(sp).replace(/@/g, '') : null, childIds: f.children.filter(function(c){ return P(c) && bioIn(c, fid); }).map(function(c){ return String(c).replace(/@/g, ''); }),
           children: kids.map(function(c){ return { id: String(c).replace(/@/g, ''), rel: relIn(c, fid) }; }) }; }).filter(Boolean)
     };
+  }
+  // V6.81 C25 (apiVersion 5): group label per last-name key = the Last names list label (§19): first spelling met in file order, whole file
+  var surLab = { g: null, m: null };
+  function surLabel(k) {
+    if (surLab.g !== G) { var m = Object.create(null); G.individuals.forEach(function(q){ lastNamesOf(q).forEach(function(x){ var kk = surKey(x); if (!(kk in m)) m[kk] = x; }); }); surLab = { g: G, m: m }; }
+    return surLab.m[k];
   }
   function apiId(id) { if (id == null || !G) return null; id = String(id); if (P(id)) return id; if (P('@' + id + '@')) return '@' + id + '@'; return null; }
   function apiArgs(dir, opts) { if (dir !== 'desc' && dir !== 'anc') return null; return { dir: dir, sibs: dir === 'anc' && !!(opts && opts.siblings) }; }
@@ -9858,7 +9870,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
     var gens = Object.keys(R.gens).sort(function(x, y){ return x - y; });
     function top(map, n) { return topList(map, n).top.map(function(e){ return { label: e[0], v: e[1] }; }); }
     return {
-      apiVersion: 4, subject: idOut(k), dir: a.dir, siblings: a.sibs, n: R.n,
+      apiVersion: 5, subject: idOut(k), dir: a.dir, siblings: a.sibs, n: R.n,
       perGeneration: gens.map(function(g){ return { gen: D(g), v: R.gens[g], n: R.gens[g], small: R.gens[g] < 30 }; }),
       lifespanPerGeneration: ['M', 'F'].reduce(function(o, sx){ o[sx] = gens.map(function(g){ var L = R.lifeGenS[sx][g] || [], r = V(L); r.gen = D(g); r.hidden = whyHidden(L, R.genPopS[sx][g]); return r; }); return o; }, {}),
       lifespanAll: V(R.lifeAll),
@@ -9873,7 +9885,7 @@ function sexKey(p) { return p && p.sex === 'F' ? 'f' : p && p.sex === 'M' ? 'm' 
   }
   (function(){ function upd(){ document.body.classList.toggle('is-scrolled', (window.scrollY || 0) > 0); } window.addEventListener('scroll', upd, { passive: true }); upd(); })();   // V6.73 C16 Q68: start-page band after scrolling
   window.TreeLine = Object.assign(window.TreeLine || {}, {   // V6.72: keeps a hook a host set before load (onDownload, C12)
-    apiVersion: 4,   // V6.73 C15: additive name fields on people() · V6.77 C19: registerAction / action (host action slot) · V6.80 C23: personData() + families[].children
+    apiVersion: 5,   // V6.73 C15: additive name fields on people() · V6.77 C19: registerAction / action (host action slot) · V6.80 C23: personData() + families[].children · V6.81 C24 + C25: years, surnameLabels
     registerAction: function(def){   // V6.77 C19 (spec §29.4): max 1 action; a new valid def replaces the old one; invalid def → ignored
       try { if (!hostActValid(def)) return; window.TreeLine.action = def;
         if (factsOn) { var fv = document.getElementById('factsView'), y = fv.scrollTop; renderFacts(); fv.scrollTop = y; } } catch (e) { console.error(e); }
@@ -10556,7 +10568,8 @@ window.TLPrivacy = (function(){
 /* V5.22 — About: release notes of the CURRENT version only + author.
    Keep RELEASE up to date with every version — one entry, plain sentences (what changed and why). */
 var RELEASE = {
-  version: 'V6.80', since: 'V5.45', date: [2026, 11, 6],   // y, m, d — shown in the UI language (I18N date.dmy)
+  version: 'V6.81', since: 'V5.45', date: [2026, 11, 7],   // y, m, d — shown in the UI language (I18N date.dmy)
+  // V6.81 (C24 + C25 + Q104): host API (no Free user value) + Find gaps step centres the person — note 1 extended.
   // V6.80 (C23): host API only, no user value in Free — notes unchanged.
   // V6.79 (C21 + C22): Find gaps bar — note 1 replaced the oldest note.
   // V6.78 (Q98): code comments only — notes unchanged.
@@ -10566,7 +10579,7 @@ var RELEASE = {
   // Notes stay in English for now (open question, spec §i18n).
   // Rule (V6.61, owner): the 3 newest user-facing changes only, short; no "since" line. Replace — never append.
   notes: [
-    "Find gaps: no empty space under the buttons, and the buttons stay on one line in every language.",
+    "Find gaps: each step shows the person in the middle of the timeline, and the buttons stay on one line in every language.",
     "Remembers your Light or Dark mode choice. New Automatic mode follows your device.",
     "Tablets and small windows: the top bar fits the screen in every language, and the logo stays in the same place."
   ],
